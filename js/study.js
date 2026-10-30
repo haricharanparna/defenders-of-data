@@ -21,7 +21,12 @@ document.addEventListener('keydown', e => {
   if ((e.key === 'l' || e.key === 'L') && !anyDialogOpen()) openStudy('cards');
 });
 
-function openStudy(tab) {
+// card: which flashcard to show first. afterClose: called when the panel closes.
+// (The Level Briefing uses both to show its own words, then come back.)
+let afterStudy = null;
+function openStudy(tab, card = null, afterClose = null) {
+  if (card !== null) cardIndex = card;
+  afterStudy = afterClose;
   showTab(tab);
   studyDialog.showModal();
   // Focus the card so Space flips it right away
@@ -43,21 +48,45 @@ function showTab(tab) {
 for (const name of STUDY_TABS) {
   document.getElementById(`tab-${name}`).addEventListener('click', () => showTab(name));
 }
-document.getElementById('study-close').addEventListener('click', () => studyDialog.close());
+function closeStudy() {
+  studyDialog.close();
+  const after = afterStudy;
+  afterStudy = null;
+  if (after) after();
+}
+document.getElementById('study-close').addEventListener('click', closeStudy);
+studyDialog.addEventListener('cancel', e => {
+  e.preventDefault();
+  closeStudy();
+});
 
 // ---------- Flashcards ----------
 const flashcard = document.getElementById('flashcard');
 
+// Cards unlock 5 levels at a time: levels 1-5 get the basics, and every 5 levels
+// adds the words you need for the next 5. (In Endless, "level" is the wave.)
+const CARD_BLOCK = 5;
+const cardsUpTo = level => Math.ceil(level / CARD_BLOCK) * CARD_BLOCK;
+
+function unlockedCards(level = state.wave + 1) {
+  return FLASHCARDS.filter(card => card.level <= cardsUpTo(level));
+}
+
 function showCard(i) {
-  cardIndex = (i + FLASHCARDS.length) % FLASHCARDS.length;
-  const card = FLASHCARDS[cardIndex];
+  const cards = unlockedCards();
+  cardIndex = (i + cards.length) % cards.length;
+  const card = cards[cardIndex];
   flashcard.classList.remove('flipped');
   document.getElementById('card-emoji').textContent = card.emoji;
   document.getElementById('card-term').textContent = card.term;
   document.getElementById('card-term-back').textContent = `${card.emoji} ${card.term}`;
   document.getElementById('card-def').textContent = card.def;
   document.getElementById('card-example').textContent = card.example ? `Example: ${card.example}` : '';
-  document.getElementById('card-count').textContent = `${cardIndex + 1} / ${FLASHCARDS.length}`;
+  document.getElementById('card-count').textContent = `${cardIndex + 1} / ${cards.length}`;
+  const locked = FLASHCARDS.length - cards.length;
+  document.getElementById('cards-locked').textContent = locked > 0
+    ? `🔒 ${locked} more cards unlock as you go. Next new cards: level ${cardsUpTo(state.wave + 1) + 1}`
+    : '🏆 You\'ve unlocked every flashcard!';
 }
 
 flashcard.addEventListener('click', () => flashcard.classList.toggle('flipped'));

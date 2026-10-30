@@ -152,6 +152,46 @@
     <button class="btn btn-primary close-btn" id="q-continue" hidden>Got it</button>
   </dialog>
 
+  <!-- Between levels in Levels mode (briefing.js) -->
+  <dialog id="dlg-cleared" class="panel cleared-panel" aria-labelledby="cleared-title">
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="intro-emoji">🎉</div>
+    <h2 id="cleared-title"></h2>
+    <p class="cleared-stars" id="cleared-stars"></p>
+    <p class="center" id="cleared-praise"></p>
+    <div class="cleared-stats" id="cleared-stats"></div>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="cleared-next"></button>
+      <button class="btn" id="cleared-map">🗺️ Level map</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-skill" class="panel lesson skill-panel" aria-labelledby="skill-name">
+    <p class="new-tag" id="skill-tag"></p>
+    <div class="intro-emoji" id="skill-emoji"></div>
+    <h2 id="skill-name"></h2>
+    <p id="skill-lesson"></p>
+    <ul class="skill-tips" id="skill-tips"></ul>
+    <p class="brief-head">📖 New flashcard</p>
+    <div id="skill-word"></div>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="skill-go">🧠 Take the skill check (2 questions)</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-brief" class="panel lesson" aria-labelledby="brief-title">
+    <p class="new-tag" id="brief-tag"></p>
+    <h2 id="brief-title"></h2>
+    <p class="brief-head">📖 New vocabulary</p>
+    <div class="brief-vocab" id="brief-vocab"></div>
+    <p class="brief-head">🎯 What you need to know</p>
+    <ul class="brief-know" id="brief-know"></ul>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="brief-go">✅ I know this, let's go!</button>
+      <button class="btn" id="brief-study">📚 Study the flashcards</button>
+    </div>
+  </dialog>
+
   <!-- Tower menu: upgrade or sell (upgrade.js) -->
   <dialog id="dlg-upgrade" class="panel" aria-labelledby="up-title">
     <div class="intro-emoji" id="up-emoji"></div>
@@ -197,6 +237,7 @@
         <button class="btn btn-small" id="card-next" aria-label="Next card">Next ▶</button>
       </div>
       <p class="tip center">Keys: ← → to switch cards, Space to flip</p>
+      <p class="tip center" id="cards-locked"></p>
     </section>
 
     <section id="panel-missed" role="tabpanel" aria-labelledby="tab-missed" hidden>
@@ -320,6 +361,7 @@
   <script src="js/dm.js"></script>
   <script src="js/password.js"></script>
   <script src="js/levels.js"></script>
+  <script src="js/briefing.js"></script>
   <script src="js/upgrade.js"></script>
   <script src="js/boss.js"></script>
   <script src="js/rewards.js"></script>

@@ -97,6 +97,14 @@ function hpScale(wave) {
   return LEVELS_MODE ? 1 + LEVEL_HP_STEP * extra : HP_GROWTH ** extra;
 }
 
+// Made-up waves are random, so plan each one once and remember it.
+// That way the Level Briefing (briefing.js) can tell you what's coming before you start.
+let planned = { wave: -1, groups: null };
+function plannedWave(wave) {
+  if (planned.wave !== wave) planned = { wave, groups: makeWave(wave) };
+  return planned.groups;
+}
+
 function makeWave(wave) {
   if (wave < INTRO_WAVES.length) return INTRO_WAVES[wave];
   const n = wave + 1;
@@ -129,7 +137,7 @@ const toast = el('toast');
 const anyDialogOpen = () => document.querySelector('dialog[open]') !== null;
 
 // The other game files (dm.js, boss.js, rewards.js) plug into the game through these
-const hooks = { newGame: [], hud: [], waveStart: [], waveEnd: [], update: [], draw: [], end: [] };
+const hooks = { newGame: [], hud: [], waveStart: [], waveEnd: [], afterQuiz: [], update: [], draw: [], end: [] };
 function runHooks(name, ...args) {
   for (const fn of hooks[name]) fn(...args);
 }
@@ -292,7 +300,7 @@ function startWave() {
   if (state.waveActive || state.over) return;
   let at = 0;
   state.spawnQueue = [];
-  for (const [type, count, gap] of makeWave(state.wave)) {
+  for (const [type, count, gap] of plannedWave(state.wave)) {
     for (let i = 0; i < count; i++) {
       state.spawnQueue.push({ type, at });
       at += gap;
@@ -330,6 +338,7 @@ function finishWave() {
       ? `⚠️ +${earned + WAVE_BONUS} bytes. The RANSOMWARE BOSS is next. Upgrade your towers!`
       : `Wave cleared! You got ${right} of ${total} right: +${earned + WAVE_BONUS} bytes`);
     updateHud();
+    runHooks('afterQuiz', right, total, earned + WAVE_BONUS);
   }, tierFor(state.wave));
 }
 

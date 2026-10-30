@@ -103,7 +103,8 @@ function startAtWave(level) {
     state.lastLogin = state.wave;
   }
   updateHud();
-  showToast(level > 1 ? `🚀 Level ${level}! Build your towers, then press Start Level.` : 'Fresh start! Good luck, Defender.');
+  // Every new start gets a Level Briefing (briefing.js)
+  showBriefing(level);
 }
 
 // ---------- Security Clearance test ----------
@@ -125,7 +126,7 @@ function buildSkipQuestions(level) {
   let order = [];
   while (questions.length < skipQuestionCount(level)) {
     if (order.length === 0) order = shuffle(makers);
-    questions.push(order.pop()(tier));
+    questions.push(order.pop()(tier, level));
   }
   return questions;
 }
@@ -268,8 +269,9 @@ function makeSentence(tier) {
   };
 }
 
-function makeMatch() {
-  const cards = shuffle(FLASHCARDS).slice(0, 4);
+function makeMatch(tier, level) {
+  // Only words you would have unlocked by that level
+  const cards = shuffle(unlockedCards(level)).slice(0, 4);
   return {
     label: '🔌 Reconnect the wires',
     render(body) {

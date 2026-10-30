@@ -17,6 +17,7 @@ Hackers, phishers and malware are marching toward your Data Core. Stop them by b
 7. **Beat the bosses.** Every 10th wave is a **Ransomware Boss** that locks your towers, and you restore them by answering questions about backups.
 8. **Remember your password!** The practice password you make for the 2FA Lock comes back: every few waves, a surprise login check asks for it plus a 2-step code.
 9. **Two modes.** **Levels:** clear 100 levels (a boss every 10) on the 🗺️ Level Map. To jump ahead, pass a **Security Clearance** test: threat intel, intercepted messages, fact or myth, link scanner, repair the rule and reconnect the wires, with 3 firewall shields. **Endless:** the waves never stop, so beat your best.
+   Between levels you get a **Level Cleared** screen with stars, a **Level Briefing** with the new vocabulary and what you need to know, and every 5 levels a **New Skill** lesson and skill check (20 skills, each adding a flashcard).
 10. **Study** flashcards, review what you missed, and collect 🏅 badges.
 
 Questions get harder as the waves go up: easy, then medium, then hard.

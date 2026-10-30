@@ -198,10 +198,12 @@ const QUIZ = [
 
 // ---------- Flashcards (the Study tab) ----------
 // The words players need to know. "example" is optional.
+// "level" is the first level that needs the word. Cards unlock 5 levels at a time (study.js).
 const FLASHCARDS = [
   {
     emoji: '🎣',
     term: 'Phishing',
+    level: 1,
     short: 'Fake message that tricks you into clicking',
     def: 'A fake message, email or text pretending to be someone you trust, so you\'ll click a bad link or give away your password.',
     example: 'A text from "USPS" with a link to usps-redelivery-help.com',
@@ -209,6 +211,7 @@ const FLASHCARDS = [
   {
     emoji: '🚩',
     term: 'Red flag',
+    level: 1,
     short: 'A warning sign of a scam',
     def: 'A warning sign that something might be a scam: rushing you, prizes you never entered for, spelling mistakes, or asking for private info.',
     example: '"Claim your FREE Robux in the next 60 minutes!"',
@@ -216,6 +219,7 @@ const FLASHCARDS = [
   {
     emoji: '🌐',
     term: 'Domain',
+    level: 1,
     short: 'A website\'s real name',
     def: 'The real name of a website: the part right before the first single "/". Scammers make fake domains that look almost right.',
     example: 'In roblox.com.free-robux.net/login, the real domain is free-robux.net',
@@ -223,6 +227,7 @@ const FLASHCARDS = [
   {
     emoji: '🔓',
     term: 'Password attack',
+    level: 2,
     short: 'Guessing or stealing your password',
     def: 'When someone tries to break into your account by guessing your password, or by using one that leaked from another site.',
     example: 'A login code you didn\'t ask for shows up on your phone.',
@@ -230,6 +235,7 @@ const FLASHCARDS = [
   {
     emoji: '💥',
     term: 'Data breach',
+    level: 3,
     short: 'A company gets hacked and info leaks',
     def: 'When a company gets hacked and people\'s info, like emails and passwords, gets leaked.',
     example: 'If a site you used gets breached, change that password everywhere you used it.',
@@ -237,6 +243,7 @@ const FLASHCARDS = [
   {
     emoji: '🔑',
     term: 'Strong password',
+    level: 2,
     short: 'Long, unique and hard to guess',
     def: 'A long password (12+ characters) that\'s different for every account. Three or four random words together is strong and easy to remember.',
     example: 'Purple-Taco-Rocket-42',
@@ -244,6 +251,7 @@ const FLASHCARDS = [
   {
     emoji: '🔐',
     term: '2-step verification (2FA)',
+    level: 2,
     short: 'A second check when you log in',
     def: 'A second check when you log in, like a code sent to your phone. Even if someone steals your password, they can\'t get in without it.',
     example: 'Never share your 2FA code, not even with "friends".',
@@ -251,6 +259,7 @@ const FLASHCARDS = [
   {
     emoji: '🐛',
     term: 'Malware',
+    level: 4,
     short: 'Harmful software hidden in downloads',
     def: 'Harmful software hidden in downloads, game cheats, mods or fake apps. It can spy on you or steal your info.',
     example: 'A file called Homework_Final.pdf.exe',
@@ -258,6 +267,7 @@ const FLASHCARDS = [
   {
     emoji: '🔄',
     term: 'Software update',
+    level: 4,
     short: 'A free fix for security holes',
     def: 'A free fix from the company that made your device or app. Updates patch security holes that hackers use.',
     example: 'Update from Settings or the official app store, never from a pop-up.',
@@ -265,6 +275,7 @@ const FLASHCARDS = [
   {
     emoji: '🎭',
     term: 'Catfish',
+    level: 5,
     short: 'A fake person pretending to be someone else',
     def: 'Someone online pretending to be a different person, often someone your age, to win your trust.',
     example: 'A brand-new account that can never video call.',
@@ -272,24 +283,28 @@ const FLASHCARDS = [
   {
     emoji: '✅',
     term: 'Verify',
+    level: 5,
     short: 'Check that something is real first',
     def: 'Checking that someone or something is real before you trust it, like asking a friend in person or going to the official website yourself.',
   },
   {
     emoji: '🪪',
     term: 'Personal info',
+    level: 5,
     short: 'Details that can identify or find you',
     def: 'Details that can identify or find you: your full name, address, school, birthday, passwords and photos. Keep them private online.',
   },
   {
     emoji: '⚙️',
     term: 'Privacy settings',
+    level: 15,
     short: 'Control who sees your stuff',
     def: 'Options in apps that control who can see your posts and message you. Set accounts to private and only accept people you know.',
   },
   {
     emoji: '💸',
     term: 'Money mule',
+    level: 40,
     short: 'Moving money for strangers',
     def: 'Someone who moves money for strangers, which is usually stolen money. It\'s illegal, even if you didn\'t know.',
     example: '"Earn $500/week! Just receive money and send it on."',
@@ -297,6 +312,7 @@ const FLASHCARDS = [
   {
     emoji: '👾',
     term: 'Ransomware',
+    level: 10,
     short: 'Locks your files for money',
     def: 'Malware that locks (encrypts) your files and demands money to unlock them. Paying doesn\'t guarantee you get anything back.',
     example: '"Your files are locked. Pay $500 in Bitcoin within 48 hours."',
@@ -304,6 +320,7 @@ const FLASHCARDS = [
   {
     emoji: '💽',
     term: 'Backup',
+    level: 10,
     short: 'An extra copy of your files',
     def: 'An extra copy of your files kept somewhere else, like the cloud or an external drive. If ransomware strikes, you just restore your copy.',
     example: 'Turn on automatic cloud backup for your photos and schoolwork.',
@@ -311,6 +328,7 @@ const FLASHCARDS = [
   {
     emoji: '📲',
     term: 'Authenticator app',
+    level: 20,
     short: 'Makes a new login code every 30 seconds',
     def: 'An app that makes a new login code every 30 seconds. It\'s safer than text-message codes, because the codes never travel over your phone number.',
   },
@@ -986,3 +1004,332 @@ const SENTENCES = [
   { level: 3, words: ['Back', 'up', 'your', 'files', 'often'], extra: ['never', 'pay'] },
   { level: 3, words: ['Verify', 'before', 'you', 'trust', 'anyone'], extra: ['after', 'everyone'] },
 ];
+
+// ---------- Skills (Levels mode) ----------
+// Every 5 levels you learn a new skill: a short lesson, a word for your flashcards, and a 2-question skill check.
+// "level" is the level the skill is taught before.
+const SKILLS = [
+  {
+    level: 5, emoji: '🔗', name: 'Reading Web Addresses',
+    lesson: 'Every link has a real name hiding in it: the domain. Scammers bury fake domains inside long links so they look real at a glance.',
+    tips: ['Find the first single "/" and read the part just before it', 'Read the domain right to left: paypal.com.login.net is really login.net', 'Watch for swapped letters like rn for m or 1 for l'],
+    vocab: { emoji: '🧭', term: 'Subdomain', short: 'Extra words before the real domain', def: 'Words added in front of a domain, like "help" in help.roblox.com. Scammers fake it the other way: roblox.com.free-gift.net is really free-gift.net.', example: 'In accounts.google.com, "accounts" is the subdomain.' },
+    questions: [
+      { prompt: 'In "https://roblox.com.free-robux.app/login", what is the REAL domain?', options: [
+        { text: 'free-robux.app', correct: true, why: 'Right! It\'s the part right before the first single slash.' },
+        { text: 'roblox.com', correct: false, why: 'That\'s a fake subdomain hiding in front of the real domain.' },
+        { text: 'login', correct: false, why: '"login" comes after the slash. It\'s just a page on the site.' } ] },
+      { prompt: 'Which of these really belongs to google.com?', options: [
+        { text: 'mail.google.com', correct: true, why: 'Right! "mail" is a subdomain of google.com.' },
+        { text: 'google.com.mail-login.co', correct: false, why: 'The real domain there is mail-login.co.' },
+        { text: 'g00gle.com', correct: false, why: 'Zeros instead of Os. It\'s a look-alike.' } ] },
+    ],
+  },
+  {
+    level: 10, emoji: '💽', name: 'Backing Up Your Files',
+    lesson: 'A backup is a spare copy of your files. If your device breaks, gets stolen or gets hit by ransomware, a backup means you lose nothing.',
+    tips: ['Turn on automatic cloud backup for photos and schoolwork', 'Keep one copy somewhere that isn\'t plugged in all the time', 'Test it: make sure you can actually get a file back'],
+    vocab: { emoji: '3️⃣', term: '3-2-1 backup rule', short: '3 copies, 2 kinds of storage, 1 off-site', def: 'Keep 3 copies of important files, on 2 different kinds of storage, with 1 copy kept somewhere else (like the cloud).', example: 'Laptop + external drive + cloud backup = 3-2-1.' },
+    questions: [
+      { prompt: 'What does the "1" in the 3-2-1 backup rule mean?', options: [
+        { text: 'Keep 1 copy somewhere else, away from your device', correct: true, why: 'Right! So one disaster can\'t wipe out every copy.' },
+        { text: 'Back up 1 time ever', correct: false, why: 'Backups should happen regularly, ideally automatically.' },
+        { text: 'Use 1 password for everything', correct: false, why: 'That\'s a different (bad) idea! The 1 is an off-site copy.' } ] },
+      { prompt: 'Your laptop gets ransomware. Who is in the best shape?', options: [
+        { text: 'Someone with an automatic cloud backup', correct: true, why: 'Right! They can wipe the laptop and restore everything.' },
+        { text: 'Someone who saved everything on the desktop', correct: false, why: 'The desktop gets locked along with everything else.' },
+        { text: 'Someone who plans to pay the ransom', correct: false, why: 'Paying often doesn\'t work and funds criminals.' } ] },
+    ],
+  },
+  {
+    level: 15, emoji: '👣', name: 'Your Digital Footprint',
+    lesson: 'Everything you post, like, and share leaves a trail called a digital footprint. Strangers, scammers, and later on schools and employers can see it.',
+    tips: ['Think before you post: would you be OK with anyone seeing it?', 'Don\'t post your school, address or daily schedule', 'Search your own name sometimes to see what\'s out there'],
+    vocab: { emoji: '👣', term: 'Digital footprint', short: 'The trail you leave online', def: 'All the information about you online: posts, photos, comments, and what others share about you. It can last for years.', example: 'A photo in your school hoodie tells strangers where you go to school.' },
+    questions: [
+      { prompt: 'You post a selfie in front of your house with your street sign visible. What\'s the risk?', options: [
+        { text: 'Strangers can figure out where you live', correct: true, why: 'Right! Check backgrounds for street signs, school names and house numbers before posting.' },
+        { text: 'No risk, it\'s just a selfie', correct: false, why: 'Small details in the background can reveal where you live.' },
+        { text: 'The photo might be blurry', correct: false, why: 'The bigger issue is giving away your location.' } ] },
+      { prompt: 'Can deleting a post make it disappear forever?', options: [
+        { text: 'Not always: people may have screenshotted or saved it', correct: true, why: 'Right! That\'s why it\'s best to think before you post.' },
+        { text: 'Yes, always', correct: false, why: 'Screenshots, shares and archives can keep it around.' },
+        { text: 'Only on weekends', correct: false, why: 'Ha! Once shared, it can stick around any day.' } ] },
+    ],
+  },
+  {
+    level: 20, emoji: '🗝️', name: 'Password Managers',
+    lesson: 'Nobody can remember 50 different strong passwords. A password manager makes a strong, unique password for every account and remembers them for you.',
+    tips: ['You only remember ONE strong master password', 'It fills in passwords only on the real site, which also blocks phishing', 'Turn on 2FA for the password manager itself'],
+    vocab: { emoji: '🗝️', term: 'Password manager', short: 'An app that remembers all your passwords', def: 'A secure app that creates and stores a different strong password for each account, locked behind one master password.', example: 'Built-in options include the ones in Chrome, Safari and phones.' },
+    questions: [
+      { prompt: 'Why can a password manager help stop phishing?', options: [
+        { text: 'It only auto-fills your password on the real website, not a fake one', correct: true, why: 'Right! If it doesn\'t fill in, double-check the domain.' },
+        { text: 'It deletes phishing emails', correct: false, why: 'It doesn\'t read your email. It just won\'t fill passwords on fake sites.' },
+        { text: 'It doesn\'t help at all', correct: false, why: 'It does, because it checks the real domain before filling in.' } ] },
+      { prompt: 'With a password manager, how many passwords do you need to remember?', options: [
+        { text: 'Just one strong master password', correct: true, why: 'Right! Make it a long passphrase you won\'t forget.' },
+        { text: 'All of them, written on a sticky note', correct: false, why: 'Sticky notes can be seen by anyone nearby.' },
+        { text: 'None, it doesn\'t need a password', correct: false, why: 'It\'s locked with one master password (plus 2FA).' } ] },
+    ],
+  },
+  {
+    level: 25, emoji: '📶', name: 'Public Wi-Fi Safety',
+    lesson: 'Free Wi-Fi at cafés, malls and airports is handy but risky. Anyone can create a network with a trustworthy-sounding name, and some can spy on what you send.',
+    tips: ['Ask staff for the real network name', 'Avoid logging in to banking or important accounts on public Wi-Fi', 'Use your phone\'s data or a trusted VPN when it matters'],
+    vocab: { emoji: '📶', term: 'Evil twin network', short: 'A fake Wi-Fi with a real-looking name', def: 'A fake Wi-Fi network set up by an attacker with a name like "Starbucks_Free" to trick people into connecting so they can spy on them.', example: 'Two networks called "Airport_WiFi" and "Airport-WiFi-Free".' },
+    questions: [
+      { prompt: 'At a café you see "Cafe_Guest" and "Cafe_Guest_FREE". What should you do?', options: [
+        { text: 'Ask the staff which one is real', correct: true, why: 'Right! Attackers make look-alike "evil twin" networks.' },
+        { text: 'Pick the one with FREE in the name', correct: false, why: 'Anyone can add FREE to a network name. Ask staff.' },
+        { text: 'Connect to both', correct: false, why: 'Connecting to a fake network lets an attacker watch your traffic.' } ] },
+      { prompt: 'What\'s the safest way to check your bank balance while out?', options: [
+        { text: 'Use your phone\'s mobile data in the bank\'s official app', correct: true, why: 'Right! Mobile data is much harder to spy on than open Wi-Fi.' },
+        { text: 'Use any free Wi-Fi nearby', correct: false, why: 'Open networks can be watched or faked.' },
+        { text: 'Ask a stranger to log in for you', correct: false, why: 'Never share your login with strangers.' } ] },
+    ],
+  },
+  {
+    level: 30, emoji: '🎭', name: 'Social Engineering',
+    lesson: 'Hackers often don\'t hack computers. They hack PEOPLE, by tricking them with urgency, fear, flattery or fake authority.',
+    tips: ['Urgent + secret + unusual request = slow down', 'Verify through a different channel (call, in person)', 'It\'s OK to say no, even to someone who sounds important'],
+    vocab: { emoji: '🎭', term: 'Social engineering', short: 'Tricking people instead of computers', def: 'Manipulating people into giving up information or access, using tricks like pretending to be someone in charge or creating panic.', example: '"This is IT. I need your password right now or your account gets deleted!"' },
+    questions: [
+      { prompt: 'Someone calls claiming to be from your school\'s IT team and needs your password "to fix your account". What\'s this?', options: [
+        { text: 'Social engineering. Real IT never asks for your password', correct: true, why: 'Right! Hang up and contact IT yourself.' },
+        { text: 'Normal, IT needs passwords', correct: false, why: 'Real IT staff can reset accounts without your password.' },
+        { text: 'A wrong number', correct: false, why: 'It\'s a trick to steal your account.' } ] },
+      { prompt: 'Which feeling do scammers try to create most?', options: [
+        { text: 'Urgency or panic, so you act before thinking', correct: true, why: 'Right! When you feel rushed, that\'s the moment to slow down.' },
+        { text: 'Boredom', correct: false, why: 'They want you rushed and emotional, not bored.' },
+        { text: 'Sleepiness', correct: false, why: 'They want you to panic and act fast.' } ] },
+    ],
+  },
+  {
+    level: 35, emoji: '📱', name: 'App Permissions',
+    lesson: 'Apps ask for permission to use your camera, mic, contacts and location. Some ask for way more than they need, and that data can be sold or leaked.',
+    tips: ['Ask: does this app really NEED this?', 'Choose "Only while using the app" for location', 'Check your phone\'s privacy settings now and then'],
+    vocab: { emoji: '📱', term: 'App permissions', short: 'What an app is allowed to access', def: 'The access you give an app to things like your camera, microphone, contacts, photos and location. You can change them any time in Settings.', example: 'A flashlight app asking for your contacts is a red flag.' },
+    questions: [
+      { prompt: 'A simple calculator app asks to access your contacts and location. What should you do?', options: [
+        { text: 'Deny it. A calculator doesn\'t need that', correct: true, why: 'Right! Extra permissions can mean your data is being collected.' },
+        { text: 'Allow everything so it works', correct: false, why: 'A calculator works fine without your contacts.' },
+        { text: 'Give it your password too', correct: false, why: 'Never! Apps don\'t need your passwords.' } ] },
+      { prompt: 'What\'s the safest location setting for most apps?', options: [
+        { text: '"Only while using the app", or off', correct: true, why: 'Right! Then apps can\'t track you in the background.' },
+        { text: '"Always"', correct: false, why: 'That lets the app track you all the time.' },
+        { text: 'Share it with everyone', correct: false, why: 'Your location is private info.' } ] },
+    ],
+  },
+  {
+    level: 40, emoji: '🛒', name: 'Shopping Scams',
+    lesson: 'Fake online stores copy real brands and sell things that never arrive. Deals that are way too good are usually fake.',
+    tips: ['Check reviews on other sites, not just the store\'s own page', 'Be suspicious of huge discounts and countdown timers', 'Pay with methods that have buyer protection, never gift cards'],
+    vocab: { emoji: '🛒', term: 'Too-good-to-be-true deal', short: 'A fake bargain used as bait', def: 'A deal so cheap it can\'t be real, like brand-new sneakers for $15. It\'s used to steal your money or card info.', example: '"AirPods Pro 90% OFF, only 2 left!"' },
+    questions: [
+      { prompt: 'A site sells a $250 game console for $40 and only accepts gift cards. What is it?', options: [
+        { text: 'A scam', correct: true, why: 'Right! Huge discount + gift-card-only payment = classic scam.' },
+        { text: 'A great deal', correct: false, why: 'Real stores don\'t sell at 85% off or demand gift cards.' },
+        { text: 'A clearance sale', correct: false, why: 'Clearance doesn\'t mean gift-card-only. It\'s a scam.' } ] },
+      { prompt: 'Where should you check if an online store is real?', options: [
+        { text: 'Reviews on other websites', correct: true, why: 'Right! A store\'s own reviews can be fake.' },
+        { text: 'Only the store\'s own reviews', correct: false, why: 'Scam stores fill their pages with fake 5-star reviews.' },
+        { text: 'Its logo looks professional, so it\'s fine', correct: false, why: 'Logos are easy to copy.' } ] },
+    ],
+  },
+  {
+    level: 45, emoji: '🤖', name: 'AI Fakes',
+    lesson: 'AI can now fake voices, faces and whole videos. A call that sounds like your friend or a video of a celebrity might not be real.',
+    tips: ['Agree on a family safe word for emergencies', 'Call people back on a number you already have', 'Be extra careful when a "person" asks for money or secrets'],
+    vocab: { emoji: '🤖', term: 'Deepfake', short: 'AI-made fake video or voice', def: 'A video, picture or voice recording made by AI to look and sound like a real person saying or doing things they never did.', example: 'A video of a YouTuber promoting a crypto giveaway they never made.' },
+    questions: [
+      { prompt: 'Your "cousin" calls in a panic asking for money, and it sounds exactly like them. What\'s the best move?', options: [
+        { text: 'Hang up and call them back on their real number (or ask the family safe word)', correct: true, why: 'Right! Voices can be cloned. Verify another way.' },
+        { text: 'Send money right away', correct: false, why: 'AI voice clones are used in exactly this scam.' },
+        { text: 'Trust it because the voice matches', correct: false, why: 'A matching voice isn\'t proof anymore.' } ] },
+      { prompt: 'What is a deepfake?', options: [
+        { text: 'AI-made video or audio of someone doing or saying things they didn\'t', correct: true, why: 'Right! Always check the source.' },
+        { text: 'A very deep swimming pool', correct: false, why: 'Ha! It\'s fake AI-made media.' },
+        { text: 'A broken video file', correct: false, why: 'It works fine. That\'s why it\'s convincing.' } ] },
+    ],
+  },
+  {
+    level: 50, emoji: '🛡️', name: 'Login Alerts and MFA Fatigue',
+    lesson: 'When attackers have your password, they spam you with "Approve sign-in?" pop-ups, hoping you tap Approve just to make them stop.',
+    tips: ['Never approve a login you didn\'t start', 'Deny it, then change your password right away', 'Tell an adult or IT. It means someone has your password'],
+    vocab: { emoji: '📳', term: 'MFA fatigue', short: 'Spamming login approvals until you give in', def: 'An attack where hackers who already have your password flood your phone with sign-in requests until you approve one by mistake.', example: '10 "Approve sign-in?" pop-ups at midnight.' },
+    questions: [
+      { prompt: 'Your phone shows "Approve sign-in?" 5 times while you\'re eating dinner. What do you do?', options: [
+        { text: 'Deny every one, change your password, and tell an adult', correct: true, why: 'Right! Someone has your password, but 2FA is stopping them.' },
+        { text: 'Approve one so it stops', correct: false, why: 'That lets the attacker in. Never approve what you didn\'t start.' },
+        { text: 'Turn off 2FA', correct: false, why: '2FA is the only thing protecting you right now!' } ] },
+      { prompt: 'Why do attackers send so many login requests?', options: [
+        { text: 'Hoping you get annoyed and tap Approve', correct: true, why: 'Right! It\'s called MFA fatigue.' },
+        { text: 'The app is broken', correct: false, why: 'It\'s on purpose, to wear you down.' },
+        { text: 'To say hello', correct: false, why: 'They\'re trying to trick you into letting them in.' } ] },
+    ],
+  },
+  {
+    level: 55, emoji: '🤝', name: 'Cyberbullying',
+    lesson: 'Cyberbullying is using tech to hurt, embarrass or threaten someone. It\'s never your fault, and there are real ways to stop it.',
+    tips: ['Don\'t reply when you\'re upset. Screenshot it first', 'Block and report the account', 'Tell a trusted adult, and be an upstander for others'],
+    vocab: { emoji: '🤝', term: 'Upstander', short: 'Someone who steps in to help', def: 'A person who sees bullying or harm online and does something about it, like reporting it, supporting the target, or telling an adult.', example: 'Messaging a classmate "that wasn\'t OK, are you alright?" after a mean post.' },
+    questions: [
+      { prompt: 'Someone keeps posting mean comments about you. What\'s the best FIRST step?', options: [
+        { text: 'Screenshot the comments, then block, report, and tell a trusted adult', correct: true, why: 'Right! Screenshots are evidence if you need help later.' },
+        { text: 'Post mean comments back', correct: false, why: 'That usually makes it worse and can get you in trouble.' },
+        { text: 'Keep it secret', correct: false, why: 'You deserve help. Tell someone you trust.' } ] },
+      { prompt: 'What does an upstander do?', options: [
+        { text: 'Helps: reports it, supports the person, or tells an adult', correct: true, why: 'Right! One person speaking up can change everything.' },
+        { text: 'Watches and does nothing', correct: false, why: 'That\'s a bystander. Upstanders help.' },
+        { text: 'Joins in', correct: false, why: 'That\'s bullying. Upstanders stand up against it.' } ] },
+    ],
+  },
+  {
+    level: 60, emoji: '📍', name: 'Location Sharing',
+    lesson: 'Your phone can share where you are in posts, photos and maps. Live location is great with family, but dangerous with strangers.',
+    tips: ['Turn off location tags on posts', 'Share live location only with people you know in real life', 'Post vacation photos AFTER you\'re home'],
+    vocab: { emoji: '📍', term: 'Geotag', short: 'Location info saved in a post or photo', def: 'Location data attached to a photo or post that shows where it was taken. It can reveal your home, school or where you are right now.', example: 'A photo tagged "Lincoln Middle School" with a time stamp.' },
+    questions: [
+      { prompt: 'Who should be able to see your LIVE location on a map app?', options: [
+        { text: 'Only family and close friends you know in real life', correct: true, why: 'Right! Strangers should never know where you are right now.' },
+        { text: 'All your followers', correct: false, why: 'Followers can include people you\'ve never met.' },
+        { text: 'Everyone, it\'s fun', correct: false, why: 'Live location can help someone find you.' } ] },
+      { prompt: 'Why post vacation photos after you get home?', options: [
+        { text: 'Posting live shows everyone your house is empty', correct: true, why: 'Right! It also shows exactly where you are.' },
+        { text: 'Photos look better later', correct: false, why: 'It\'s about safety, not looks.' },
+        { text: 'There\'s no reason', correct: false, why: 'Live posts give away where you are and that you\'re away.' } ] },
+    ],
+  },
+  {
+    level: 65, emoji: '🍪', name: 'Cookies and Tracking',
+    lesson: 'Websites use cookies to remember you. Some are useful, like staying logged in, but tracking cookies follow you around the web to build a profile for ads.',
+    tips: ['Choose "Reject non-essential" on cookie pop-ups', 'Clear cookies now and then', 'Use privacy settings in your browser'],
+    vocab: { emoji: '🍪', term: 'Tracking cookie', short: 'A file that follows you across websites', def: 'A small file saved by websites that lets companies follow what you do across many sites to show targeted ads.', example: 'You look at sneakers once and see sneaker ads everywhere for a week.' },
+    questions: [
+      { prompt: 'A cookie pop-up says "Accept all" or "Reject non-essential". Which protects your privacy?', options: [
+        { text: 'Reject non-essential', correct: true, why: 'Right! The site still works, but with less tracking.' },
+        { text: 'Accept all', correct: false, why: 'That allows tracking cookies to follow you.' },
+        { text: 'They do the same thing', correct: false, why: '"Accept all" turns on tracking. Rejecting turns it off.' } ] },
+      { prompt: 'What are tracking cookies mostly used for?', options: [
+        { text: 'Following you across sites to target ads', correct: true, why: 'Right! They build a profile of what you like.' },
+        { text: 'Making snacks', correct: false, why: 'Not those cookies!' },
+        { text: 'Speeding up your Wi-Fi', correct: false, why: 'They track you. They don\'t speed anything up.' } ] },
+    ],
+  },
+  {
+    level: 70, emoji: '🩹', name: 'Patching Fast',
+    lesson: 'When companies find a security hole, they release a patch. Attackers race to use the hole on everyone who hasn\'t updated yet.',
+    tips: ['Turn on automatic updates', 'Restart when updates ask. That\'s when they install', 'Old devices that no longer get updates are risky'],
+    vocab: { emoji: '🕳️', term: 'Zero-day', short: 'A hole hackers use before there\'s a fix', def: 'A security hole that attackers know about before the company has a patch ready. Once a fix comes out, updating quickly closes it.', example: '"Update now: this flaw is being actively exploited."' },
+    questions: [
+      { prompt: 'Your phone says "Security update: fixes an actively exploited flaw." When should you update?', options: [
+        { text: 'As soon as possible', correct: true, why: 'Right! "Actively exploited" means attackers are already using it.' },
+        { text: 'Next year', correct: false, why: 'You\'d be open to a known attack all that time.' },
+        { text: 'Never', correct: false, why: 'Skipping security updates leaves the door open.' } ] },
+      { prompt: 'Why is a phone that no longer gets updates risky?', options: [
+        { text: 'New security holes will never be fixed on it', correct: true, why: 'Right! Use supported devices for important accounts.' },
+        { text: 'It gets slower each day', correct: false, why: 'The real problem is unfixed security holes.' },
+        { text: 'It isn\'t risky', correct: false, why: 'Without updates, every new hole stays open.' } ] },
+    ],
+  },
+  {
+    level: 75, emoji: '🆘', name: 'Sextortion: Know What to Do',
+    lesson: 'Sextortion is when someone threatens to share private images unless you pay or send more. It\'s a crime, it\'s never your fault, and help is available.',
+    tips: ['Don\'t pay and don\'t send anything else. Stop replying', 'Screenshot, block, report, and tell a trusted adult right away', 'Services like NCMEC\'s Take It Down can help remove images'],
+    vocab: { emoji: '🆘', term: 'Sextortion', short: 'Threats to share private images for money', def: 'A crime where someone threatens to share private images of a person unless they pay or send more. Victims are never at fault, and trusted adults can help.', example: '"Pay $200 or I send this to all your followers."' },
+    questions: [
+      { prompt: 'Someone threatens to share a private photo unless you pay. What should you do?', options: [
+        { text: 'Stop replying, don\'t pay, save evidence, report, and tell a trusted adult', correct: true, why: 'Right! Paying usually leads to more demands. You are not in trouble for getting help.' },
+        { text: 'Pay so it goes away', correct: false, why: 'Paying almost always leads to more threats.' },
+        { text: 'Handle it alone and keep it secret', correct: false, why: 'This is a crime against you. A trusted adult can help right away.' } ] },
+      { prompt: 'If this happens to someone, whose fault is it?', options: [
+        { text: 'The person making the threats', correct: true, why: 'Right! It\'s never the victim\'s fault.' },
+        { text: 'The victim', correct: false, why: 'Never. The criminal is the one at fault.' },
+        { text: 'Nobody\'s', correct: false, why: 'The person threatening is committing a crime.' } ] },
+    ],
+  },
+  {
+    level: 80, emoji: '🔳', name: 'QR Code Scams',
+    lesson: 'A QR code is just a hidden link, and you can\'t read it before scanning. Scammers stick fake QR codes on parking meters, posters and even emails.',
+    tips: ['Check the web address that pops up before opening it', 'Look for stickers placed over the real code', 'Never log in or pay through a random QR code'],
+    vocab: { emoji: '🔳', term: 'Quishing', short: 'Phishing using QR codes', def: 'QR code phishing: using a QR code to send people to a fake website that steals logins or payment info.', example: 'A sticker on a parking meter that leads to "pay-park-city.net".' },
+    questions: [
+      { prompt: 'You scan a QR code on a poster and it opens "netflix-free-year.click/login". What now?', options: [
+        { text: 'Close it. The domain isn\'t netflix.com', correct: true, why: 'Right! Check the link a QR code opens, just like any other link.' },
+        { text: 'Log in to claim the free year', correct: false, why: 'That\'s quishing. It would steal your account.' },
+        { text: 'Share the poster with friends', correct: false, why: 'You\'d spread the scam.' } ] },
+      { prompt: 'Why are QR codes good for scammers?', options: [
+        { text: 'You can\'t see where they go until you scan', correct: true, why: 'Right! They hide the link.' },
+        { text: 'They\'re always official', correct: false, why: 'Anyone can make and print one.' },
+        { text: 'They contain viruses in the ink', correct: false, why: 'The danger is the link they lead to.' } ] },
+    ],
+  },
+  {
+    level: 85, emoji: '🪙', name: 'Crypto and Money Scams',
+    lesson: 'Scammers promise to double your money, especially with crypto. Real investments never guarantee huge, fast returns.',
+    tips: ['"Guaranteed" profits are a lie', 'Nobody legit asks you to send money first to receive more', 'Talk to a trusted adult before sending money to anyone online'],
+    vocab: { emoji: '🪙', term: 'Investment scam', short: 'A fake promise to grow your money', def: 'A scam that promises big, quick, guaranteed returns, often in crypto, then disappears with the money people send.', example: '"Send 0.1 BTC and get 0.2 back in an hour!"' },
+    questions: [
+      { prompt: '"Send $50 in crypto and get $500 back in 24 hours, guaranteed!" What is it?', options: [
+        { text: 'A scam', correct: true, why: 'Right! Send-to-receive offers are always scams.' },
+        { text: 'A smart investment', correct: false, why: 'No real investment guarantees 10x in a day.' },
+        { text: 'A contest prize', correct: false, why: 'You\'d never get the $500. It\'s a scam.' } ] },
+      { prompt: 'Which word is a big red flag in a money offer?', options: [
+        { text: '"Guaranteed"', correct: true, why: 'Right! Real investments always carry risk.' },
+        { text: '"Savings account"', correct: false, why: 'That\'s normal banking.' },
+        { text: '"Receipt"', correct: false, why: 'Receipts are normal. "Guaranteed profit" is the red flag.' } ] },
+    ],
+  },
+  {
+    level: 90, emoji: '🔐', name: 'Encryption',
+    lesson: 'Encryption scrambles data so only the right person can read it. It protects your messages, passwords and websites with https.',
+    tips: ['Look for https on sites where you log in', 'Use apps with end-to-end encrypted messaging', 'Encryption protects data, but it can\'t fix a fake website'],
+    vocab: { emoji: '🔐', term: 'Encryption', short: 'Scrambling data so only the right person can read it', def: 'Turning information into scrambled code that only someone with the right key can unscramble. It keeps messages and passwords private.', example: 'End-to-end encrypted chats can only be read by you and the person you\'re talking to.' },
+    questions: [
+      { prompt: 'What does end-to-end encryption mean for your messages?', options: [
+        { text: 'Only you and the person you\'re talking to can read them', correct: true, why: 'Right! Not even the app company can read them.' },
+        { text: 'Everyone can read them', correct: false, why: 'The opposite! They\'re scrambled for everyone else.' },
+        { text: 'Messages get deleted', correct: false, why: 'They\'re scrambled, not deleted.' } ] },
+      { prompt: 'Does https (the padlock) prove a website is safe and real?', options: [
+        { text: 'No. It only means the connection is encrypted', correct: true, why: 'Right! A scam site can be encrypted too. Check the domain.' },
+        { text: 'Yes, always', correct: false, why: 'Scam sites can get https too.' },
+        { text: 'Only on Tuesdays', correct: false, why: 'Ha! It never proves a site is real.' } ] },
+    ],
+  },
+  {
+    level: 95, emoji: '🚑', name: 'If You Get Hacked',
+    lesson: 'Even careful people get hacked. What matters is acting fast: lock the attacker out, warn others, and get your account back.',
+    tips: ['Change the password (and on any account that used the same one)', 'Turn on 2FA and sign out of all other sessions', 'Warn friends, and use the site\'s official account recovery'],
+    vocab: { emoji: '🚑', term: 'Account recovery', short: 'Getting a hacked account back', def: 'The official steps a website gives to prove an account is yours and take it back, like resetting your password through your recovery email or phone.', example: 'Using instagram.com/hacked to get back a stolen Instagram account.' },
+    questions: [
+      { prompt: 'Your game account was hacked. What should you do FIRST?', options: [
+        { text: 'Change your password, turn on 2FA, and sign out all other devices', correct: true, why: 'Right! Lock them out first, then check what changed.' },
+        { text: 'Make a new account and forget it', correct: false, why: 'The hacker could keep using the old one to scam your friends.' },
+        { text: 'Pay someone online who says they can "unhack" it', correct: false, why: 'Recovery "services" in DMs are usually scams. Use the official recovery page.' } ] },
+      { prompt: 'Why warn your friends after you get hacked?', options: [
+        { text: 'The hacker may message them pretending to be you', correct: true, why: 'Right! Hacked accounts are used to scam friends.' },
+        { text: 'To brag', correct: false, why: 'It\'s to protect them from scams sent "from you".' },
+        { text: 'There\'s no reason', correct: false, why: 'Hackers often target the friends of hacked accounts.' } ] },
+    ],
+  },
+  {
+    level: 100, emoji: '☠️', name: 'Double Extortion',
+    lesson: 'Omega Ransomware is the final boss. Modern ransomware gangs steal your files BEFORE they lock them, then threaten to leak them if you don\'t pay.',
+    tips: ['Backups get files back, but can\'t un-leak stolen data', 'Store less sensitive info, and share less', 'Never pay: report it and get expert help'],
+    vocab: { emoji: '☠️', term: 'Double extortion', short: 'Stealing files AND locking them', def: 'A ransomware attack where criminals steal a copy of your data and then lock it, demanding payment both to unlock it and to not leak it.', example: '"Pay or we unlock nothing AND publish your files."' },
+    questions: [
+      { prompt: 'In double extortion, what two things do attackers do?', options: [
+        { text: 'Steal a copy of the data, then lock it', correct: true, why: 'Right! That\'s why backups alone aren\'t enough.' },
+        { text: 'Update your computer twice', correct: false, why: 'They steal AND lock your data.' },
+        { text: 'Send you two emails', correct: false, why: 'It\'s about stealing and locking data.' } ] },
+      { prompt: 'Why can\'t backups fully protect you from double extortion?', options: [
+        { text: 'Backups restore files, but can\'t stop stolen data from leaking', correct: true, why: 'Right! You need prevention too.' },
+        { text: 'Backups always stop leaks', correct: false, why: 'They restore files. They can\'t un-steal them.' },
+        { text: 'Backups make it worse', correct: false, why: 'Backups still help. They just can\'t stop leaks.' } ] },
+    ],
+  },
+];
+
+// Every skill's word goes into the Study flashcards too
+FLASHCARDS.push(...SKILLS.map(skill => ({ ...skill.vocab, skill: skill.name, level: skill.level })));
