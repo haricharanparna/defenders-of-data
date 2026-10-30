@@ -145,8 +145,7 @@ skillDialog.addEventListener('cancel', e => e.preventDefault());
 function vocabCard(card, isNew) {
   const div = document.createElement('div');
   div.className = 'vocab';
-  div.innerHTML = '<span class="vocab-emoji"></span><div><p class="vocab-term"></p><p class="vocab-def"></p></div>';
-  div.querySelector('.vocab-emoji').textContent = card.emoji;
+  div.innerHTML = '<p class="vocab-term"></p><p class="vocab-def"></p>';
   div.querySelector('.vocab-term').textContent = card.term;
   if (isNew) div.querySelector('.vocab-term').insertAdjacentHTML('beforeend', ' <span class="new-word">NEW</span>');
   div.querySelector('.vocab-def').textContent = card.def;
@@ -162,7 +161,7 @@ function showBriefing(level) {
   const types = Object.keys(counts);
 
   el('brief-tag').textContent = `Level ${level} briefing`;
-  el('brief-title').textContent = THREATS.omega && counts.omega ? '☠️ The Final Battle' : isBossWave(wave) ? `👾 Level ${level}: Boss Level` : `Get Ready for Level ${level}`;
+  el('brief-title').textContent = counts.omega ? 'The Final Battle' : isBossWave(wave) ? `Level ${level}: Boss Level` : `Get Ready for Level ${level}`;
 
   // Words: the ones for this level's threats, plus this level's new skill
   const terms = [];
@@ -182,39 +181,45 @@ function showBriefing(level) {
   }
   el('brief-study').dataset.card = cards.length ? Math.max(0, unlockedCards(level).indexOf(cards[0])) : 0;
 
-  // What you need to know
-  const list = el('brief-know');
-  list.innerHTML = '';
-  const add = html => {
-    const li = document.createElement('li');
-    li.innerHTML = html;
-    list.appendChild(li);
-  };
+  // What's coming: one row per threat, colored like the tower that beats it
+  const intel = el('brief-intel');
+  intel.innerHTML = '';
   for (const type of types) {
     const t = THREATS[type];
-    if (t.final) {
-      add('<strong>☠️ Omega Ransomware</strong>: 3 phases, calls in reinforcements and locks towers fast. Only expert answers restore them, and wrong answers heal it!');
-      continue;
-    }
-    if (t.boss) {
-      add('<strong>👾 Ransomware Boss</strong>: it locks your towers. Click a 🔒 tower and answer a question to restore it and hurt the boss.');
-      continue;
-    }
     const tower = TOWERS[t.weakTo];
-    const lockNote = unlocked.has(t.weakTo) ? '' : ` <em class="locked-note">(🔒 unlock it first!)</em>`;
-    add(`<strong>${t.emoji} ${counts[type]} ${counts[type] === 1 ? t.name : t.plural}</strong>: beat them with ${tower.emoji} ${tower.name}${lockNote}. Spot them: ${t.spot}`);
-    if (t.hidden) add(`<strong>🎭 Catfish are invisible</strong> until you scan one or a 📡 Verify Beacon reveals them.`);
+    const row = document.createElement('div');
+    row.className = `intel-row${t.boss ? ' boss' : ''}`;
+    row.style.setProperty('--accent', t.boss ? '#ff3d8b' : tower.color);
+    if (t.boss) {
+      row.innerHTML = `<p class="intel-head"><span class="intel-name">${t.name}</span><span class="intel-count">Boss</span></p>
+        <p class="intel-spot">${t.final
+          ? 'Three phases, calls in reinforcements and locks towers fast. Only expert answers restore them, and wrong answers heal it.'
+          : 'Locks your towers. Click a locked tower and answer a question to restore it and damage the boss.'}</p>`;
+    } else {
+      const needsUnlock = unlocked.has(t.weakTo) ? '' : '<span class="intel-lock">unlock it first</span>';
+      row.innerHTML = `<p class="intel-head"><span class="intel-name">${counts[type] === 1 ? t.name : t.plural}</span><span class="intel-count">× ${counts[type]}</span></p>
+        <p class="intel-counter">Counter: <strong>${tower.name}</strong> ${needsUnlock}</p>
+        <p class="intel-spot">${t.hidden ? 'Invisible until scanned or revealed by a Verify Beacon. ' : ''}Watch for: ${t.spot}</p>`;
+    }
+    intel.appendChild(row);
   }
+
+  // Short tips underneath
+  const list = el('brief-know');
+  list.innerHTML = '';
+  const add = text => {
+    const li = document.createElement('li');
+    li.textContent = text;
+    list.appendChild(li);
+  };
   // Flashcards unlock 5 levels at a time (study.js), at levels 1, 6, 11...
   if ((level - 1) % CARD_BLOCK === 0) {
     const fresh = unlockedCards(level).filter(card => card.level >= level);
-    if (fresh.length) {
-      add(`<strong>📚 ${fresh.length} new flashcard${fresh.length === 1 ? '' : 's'} unlocked</strong> for levels ${level}-${level + CARD_BLOCK - 1}: ${fresh.map(c => `${c.emoji} ${c.term}`).join(', ')}`);
-    }
+    if (fresh.length) add(`${fresh.length} new flashcard${fresh.length === 1 ? '' : 's'} unlocked in Study for levels ${level}–${level + CARD_BLOCK - 1}.`);
   }
   const tougher = Math.round((hpScale(wave) - 1) * 100);
-  if (tougher > 0) add(`<strong>💪 Threats are ${tougher}% tougher</strong> than at the start. Upgrade your towers!`);
-  add('<strong>📩 Scan threats</strong> as they arrive: identifying them makes the right tower do double damage.');
+  if (tougher > 0) add(`Threats are ${tougher}% tougher than at the start, so upgrade your towers.`);
+  add('Scan threats as they arrive. Identifying one makes the right tower do double damage.');
 
   briefDialog.showModal();
   el('brief-go').focus();
