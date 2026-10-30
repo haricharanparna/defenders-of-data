@@ -51,6 +51,32 @@ function renderMessage(box, msg) {
   }
 }
 
+// ---------- Harder questions as you go ----------
+// Questions have a level: 1 easy, 2 medium, 3 hard (no level means 1).
+const levelOf = q => q.level || 1;
+
+// How hard questions should be on a wave (wave counts from 0)
+function tierFor(wave) {
+  return wave < 5 ? 1 : wave < 12 ? 2 : 3;
+}
+
+// Picks `count` questions from `list` that haven't been asked yet, hardest allowed first,
+// so questions get harder as the tier goes up. Starts over once they've all been asked.
+const askedQuestions = new Set();
+
+function drawQuestions(list, tier, count) {
+  const allowed = list.filter(q => levelOf(q) <= tier);
+  let fresh = allowed.filter(q => !askedQuestions.has(q));
+  if (fresh.length < count) {
+    allowed.forEach(q => askedQuestions.delete(q));
+    fresh = allowed;
+  }
+  // Shuffle, then put the hardest allowed questions first (sorting keeps the shuffle within a level)
+  const picked = shuffle(fresh).sort((a, b) => levelOf(b) - levelOf(a)).slice(0, count);
+  picked.forEach(q => askedQuestions.add(q));
+  return shuffle(picked);
+}
+
 // Every wrong answer this game, newest last. The Study tab's "Missed" list reads this.
 const missed = [];
 
@@ -166,12 +192,10 @@ let quizQuestions = [];
 let quizIndex = 0;
 let quizRight = 0;
 let quizDone = null;
-let quizUnused = [];
 
-function runQuiz(count, done) {
-  // Go through every question before repeating any
-  if (quizUnused.length < count) quizUnused = shuffle(QUIZ);
-  quizQuestions = quizUnused.splice(0, count);
+// tier: how hard the questions should be (1 easy, 2 medium, 3 hard)
+function runQuiz(count, done, tier = 1) {
+  quizQuestions = drawQuestions(QUIZ, tier, count);
   quizIndex = 0;
   quizRight = 0;
   quizDone = done;
@@ -238,14 +262,20 @@ let challengeCounted = false;
 const COMMON_PASSWORDS = ['password', '123456', 'qwerty', 'letmein', 'abc123', 'iloveyou', '111111',
   'admin', 'welcome', 'monkey', 'dragon', 'football', 'roblox', 'minecraft', 'fortnite'];
 
-function openChallenge(towerId, done) {
-  const ch = CHALLENGES[towerId];
+const lastChallenge = {};  // so the same challenge doesn't come up twice in a row
+
+// tag: the line at the top (password.js uses it for "Reset your password")
+function openChallenge(towerId, done, tag = null) {
   const tower = TOWERS[towerId];
+  const choices = CHALLENGES[towerId].filter(c => c !== lastChallenge[towerId]);
+  const ch = pickRandom(choices.length ? choices : CHALLENGES[towerId]);
+  lastChallenge[towerId] = ch;
   challengeDone = done;
   challengePassed = false;
   challengeCounted = false;
 
-  $('ch-tag').textContent = `🔒 Unlock ${tower.emoji} ${tower.name}`;
+  $('ch-tag').textContent = tag || `🔒 Unlock ${tower.emoji} ${tower.name}`;
+  $('ch-unlock').textContent = tag ? '✅ Save password' : '🔓 Unlock tower!';
   $('ch-title').textContent = ch.title;
   $('ch-prompt').textContent = ch.prompt;
   $('ch-tip').textContent = ch.tip;
@@ -339,6 +369,8 @@ function passChallenge(moveFocus = true) {
 }
 
 function finishChallenge(unlocked) {
+  // Remember the practice password, so you can be asked to log in with it later (password.js)
+  if (unlocked && !$('ch-password').hidden) savePracticePassword($('ch-pw').value);
   challengeDialog.close();
   const done = challengeDone;
   challengeDone = null;

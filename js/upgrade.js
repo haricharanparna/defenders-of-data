@@ -3,7 +3,6 @@
 // Uses UPGRADES from content.js.
 
 const upgradeDialog = el('dlg-upgrade');
-const upgradeUnused = {};   // questions not asked yet, per tower type
 let menuTower = null;
 
 const upgradeCost = tower => Math.round(TOWERS[tower.type].cost * 0.8 * tower.level);
@@ -61,10 +60,8 @@ function startUpgrade() {
   const info = TOWERS[tower.type];
   upgradeDialog.close();
 
-  if (!upgradeUnused[tower.type] || upgradeUnused[tower.type].length === 0) {
-    upgradeUnused[tower.type] = shuffle(UPGRADES[tower.type]);
-  }
-  const q = upgradeUnused[tower.type].pop();
+  // Going to level 3 asks a harder question than going to level 2
+  const [q] = drawQuestions(UPGRADES[tower.type], tower.level, 1);
 
   openQuestion({
     tag: `⬆ Upgrade ${info.emoji} ${info.name}`,

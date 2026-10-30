@@ -16,14 +16,12 @@ const dmBox = el('dm');
 let dm = null;              // the DM on screen: { msg, timeLeft, answered, resultLeft }
 let dmCount = 0;
 let dmNextAt = 0;
-let dmUnused = [];
 
 const between = (min, max) => min + Math.random() * (max - min);
 
 function showDm() {
-  // Go through every DM before repeating any
-  if (dmUnused.length === 0) dmUnused = shuffle(DMS);
-  const msg = dmUnused.pop();
+  // Trickier DMs show up in later waves
+  const [msg] = drawQuestions(DMS, tierFor(state.wave), 1);
   dm = { msg, timeLeft: DM_TIME, answered: false, resultLeft: DM_RESULT_TIME };
   dmCount++;
 

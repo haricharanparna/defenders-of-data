@@ -283,7 +283,7 @@ function finishWave() {
   state.bytes += WAVE_BONUS;
   updateHud();
 
-  // Real or Scam round between waves: learning earns you bytes for towers
+  // Real or Scam round between waves: learning earns you bytes for towers. Questions get harder as you go.
   runQuiz(QUIZ_SIZE, (right, total) => {
     state.stats.quiz += total;
     state.stats.quizRight += right;
@@ -294,7 +294,7 @@ function finishWave() {
       ? `⚠️ +${earned + WAVE_BONUS} bytes. The RANSOMWARE BOSS is next. Upgrade your towers!`
       : `Wave cleared! You got ${right} of ${total} right: +${earned + WAVE_BONUS} bytes`);
     updateHud();
-  });
+  }, tierFor(state.wave));
 }
 
 // ---------- Scanning threats ----------

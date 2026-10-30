@@ -9,7 +9,6 @@ const RESTORE_DAMAGE = 0.08;  // share of the boss's max HP each right answer ta
 
 let encryptTimer = 0;
 let bossAnnounced = false;
-let bossUnused = [];
 let beams = [];               // red beams drawn when the boss locks a tower
 
 const findBoss = () => state.enemies.find(e => THREATS[e.type].boss && !e.gone);
@@ -27,8 +26,8 @@ function encryptTower(boss) {
 }
 
 function openBossQuestion(tower) {
-  if (bossUnused.length === 0) bossUnused = shuffle(BOSS_QUESTIONS);
-  const q = bossUnused.pop();
+  // Later bosses ask harder questions
+  const [q] = drawQuestions(BOSS_QUESTIONS, bossNumber(state.wave), 1);
   openQuestion({
     tag: '👾 Ransomware Boss',
     title: 'Restore from Backup',

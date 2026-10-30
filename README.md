@@ -15,11 +15,15 @@ Hackers, phishers and malware are marching toward your Data Core. Stop them by b
 5. **Answer live DMs** that pop up mid-wave. A safe reply gives an Overclock boost, and a risky one lets more threats in.
 6. **Upgrade towers** by answering deeper questions, and build answer streaks to charge the 💥 Firewall Blast.
 7. **Survive as long as you can.** The waves never end and keep getting tougher. Every 10th wave is a **Ransomware Boss** that locks your towers, and you restore them by answering questions about backups. Try to beat your best wave!
-8. **Study** flashcards, review what you missed, and collect 🏅 badges.
+8. **Remember your password!** The practice password you make for the 2FA Lock comes back: every few waves, a surprise login check asks for it plus a 2-step code.
+9. **Skip ahead** from the 🗺️ Level Map by passing a Duolingo-style quiz (multiple choice, real or scam, true or false, spot the real link, build the rule, match pairs) with 3 hearts.
+10. **Study** flashcards, review what you missed, and collect 🏅 badges.
+
+Questions get harder as the waves go up: easy, then medium, then hard.
 
 Progress, badges and sound settings are saved in the browser on the computer you play on.
 
-Keys: 1-4 towers, S sell, Space start wave, B blast, L study, P pause, F speed, M mute. Works with a mouse or keyboard (Tab, Enter, Esc).
+Keys: 1-4 towers, S sell, Space start wave, B blast, L study, V level map, P pause, F speed, M mute. Works with a mouse or keyboard (Tab, Enter, Esc).
 
 ## Run it locally
 

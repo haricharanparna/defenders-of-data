@@ -46,6 +46,7 @@ function saveGame() {
       dmSafe: state.dmSafe,
       perfectQuiz: state.perfectQuiz,
       blasts: state.blasts,
+      lastLogin: state.lastLogin,
       index: [...state.index],
       seen: [...state.seen],
       stopped: state.stopped,
@@ -108,6 +109,7 @@ function restoreGame(game) {
   state.dmSafe = game.dmSafe || 0;
   state.perfectQuiz = game.perfectQuiz || false;
   state.blasts = game.blasts || 0;
+  state.lastLogin = game.lastLogin || 0;
   state.index = new Set(game.index);
   state.seen = new Set(game.seen);
   state.stopped = game.stopped || {};
