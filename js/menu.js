@@ -19,7 +19,6 @@ document.querySelectorAll('dialog').forEach(dlg => {
   });
 });
 
-// The game itself isn't built yet, so Play just shows a message for now
 let toastTimer;
 function showToast(message) {
   toast.textContent = message;
@@ -28,9 +27,7 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-document.getElementById('btn-play').addEventListener('click', () => {
-  showToast('Level 1 is under construction... check back soon!');
-});
-
+const modeDialog = document.getElementById('dlg-mode');
+document.getElementById('btn-play').addEventListener('click', () => modeDialog.showModal());
 // Start with the Play button focused so keyboard players can press Enter right away
 document.getElementById('btn-play').focus();

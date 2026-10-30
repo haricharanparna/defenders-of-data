@@ -1,0 +1,212 @@
+/* Tower Defense page. Colors, buttons and panels come from style.css */
+
+body.td {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ---------- Top bar ---------- */
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background: rgba(7, 11, 31, 0.9);
+  border-bottom: 2px solid var(--cyan-dim);
+}
+.stats { display: flex; gap: 1.4rem; flex-wrap: wrap; font-weight: 700; }
+.stat strong { font-family: var(--pixel); font-size: 0.85rem; color: var(--gold); margin-left: 0.3rem; }
+.stat.low strong { color: var(--pink); }
+.controls { display: flex; gap: 0.5rem; }
+
+.btn-small { font-size: 0.65rem; padding: 0.6rem 0.8rem; text-decoration: none; }
+.btn-primary.btn-small { font-size: 0.7rem; box-shadow: 0 3px 0 #b38a00; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ---------- Board ---------- */
+.board {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem;
+}
+#board {
+  max-width: 100%;
+  max-height: 100%;
+  border: 2px solid var(--cyan-dim);
+  border-radius: 6px;
+  background: #0a1030;
+  box-shadow: 0 0 30px rgba(46, 230, 255, 0.15);
+}
+#board.placing { cursor: crosshair; }
+
+/* ---------- Tower bar ---------- */
+.tower-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem 0.8rem;
+  background: rgba(7, 11, 31, 0.9);
+  border-top: 2px solid var(--cyan-dim);
+}
+.tool {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "emoji name" "emoji cost" "beats beats";
+  column-gap: 0.6rem;
+  align-items: center;
+  min-width: 170px;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  background: var(--bg-2);
+  border: 3px solid var(--cyan-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+}
+.tool:hover:not(:disabled), .tool:focus-visible { border-color: var(--cyan); outline: none; transform: translateY(-2px); }
+.tool.selected { border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 210, 63, 0.6); }
+.tool:disabled { opacity: 0.45; cursor: not-allowed; }
+.tool-emoji { grid-area: emoji; font-size: 1.9rem; line-height: 1; }
+.tool-name { grid-area: name; font-weight: 800; font-size: 0.95rem; }
+.tool-cost { grid-area: cost; font-size: 0.85rem; color: var(--gold); font-weight: 700; }
+.tool-beats { grid-area: beats; margin-top: 0.3rem; font-size: 0.78rem; color: var(--text-dim); }
+.tool-key {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-dim);
+}
+
+.tool.locked { border-style: dashed; }
+.tool.locked .tool-emoji { filter: grayscale(1); opacity: 0.6; }
+.tool.locked .tool-cost { color: var(--pink); }
+
+/* ---------- Lesson pop-ups (scan, quiz, challenges) ---------- */
+.panel.lesson { width: min(620px, 94vw); }
+.panel.lesson h2 { margin-bottom: 0.4rem; }
+.progress { margin: 0 0 0.8rem; text-align: center; font-size: 0.9rem; color: var(--text-dim); }
+
+/* A message that looks like a phone notification */
+.message {
+  margin: 0.8rem 0 1rem;
+  padding: 0.9rem 1rem;
+  color: #1b2030;
+  background: #f3f5fb;
+  border-radius: 14px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+}
+.msg-from { font-weight: 800; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.msg-meta { font-weight: 400; font-size: 0.82rem; color: #5b6478; }
+.msg-note { margin: 0.4rem 0 0; font-size: 0.85rem; font-style: italic; color: #5b6478; }
+.msg-text { margin: 0.45rem 0 0; }
+.msg-link {
+  margin-top: 0.5rem;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.95rem;
+  color: #1a56db;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+#ch-options { grid-template-columns: 1fr; }
+@media (max-width: 520px) { .choices { grid-template-columns: 1fr; } }
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.9rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  text-align: left;
+  background: var(--bg-2);
+  border: 2px solid var(--cyan-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.1s, transform 0.1s;
+}
+.choice span { font-size: 0.82rem; color: var(--text-dim); }
+.choice:hover:not(:disabled), .choice:focus-visible { border-color: var(--cyan); outline: none; transform: translateY(-1px); }
+.choice:disabled { cursor: default; opacity: 0.55; }
+.choice.big { align-items: center; font-family: var(--pixel); font-size: 0.85rem; padding: 1rem; }
+.choice.right { border-color: #7cff6b; background: rgba(124, 255, 107, 0.15); opacity: 1; }
+.choice.wrong { border-color: var(--pink); background: rgba(255, 61, 139, 0.15); opacity: 1; }
+
+.result {
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border-left: 5px solid;
+}
+.result p { margin: 0.35rem 0; }
+.result.good { background: rgba(124, 255, 107, 0.1); border-color: #7cff6b; }
+.result.bad { background: rgba(255, 61, 139, 0.1); border-color: var(--pink); }
+.result .verdict { font-weight: 800; font-size: 1.05rem; }
+.result .reward { color: var(--gold); font-weight: 700; }
+.result .penalty { color: #ffb3cf; font-weight: 700; }
+.index-entry {
+  margin-top: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(46, 230, 255, 0.08);
+  border: 1px dashed var(--cyan);
+  border-radius: 6px;
+}
+.index-tag { font-weight: 800; color: var(--cyan); }
+
+.tip { margin: 0.8rem 0 0; font-size: 0.92rem; color: var(--text-dim); font-style: italic; }
+
+/* Password challenge */
+.pw-label { display: block; font-weight: 700; margin-bottom: 0.3rem; }
+#ch-pw {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 1.05rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--cyan-dim);
+  border-radius: 6px;
+}
+#ch-pw:focus { outline: none; border-color: var(--cyan); }
+.meter { height: 10px; margin-top: 0.6rem; background: var(--bg); border-radius: 5px; overflow: hidden; }
+#ch-meter { height: 100%; width: 0; transition: width 0.2s, background 0.2s; }
+#ch-meter.weak { background: var(--pink); }
+#ch-meter.ok { background: var(--gold); }
+#ch-meter.strong { background: #7cff6b; }
+.meter-label { margin: 0.3rem 0 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--text-dim); }
+.rules { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.3rem; font-size: 0.92rem; }
+.rules li::before { content: '✖ '; color: var(--pink); font-weight: 800; }
+.rules li.ok::before { content: '✔ '; color: #7cff6b; }
+.rules label { cursor: pointer; }
+
+/* ---------- End screen ---------- */
+.end-stats { text-align: center; font-weight: 700; color: var(--cyan); }
+.new-tag {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  color: var(--pink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.intro-emoji { font-size: 3.5rem; text-align: center; line-height: 1.2; }
+#dlg-end h3 { font-size: 1rem; color: var(--cyan); margin-bottom: 0.4rem; }
+#end-summary { text-align: center; }
+.lessons { padding-left: 1.2rem; display: grid; gap: 0.5rem; }
+.lessons .leaked { color: #ffb3cf; }
+.end-buttons { display: flex; justify-content: center; gap: 0.8rem; margin-top: 1.2rem; }
+.end-buttons .btn { text-decoration: none; }

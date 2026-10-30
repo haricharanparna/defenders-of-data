@@ -13,6 +13,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0;
@@ -169,6 +170,44 @@ kbd {
 .facts strong { color: var(--cyan); }
 
 .close-btn { display: block; margin: 1.2rem auto 0; }
+
+/* ---------- Mode select ---------- */
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 520px) { .modes { grid-template-columns: 1fr; } }
+
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.2rem 1rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  text-align: center;
+  text-decoration: none;
+  background: rgba(7, 11, 31, 0.8);
+  border: 3px solid var(--cyan-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+.mode-card strong { font-family: var(--pixel); font-size: 0.85rem; color: var(--gold); }
+.mode-card:hover, .mode-card:focus-visible {
+  border-color: var(--cyan);
+  box-shadow: 0 0 16px rgba(46, 230, 255, 0.55);
+  transform: translateY(-3px);
+  outline: none;
+}
+.mode-card:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; border-color: var(--cyan-dim); }
+.mode-emoji { font-size: 2.6rem; line-height: 1; }
+.soon {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--pink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 
 /* ---------- Toast ---------- */
 #toast {

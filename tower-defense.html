@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tower Defense - Defenders of the Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/td.css">
+</head>
+<body class="td">
+  <header class="hud">
+    <a class="btn btn-small" href="index.html" aria-label="Back to main menu">&#8592; Menu</a>
+    <div class="stats">
+      <span class="stat" title="Data left. If it hits 0, your data is leaked!">❤️ Data <strong id="data">20</strong></span>
+      <span class="stat" title="Bytes. Spend them on towers.">💾 Bytes <strong id="bytes">150</strong></span>
+      <span class="stat">🌊 Wave <strong id="wave">1</strong>/<span id="wave-total">6</span></span>
+    </div>
+    <div class="controls">
+      <button class="btn btn-small" id="btn-speed" title="Speed (F)">1x</button>
+      <button class="btn btn-small" id="btn-pause" title="Pause (P)">⏸</button>
+      <button class="btn btn-primary btn-small" id="btn-wave">Start Wave (Space)</button>
+    </div>
+  </header>
+
+  <main class="board">
+    <canvas id="board" aria-label="Game board. Threats travel along the path toward your Data Core."></canvas>
+  </main>
+
+  <footer class="tower-bar" id="tower-bar" aria-label="Towers">
+    <!-- Tower buttons are added by td.js -->
+  </footer>
+
+  <!-- Scan: read a threat's message and decide what kind of threat it is -->
+  <dialog id="dlg-scan" class="panel lesson" aria-labelledby="scan-title">
+    <p class="new-tag" id="scan-title">📩 Scan: what kind of threat is this?</p>
+    <div class="message" id="scan-message"></div>
+    <div class="choices" id="scan-choices"></div>
+    <div id="scan-result" class="result" hidden></div>
+    <button class="btn btn-primary close-btn" id="scan-continue" hidden>Back to defending!</button>
+  </dialog>
+
+  <!-- Real or Scam quiz between waves -->
+  <dialog id="dlg-quiz" class="panel lesson" aria-labelledby="quiz-title">
+    <h2 id="quiz-title">Real or Scam?</h2>
+    <p class="progress" id="quiz-progress"></p>
+    <div class="message" id="quiz-message"></div>
+    <div class="choices two">
+      <button class="choice big" id="quiz-real">✅ Real</button>
+      <button class="choice big" id="quiz-scam">🚩 Scam</button>
+    </div>
+    <div id="quiz-result" class="result" hidden></div>
+    <button class="btn btn-primary close-btn" id="quiz-next" hidden>Next question</button>
+  </dialog>
+
+  <!-- Challenge to unlock a tower -->
+  <dialog id="dlg-challenge" class="panel lesson" aria-labelledby="ch-title">
+    <p class="new-tag" id="ch-tag"></p>
+    <h2 id="ch-title"></h2>
+    <p id="ch-prompt"></p>
+    <div class="choices" id="ch-options"></div>
+    <div id="ch-password" hidden>
+      <label for="ch-pw" class="pw-label">Practice password</label>
+      <input id="ch-pw" type="text" autocomplete="off" spellcheck="false" placeholder="Type a practice password...">
+      <div class="meter"><div id="ch-meter"></div></div>
+      <p class="meter-label" id="ch-meter-label"></p>
+      <ul class="rules">
+        <li id="rule-length">At least 12 characters</li>
+        <li id="rule-mix">Mix of at least 3: lowercase, UPPERCASE, numbers, symbols</li>
+        <li id="rule-common">Not a common password or word (like "password" or "qwerty")</li>
+        <li id="rule-2fa"><label><input type="checkbox" id="ch-2fa"> Turn on 2-step verification</label></li>
+      </ul>
+    </div>
+    <div id="ch-result" class="result" hidden></div>
+    <p class="tip" id="ch-tip" hidden></p>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="ch-unlock" hidden>🔓 Unlock tower!</button>
+      <button class="btn" id="ch-cancel">Not now</button>
+    </div>
+  </dialog>
+
+  <!-- Win or lose -->
+  <dialog id="dlg-end" class="panel" aria-labelledby="end-title">
+    <div class="intro-emoji" id="end-emoji"></div>
+    <h2 id="end-title"></h2>
+    <p id="end-summary"></p>
+    <p class="end-stats" id="end-stats"></p>
+    <h3>What you learned</h3>
+    <ul class="lessons" id="end-lessons"></ul>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="btn-again">Play Again</button>
+      <a class="btn" href="index.html">Main Menu</a>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/threats.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/lessons.js"></script>
+  <script src="js/td.js"></script>
+</body>
+</html>
