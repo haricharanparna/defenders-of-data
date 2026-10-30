@@ -28,31 +28,83 @@ let briefNew = null;           // { level, terms } words tagged NEW in the curre
 const cardFor = term => FLASHCARDS.find(card => card.term === term);
 
 // ---------- 1. Level Cleared ----------
+// Stars (1 to 3) come from three things during the level:
+//  - Questions: how many you got right (scans, DMs, boss questions, Real or Scam...)
+//  - Data kept: losing 5 or more data drops this to zero
+//  - Threats stopped: how many you stopped instead of letting through
+const STAR_WEIGHTS = { questions: 0.4, data: 0.3, stopped: 0.3 };
+const DATA_FOR_ZERO = 5;
+const STARS_AT = [0.7, 0.9];   // score needed for 2 stars and 3 stars
+
+const totalOf = counts => Object.values(counts).reduce((a, b) => a + b, 0);
+
 hooks.waveStart.push(() => {
-  const stopped = Object.values(state.stopped).reduce((a, b) => a + b, 0);
-  levelStart = { stopped, data: state.data };
+  levelStart = { stopped: totalOf(state.stopped), leaked: totalOf(state.leaked), data: state.data, right: 0, answered: 0 };
 });
+
+// Count every answer between the start of a level and its Real or Scam round
+answerListeners.push(correct => {
+  if (!levelStart) return;
+  levelStart.answered++;
+  if (correct) levelStart.right++;
+});
+
+function levelResult() {
+  const stopped = totalOf(state.stopped) - levelStart.stopped;
+  const leaked = totalOf(state.leaked) - levelStart.leaked;
+  const lost = levelStart.data - state.data;
+  const parts = {
+    questions: levelStart.answered ? levelStart.right / levelStart.answered : 1,
+    data: Math.max(0, 1 - lost / DATA_FOR_ZERO),
+    stopped: stopped + leaked ? stopped / (stopped + leaked) : 1,
+  };
+  const score = Object.entries(STAR_WEIGHTS).reduce((sum, [key, weight]) => sum + parts[key] * weight, 0);
+  const stars = score >= STARS_AT[1] ? 3 : score >= STARS_AT[0] ? 2 : 1;
+  return { stars, parts, stopped, leaked, lost, right: levelStart.right, answered: levelStart.answered };
+}
 
 hooks.afterQuiz.push((right, total, bytesEarned) => {
   if (!LEVELS_MODE || state.over || !levelStart) return;
-  showCleared(state.wave, right, total, bytesEarned);
+  const result = levelResult();
+  levelStart = null;
+  saveLevelStars(state.wave, result.stars);
+  showCleared(state.wave, result, bytesEarned);
 });
 
-function showCleared(level, quizRight, quizTotal, bytesEarned) {
-  const stopped = Object.values(state.stopped).reduce((a, b) => a + b, 0) - levelStart.stopped;
-  const lost = levelStart.data - state.data;
-  const stars = lost === 0 ? 3 : lost <= 3 ? 2 : 1;
+// Level 100 ends the game right away, so save its stars there
+hooks.end.push(() => {
+  if (!LEVELS_MODE || !state.won || !levelStart) return;
+  saveLevelStars(LEVEL_COUNT, levelResult().stars);
+  levelStart = null;
+});
+
+function starRow(stars) {
+  return [1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}">★</span>`).join('');
+}
+
+function showCleared(level, result, bytesEarned) {
+  const { stars, parts } = result;
+  const best = levelStars[level] || 0;
 
   el('cleared-title').textContent = `Level ${level} Cleared!`;
-  el('cleared-stars').innerHTML = [1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}">★</span>`).join('');
+  el('cleared-stars').innerHTML = starRow(stars);
   el('cleared-stars').setAttribute('aria-label', `${stars} out of 3 stars`);
-  el('cleared-praise').textContent = stars === 3 ? 'Perfect defense! No data lost.' : stars === 2 ? 'Great job! Only a little data slipped through.' : 'You made it! Try to lose less data next time.';
-  el('cleared-stats').innerHTML = `
-    <div><strong>${stopped}</strong><span>threats stopped</span></div>
-    <div><strong>${lost}</strong><span>data lost</span></div>
-    <div><strong>${quizRight}/${quizTotal}</strong><span>Real or Scam</span></div>
-    <div><strong>+${bytesEarned}</strong><span>bonus bytes</span></div>`;
-  el('cleared-next').textContent = `▶ Move on to Level ${level + 1}`;
+  el('cleared-praise').textContent =
+    (stars === 3 ? 'Perfect run!' : stars === 2 ? 'Great job!' : 'You made it!') +
+    (best > stars ? ` Your best here is still ${best} stars.` : stars < 3 ? ' Replay it from the Level Map to earn more stars.' : '');
+
+  const meter = (label, value, detail) => `
+    <div class="score-row">
+      <span class="score-label">${label}</span>
+      <span class="score-bar"><span style="width: ${Math.round(value * 100)}%"></span></span>
+      <span class="score-detail">${detail}</span>
+    </div>`;
+  el('cleared-stats').innerHTML =
+    meter('Questions right', parts.questions, `${result.right}/${result.answered}`) +
+    meter('Data kept', parts.data, result.lost ? `lost ${result.lost}` : 'none lost') +
+    meter('Threats stopped', parts.stopped, `${result.stopped}/${result.stopped + result.leaked}`) +
+    `<p class="score-bytes">+${bytesEarned} bonus bytes</p>`;
+  el('cleared-next').textContent = `Move on to Level ${level + 1}`;
   makeConfetti();
   clearedDialog.showModal();
   playSound('badge');

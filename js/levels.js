@@ -13,12 +13,27 @@ const skipDialog = el('dlg-skip');
 // The map, its button and the clearance test are only in Levels mode
 el('btn-levels').hidden = !LEVELS_MODE;
 
+// Best stars earned on each level, saved on this computer: { 1: 3, 2: 1, ... } (briefing.js scores them)
+const STARS_KEY = 'defenders-of-data-stars';
+let levelStars = {};
+try { levelStars = JSON.parse(localStorage.getItem(STARS_KEY)) || {}; } catch { /* storage blocked */ }
+
+function saveLevelStars(level, stars) {
+  if (stars <= (levelStars[level] || 0)) return;
+  levelStars[level] = stars;
+  try { localStorage.setItem(STARS_KEY, JSON.stringify(levelStars)); } catch { /* storage blocked */ }
+}
+
+const levelStarsHtml = level => `<span class="level-stars" aria-hidden="true">${[1, 2, 3]
+  .map(i => `<span class="${i <= (levelStars[level] || 0) ? 'on' : ''}">★</span>`).join('')}</span>`;
+
 // Highest level you can play without a clearance test
 const reachedLevel = () => Math.min(LEVEL_COUNT, bestWave + 1);
 
 // ---------- Level map ----------
 function openLevels() {
-  el('levels-best').textContent = `🏆 Cleared ${bestWave} of ${LEVEL_COUNT} levels. Play any level you've reached, or pass a Security Clearance test to jump ahead!`;
+  const totalStars = Object.values(levelStars).reduce((a, b) => a + b, 0);
+  el('levels-best').textContent = `🏆 Cleared ${bestWave} of ${LEVEL_COUNT} levels · ★ ${totalStars} of ${LEVEL_COUNT * 3} stars. Replay levels to earn more stars, or pass a Security Clearance test to jump ahead!`;
 
   const grid = el('levels-grid');
   grid.innerHTML = '';
@@ -32,9 +47,9 @@ function openLevels() {
     btn.className = `level${final ? ' final' : boss ? ' boss' : ''}${cleared ? ' cleared' : ''}${locked ? ' locked' : ''}${current ? ' current' : ''}`;
     btn.innerHTML = final
       // The last level gets its own big tile in the middle
-      ? `<span class="final-skull">☠️</span><span class="final-text"><span class="final-tag">Level ${level} · Final Boss</span><span class="final-name">OMEGA</span></span><span class="final-skull">${cleared ? '🏆' : locked ? '🔒' : current ? '📍' : '☠️'}</span>`
-      : `<span class="level-num">${level}</span><span class="level-icon">${current ? '📍' : boss ? '👾' : cleared ? '✓' : locked ? '🔒' : ''}</span>`;
-    btn.setAttribute('aria-label', `Level ${level}${final ? ', final boss: Omega Ransomware' : boss ? ', boss level' : ''}${current ? ', you are here' : cleared ? ', cleared' : locked ? ', locked' : ''}`);
+      ? `<span class="final-skull">☠️</span><span class="final-text"><span class="final-tag">Level ${level} · Final Boss</span><span class="final-name">OMEGA</span>${levelStarsHtml(level)}</span><span class="final-skull">${cleared ? '🏆' : locked ? '🔒' : current ? '📍' : '☠️'}</span>`
+      : `<span class="level-num">${level}</span><span class="level-icon">${current ? '📍' : boss ? '👾' : locked ? '🔒' : ''}</span>${levelStarsHtml(level)}`;
+    btn.setAttribute('aria-label', `Level ${level}${final ? ', final boss: Omega Ransomware' : boss ? ', boss level' : ''}${current ? ', you are here' : cleared ? ', cleared' : locked ? ', locked' : ''}, ${levelStars[level] || 0} of 3 stars`);
     btn.addEventListener('click', () => chooseLevel(level));
     grid.appendChild(btn);
   }
