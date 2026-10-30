@@ -1,6 +1,6 @@
-// The Study tab: flashcards of the key terms, plus a list of everything you got wrong.
+// The Study tab: flashcards of the key terms, a list of everything you got wrong, and your badges.
 // Opening it pauses the game, so players can look things up whenever they're stuck.
-// Uses FLASHCARDS from content.js and the `missed` list from lessons.js.
+// Uses FLASHCARDS from content.js, the `missed` list from lessons.js and renderBadges() from rewards.js.
 
 const studyDialog = document.getElementById('dlg-study');
 let cardIndex = 0;
@@ -12,7 +12,7 @@ studyButton.innerHTML = `
   <span class="tool-key">L</span>
   <span class="tool-emoji">📚</span>
   <span class="tool-name">Study</span>
-  <span class="tool-cost">Flashcards &amp; missed</span>
+  <span class="tool-cost">Cards, missed &amp; badges</span>
   <span class="tool-beats">Stuck? Learn the terms here</span>`;
 studyButton.addEventListener('click', () => openStudy('cards'));
 document.getElementById('tower-bar').appendChild(studyButton);
@@ -28,18 +28,21 @@ function openStudy(tab) {
   if (tab === 'cards') flashcard.focus();
 }
 
+const STUDY_TABS = ['cards', 'missed', 'badges'];
+
 function showTab(tab) {
-  const cards = tab === 'cards';
-  document.getElementById('panel-cards').hidden = !cards;
-  document.getElementById('panel-missed').hidden = cards;
-  document.getElementById('tab-cards').setAttribute('aria-selected', cards);
-  document.getElementById('tab-missed').setAttribute('aria-selected', !cards);
-  if (cards) showCard(cardIndex);
-  else renderMissed();
+  for (const name of STUDY_TABS) {
+    document.getElementById(`panel-${name}`).hidden = name !== tab;
+    document.getElementById(`tab-${name}`).setAttribute('aria-selected', name === tab);
+  }
+  if (tab === 'cards') showCard(cardIndex);
+  else if (tab === 'missed') renderMissed();
+  else renderBadges();
 }
 
-document.getElementById('tab-cards').addEventListener('click', () => showTab('cards'));
-document.getElementById('tab-missed').addEventListener('click', () => showTab('missed'));
+for (const name of STUDY_TABS) {
+  document.getElementById(`tab-${name}`).addEventListener('click', () => showTab(name));
+}
 document.getElementById('study-close').addEventListener('click', () => studyDialog.close());
 
 // ---------- Flashcards ----------

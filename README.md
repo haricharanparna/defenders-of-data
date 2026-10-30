@@ -8,12 +8,18 @@ Hackers, phishers and malware are marching toward your Data Core. Stop them by b
 
 ## How to play
 
-1. Threats travel down the path toward your Data Core.
-2. Pick a tower, then click an empty spot next to the path to place it.
-3. Each tower works best against certain threats, so choose wisely.
-4. Survive every wave to win the level.
+1. **Unlock towers** by passing a quick safety challenge. Each tower is a real habit.
+2. **Build towers** next to the path to stop threats before they reach your Data Core.
+3. **Scan threats.** They arrive as mystery messages. Identify each one for double damage.
+4. **Real or Scam?** Between waves, spot the scams to earn bytes.
+5. **Answer live DMs** that pop up mid-wave. A safe reply gives an Overclock boost, and a risky one lets more threats in.
+6. **Upgrade towers** by answering deeper questions, and build answer streaks to charge the 💥 Firewall Blast.
+7. **Survive as long as you can.** The waves never end and keep getting tougher. Every 10th wave is a **Ransomware Boss** that locks your towers, and you restore them by answering questions about backups. Try to beat your best wave!
+8. **Study** flashcards, review what you missed, and collect 🏅 badges.
 
-Works with a mouse or keyboard (Tab, Enter, Esc).
+Progress, badges and sound settings are saved in the browser on the computer you play on.
+
+Keys: 1-4 towers, S sell, Space start wave, B blast, L study, P pause, F speed, M mute. Works with a mouse or keyboard (Tab, Enter, Esc).
 
 ## Run it locally
 

@@ -16,9 +16,16 @@
     <div class="stats">
       <span class="stat" title="Data left. If it hits 0, your data is leaked!">❤️ Data <strong id="data">20</strong></span>
       <span class="stat" title="Bytes. Spend them on towers.">💾 Bytes <strong id="bytes">150</strong></span>
-      <span class="stat">🌊 Wave <strong id="wave">1</strong>/<span id="wave-total">6</span></span>
+      <span class="stat">🌊 Wave <strong id="wave">1</strong></span>
+      <span class="stat" title="Most waves you have ever survived">🏆 Best <strong id="best">0</strong></span>
+      <span class="stat streak" title="Right answers in a row. 3+ charges your Firewall Blast twice as fast!">🔥 Streak <strong id="streak">0</strong></span>
     </div>
     <div class="controls">
+      <button class="btn btn-small blast" id="btn-blast" disabled>
+        💥 Blast (B)
+        <span class="charge" aria-hidden="true"><span id="charge-fill"></span></span>
+      </button>
+      <button class="btn btn-small" id="btn-mute" title="Sound (M)">🔊</button>
       <button class="btn btn-small" id="btn-speed" title="Speed (F)">1x</button>
       <button class="btn btn-small" id="btn-pause" title="Pause (P)">⏸</button>
       <button class="btn btn-primary btn-small" id="btn-wave">Start Wave (Space)</button>
@@ -27,6 +34,18 @@
 
   <main class="board">
     <canvas id="board" aria-label="Game board. Threats travel along the path toward your Data Core."></canvas>
+
+    <!-- Live DM: pops up during waves while the game keeps running (dm.js) -->
+    <aside id="dm" class="dm" hidden aria-live="polite" aria-label="New message">
+      <div class="dm-head">
+        <span>💬 New message! Reply fast</span>
+        <button class="dm-close" id="dm-close" aria-label="Dismiss message">✕</button>
+      </div>
+      <div class="message" id="dm-message"></div>
+      <div class="dm-timer" id="dm-timer"><div id="dm-timer-fill"></div></div>
+      <div class="dm-replies" id="dm-replies"></div>
+      <div id="dm-result" class="result" hidden></div>
+    </aside>
   </main>
 
   <footer class="tower-bar" id="tower-bar" aria-label="Towers">
@@ -81,12 +100,39 @@
     </div>
   </dialog>
 
-  <!-- Study: flashcards and everything you got wrong -->
+  <!-- One question: tower upgrades and the Ransomware Boss -->
+  <dialog id="dlg-question" class="panel lesson" aria-labelledby="q-title">
+    <p class="new-tag" id="q-tag"></p>
+    <h2 id="q-title"></h2>
+    <p id="q-prompt"></p>
+    <div class="message" id="q-message" hidden></div>
+    <div class="choices" id="q-options"></div>
+    <div id="q-result" class="result" hidden></div>
+    <button class="btn btn-primary close-btn" id="q-continue" hidden>Got it</button>
+  </dialog>
+
+  <!-- Tower menu: upgrade or sell (upgrade.js) -->
+  <dialog id="dlg-upgrade" class="panel" aria-labelledby="up-title">
+    <div class="intro-emoji" id="up-emoji"></div>
+    <h2 id="up-title"></h2>
+    <p class="up-stars" id="up-stars"></p>
+    <p class="up-habit" id="up-habit"></p>
+    <table class="up-stats" id="up-stats"></table>
+    <p class="tip center" id="up-note"></p>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="up-go"></button>
+      <button class="btn" id="up-sell"></button>
+      <button class="btn" id="up-close">Close</button>
+    </div>
+  </dialog>
+
+  <!-- Study: flashcards, everything you got wrong, and badges -->
   <dialog id="dlg-study" class="panel lesson" aria-labelledby="study-title">
     <h2 id="study-title">📚 Study</h2>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-cards" aria-controls="panel-cards">🃏 Flashcards</button>
       <button class="tab" role="tab" id="tab-missed" aria-controls="panel-missed">❌ Missed <span class="badge" id="missed-count">0</span></button>
+      <button class="tab" role="tab" id="tab-badges" aria-controls="panel-badges">🏅 Badges</button>
     </div>
 
     <section id="panel-cards" role="tabpanel" aria-labelledby="tab-cards">
@@ -117,6 +163,11 @@
       <div id="missed-list"></div>
     </section>
 
+    <section id="panel-badges" role="tabpanel" aria-labelledby="tab-badges" hidden>
+      <p class="tip center" id="badge-total"></p>
+      <div class="badge-grid" id="badge-grid"></div>
+    </section>
+
     <button class="btn btn-primary close-btn" id="study-close">Back to the game</button>
   </dialog>
 
@@ -138,6 +189,7 @@
     <h2 id="end-title"></h2>
     <p id="end-summary"></p>
     <p class="end-stats" id="end-stats"></p>
+    <p class="end-badges" id="end-badges" hidden></p>
     <h3>What you learned</h3>
     <ul class="lessons" id="end-lessons"></ul>
     <div class="end-buttons">
@@ -149,11 +201,27 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <!-- Pops up over everything when you earn a badge -->
+  <div id="badge-pop" class="badge-pop" popover="manual" role="status" aria-live="polite">
+    <span class="badge-pop-emoji" id="badge-pop-emoji"></span>
+    <span>
+      <span class="badge-pop-tag">🏅 Badge unlocked!</span>
+      <strong id="badge-pop-name"></strong>
+      <span class="badge-pop-how" id="badge-pop-how"></span>
+    </span>
+  </div>
+
   <script src="js/threats.js"></script>
   <script src="js/content.js"></script>
+  <script src="js/sound.js"></script>
   <script src="js/lessons.js"></script>
   <script src="js/save.js"></script>
   <script src="js/td.js"></script>
+  <script src="js/dm.js"></script>
+  <script src="js/upgrade.js"></script>
+  <script src="js/boss.js"></script>
+  <script src="js/rewards.js"></script>
   <script src="js/study.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

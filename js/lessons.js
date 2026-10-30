@@ -59,6 +59,13 @@ function recordMiss(miss) {
   if (typeof updateMissedBadge === 'function') updateMissedBadge();
 }
 
+// Every answer the player gives, right or wrong. rewards.js listens to build streaks and play sounds.
+const answerListeners = [];
+
+function reportAnswer(correct) {
+  for (const listener of answerListeners) listener(correct);
+}
+
 function showResult(box, good, html) {
   box.hidden = false;
   box.className = `result ${good ? 'good' : 'bad'}`;
@@ -84,6 +91,7 @@ function openScan(type, firstTime, done) {
   const choices = $('scan-choices');
   choices.innerHTML = '';
   for (const [id, threat] of Object.entries(THREATS)) {
+    if (threat.boss) continue;
     const btn = document.createElement('button');
     btn.className = 'choice';
     btn.dataset.type = id;
@@ -102,6 +110,7 @@ function answerScan(button, guess, type, msg, firstTime) {
   scanAnswered = true;
   const threat = THREATS[type];
   const correct = guess === type;
+  reportAnswer(correct);
 
   [...$('scan-choices').children].forEach(b => { b.disabled = true; });
   button.classList.add(correct ? 'right' : 'wrong');
@@ -115,7 +124,7 @@ function answerScan(button, guess, type, msg, firstTime) {
 
   if (correct) {
     const tower = TOWERS[threat.weakTo];
-    html += `<p class="reward">+10 bytes! For the rest of this wave, every ${threat.name} is exposed and takes double damage from ${tower.emoji} ${tower.name}.</p>`;
+    html += `<p class="reward">+${SCAN_REWARD} bytes! For the rest of this wave, every ${threat.name} is exposed and takes double damage from ${tower.emoji} ${tower.name}.</p>`;
     if (firstTime) {
       html += `<div class="index-entry"><p class="index-tag">📖 New Threat Index entry: ${threat.emoji} ${threat.name}</p>
         <p>${threat.fact}</p>
@@ -172,7 +181,7 @@ function runQuiz(count, done) {
 
 function showQuizQuestion() {
   const q = quizQuestions[quizIndex];
-  $('quiz-progress').textContent = `Question ${quizIndex + 1} of ${quizQuestions.length} · +15 bytes for each right answer`;
+  $('quiz-progress').textContent = `Question ${quizIndex + 1} of ${quizQuestions.length} · +${QUIZ_REWARD} bytes for each right answer`;
   renderMessage($('quiz-message'), q);
   $('quiz-result').hidden = true;
   $('quiz-next').hidden = true;
@@ -186,6 +195,7 @@ function answerQuiz(guess) {
   const q = quizQuestions[quizIndex];
   const correct = guess === q.answer;
   if (correct) quizRight++;
+  reportAnswer(correct);
   $('quiz-real').disabled = true;
   $('quiz-scam').disabled = true;
   $(guess === 'real' ? 'quiz-real' : 'quiz-scam').classList.add(correct ? 'right' : 'wrong');
@@ -223,6 +233,7 @@ quizDialog.addEventListener('cancel', e => e.preventDefault());
 const challengeDialog = $('dlg-challenge');
 let challengeDone = null;
 let challengePassed = false;
+let challengeCounted = false;
 
 const COMMON_PASSWORDS = ['password', '123456', 'qwerty', 'letmein', 'abc123', 'iloveyou', '111111',
   'admin', 'welcome', 'monkey', 'dragon', 'football', 'roblox', 'minecraft', 'fortnite'];
@@ -232,6 +243,7 @@ function openChallenge(towerId, done) {
   const tower = TOWERS[towerId];
   challengeDone = done;
   challengePassed = false;
+  challengeCounted = false;
 
   $('ch-tag').textContent = `🔒 Unlock ${tower.emoji} ${tower.name}`;
   $('ch-title').textContent = ch.title;
@@ -266,6 +278,7 @@ function openChallenge(towerId, done) {
 function answerChallenge(button, opt, ch) {
   button.classList.add(opt.correct ? 'right' : 'wrong');
   if (!opt.correct) {
+    reportAnswer(false);
     recordMiss({
       kind: `🔒 Challenge: ${ch.title}`,
       msg: { from: 'Question', text: ch.prompt },
@@ -316,6 +329,9 @@ function checkPassword() {
 }
 
 function passChallenge(moveFocus = true) {
+  // Only count the first pass, so retyping a password doesn't farm streaks
+  if (!challengeCounted) reportAnswer(true);
+  challengeCounted = true;
   challengePassed = true;
   $('ch-tip').hidden = false;
   $('ch-unlock').hidden = false;
@@ -336,4 +352,73 @@ $('ch-cancel').addEventListener('click', () => finishChallenge(false));
 challengeDialog.addEventListener('cancel', e => {
   e.preventDefault();
   finishChallenge(false);
+});
+
+// ---------- One-question pop-up (tower upgrades and the Ransomware Boss) ----------
+// q: { tag, title, prompt, msg (optional), options: [{ text, correct, why }] }
+// done(true / false), or done(null) if closed without answering.
+const questionDialog = $('dlg-question');
+let questionDone = null;
+let questionResult = null;
+
+function openQuestion(q, done) {
+  questionDone = done;
+  questionResult = null;
+  $('q-tag').textContent = q.tag;
+  $('q-title').textContent = q.title;
+  $('q-prompt').textContent = q.prompt;
+  $('q-message').hidden = !q.msg;
+  if (q.msg) renderMessage($('q-message'), q.msg);
+  $('q-result').hidden = true;
+  $('q-continue').hidden = true;
+
+  const options = $('q-options');
+  options.innerHTML = '';
+  for (const opt of shuffle(q.options)) {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.textContent = opt.text;
+    btn.addEventListener('click', () => answerQuestion(btn, opt, q));
+    options.appendChild(btn);
+  }
+  questionDialog.showModal();
+}
+
+function answerQuestion(button, opt, q) {
+  if (questionResult !== null) return;
+  questionResult = opt.correct;
+  reportAnswer(opt.correct);
+  const right = q.options.find(o => o.correct);
+  [...$('q-options').children].forEach(b => {
+    b.disabled = true;
+    if (b.textContent === right.text) b.classList.add('right');
+  });
+  if (!opt.correct) {
+    button.classList.add('wrong');
+    recordMiss({
+      kind: q.tag,
+      msg: q.msg || { from: 'Question', text: q.prompt },
+      yours: opt.text,
+      right: right.text,
+      why: `${opt.why} ${right.why.replace(/^Right! /, '')}`,
+    });
+  }
+  showResult($('q-result'), opt.correct,
+    `<p class="verdict">${opt.correct ? '✅ Correct!' : '❌ Not quite.'}</p><p>${opt.why}</p>${opt.correct ? '' : `<p><strong>Answer:</strong> ${right.text}</p>`}`);
+  $('q-continue').textContent = opt.correct ? 'Awesome!' : 'Got it';
+  $('q-continue').hidden = false;
+  $('q-continue').focus();
+}
+
+function finishQuestion() {
+  questionDialog.close();
+  const done = questionDone;
+  questionDone = null;
+  if (done) done(questionResult);
+}
+
+$('q-continue').addEventListener('click', finishQuestion);
+questionDialog.addEventListener('cancel', e => {
+  e.preventDefault();
+  finishQuestion();
 });

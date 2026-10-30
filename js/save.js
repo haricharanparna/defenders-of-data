@@ -2,7 +2,8 @@
 // - Unlocked towers are saved as soon as you unlock them.
 // - The game itself (wave, data, bytes, towers, Threat Index, missed answers) is saved between waves.
 //   If you leave in the middle of a wave, you come back to the start of that wave.
-// Loaded before td.js, which calls saveGame() from updateHud() and loadSave() when it starts.
+// Loaded before td.js, which calls saveGame() from updateHud(). main.js calls loadSave() at the start.
+// (Badges and the mute button are saved separately, in rewards.js and sound.js.)
 
 const SAVE_KEY = 'defenders-of-data-save';
 
@@ -30,6 +31,7 @@ function saveGame() {
   if (!saveReady) return;
   const save = readSave();
   save.unlocked = [...unlocked];
+  save.best = Math.max(save.best || 0, bestWave, state.wave);
 
   if (state.over) {
     save.game = null;
@@ -38,7 +40,12 @@ function saveGame() {
       data: state.data,
       bytes: state.bytes,
       wave: state.wave,
-      towers: state.towers.map(t => ({ type: t.type, c: t.c, r: t.r })),
+      towers: state.towers.map(t => ({ type: t.type, c: t.c, r: t.r, level: t.level, spent: t.spent })),
+      streak: state.streak,
+      charge: state.charge,
+      dmSafe: state.dmSafe,
+      perfectQuiz: state.perfectQuiz,
+      blasts: state.blasts,
       index: [...state.index],
       seen: [...state.seen],
       stopped: state.stopped,
@@ -53,6 +60,7 @@ function saveGame() {
 // Called once when the page opens. Restores unlocked towers, then offers to continue a saved game.
 function loadSave() {
   const save = readSave();
+  bestWave = save.best || 0;
   for (const id of save.unlocked || []) {
     if (TOWERS[id]) unlocked.add(id);
   }
@@ -66,7 +74,7 @@ function loadSave() {
   }
 
   el('continue-summary').textContent =
-    `You were on Wave ${game.wave + 1} of ${WAVES.length} with ❤️ ${game.data} data, 💾 ${game.bytes} bytes and ${game.towers.length} tower${game.towers.length === 1 ? '' : 's'}.`;
+    `You were on Wave ${game.wave + 1} with ❤️ ${game.data} data, 💾 ${game.bytes} bytes and ${game.towers.length} tower${game.towers.length === 1 ? '' : 's'}.`;
   const dialog = el('dlg-continue');
   dialog.showModal();
   el('btn-continue').focus();
@@ -91,9 +99,15 @@ function restoreGame(game) {
   state.data = game.data;
   state.bytes = game.bytes;
   state.wave = game.wave;
-  state.towers = game.towers
-    .filter(t => TOWERS[t.type] && canBuild(t.c, t.r))
-    .map(t => ({ ...t, x: t.c * TILE + TILE / 2, y: t.r * TILE + TILE / 2, cooldown: 0 }));
+  state.towers = [];
+  for (const t of game.towers) {
+    if (TOWERS[t.type] && canBuild(t.c, t.r)) state.towers.push(makeTower(t.type, t.c, t.r, t.level || 1, t.spent || 0));
+  }
+  state.streak = game.streak || 0;
+  state.charge = game.charge || 0;
+  state.dmSafe = game.dmSafe || 0;
+  state.perfectQuiz = game.perfectQuiz || false;
+  state.blasts = game.blasts || 0;
   state.index = new Set(game.index);
   state.seen = new Set(game.seen);
   state.stopped = game.stopped || {};

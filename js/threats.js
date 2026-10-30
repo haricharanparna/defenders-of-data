@@ -11,7 +11,7 @@ const THREATS = {
     short: 'A fake message trying to get you to click a link or give away your login',
     hp: 70,
     speed: 70,      // pixels per second
-    reward: 8,      // bytes you earn for stopping it
+    reward: 4,      // bytes you earn for stopping it
     damage: 1,      // data you lose if it reaches the core
     weakTo: 'linkcheck',
     fact: 'Phishing messages pretend to be someone you trust, like a bank, a game or a friend, to trick you into clicking a fake link or typing your password.',
@@ -26,7 +26,7 @@ const THREATS = {
     short: 'Someone trying to guess or steal their way into your account',
     hp: 270,
     speed: 40,
-    reward: 15,
+    reward: 8,
     damage: 2,
     weakTo: 'twofa',
     fact: 'Hackers use programs that guess millions of passwords, and they try passwords leaked from one site on all your other accounts.',
@@ -41,7 +41,7 @@ const THREATS = {
     short: 'A download, file or app that secretly infects your device',
     hp: 38,
     speed: 100,
-    reward: 4,
+    reward: 2,
     damage: 1,
     weakTo: 'update',
     fact: 'Malware hides in "free" downloads, game cheats, mods and fake apps, then spreads and steals info from your device.',
@@ -57,12 +57,29 @@ const THREATS = {
     hidden: true,   // towers can't hit it until it's scanned or a Verify Beacon reveals it
     hp: 100,
     speed: 60,
-    reward: 12,
+    reward: 6,
     damage: 2,
     weakTo: 'verify',
     fact: 'Catfish make fake profiles that look like friendly people your age to win your trust, then ask for photos, personal info or money.',
     spot: 'New accounts with few posts, photos that look too perfect, refusing video calls, and pushing you to move to a private app.',
     defense: 'Check who people really are, never share private info with online-only friends, and tell a trusted adult if something feels off.',
+  },
+  // The boss every 10th wave. It isn't in scans or the Threat Index; boss.js gives it its own fight.
+  ransomware: {
+    name: 'Ransomware Boss',
+    plural: 'Ransomware Bosses',
+    emoji: '👾',
+    kind: 'Ransomware',
+    short: 'Malware that locks your files and demands money',
+    boss: true,
+    hp: 3000,
+    speed: 18,
+    reward: 60,
+    damage: 99,     // if it reaches the core, all your data is locked
+    weakTo: 'update',
+    fact: 'Ransomware locks (encrypts) your files and demands money to unlock them. It often sneaks in through attachments, fake downloads and out-of-date software.',
+    spot: 'Surprise attachments, files ending in .exe, and pop-ups demanding payment.',
+    defense: 'Back up your files, keep your devices updated, don\'t open surprise attachments, and never pay a ransom.',
   },
 };
 

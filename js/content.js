@@ -252,6 +252,292 @@ const FLASHCARDS = [
     def: 'Someone who moves money for strangers, which is usually stolen money. It\'s illegal, even if you didn\'t know.',
     example: '"Earn $500/week! Just receive money and send it on."',
   },
+  {
+    emoji: '👾',
+    term: 'Ransomware',
+    def: 'Malware that locks (encrypts) your files and demands money to unlock them. Paying doesn\'t guarantee you get anything back.',
+    example: '"Your files are locked. Pay $500 in Bitcoin within 48 hours."',
+  },
+  {
+    emoji: '💽',
+    term: 'Backup',
+    def: 'An extra copy of your files kept somewhere else, like the cloud or an external drive. If ransomware strikes, you just restore your copy.',
+    example: 'Turn on automatic cloud backup for your photos and schoolwork.',
+  },
+  {
+    emoji: '📲',
+    term: 'Authenticator app',
+    def: 'An app that makes a new login code every 30 seconds. It\'s safer than text-message codes, because the codes never travel over your phone number.',
+  },
+];
+
+// ---------- Live DMs (pop up during waves) ----------
+// The game keeps running while these are on screen, so players practice deciding fast, like in real life.
+// Not every DM is a scam! "punish" is the threat that sneaks in if you pick an unsafe reply.
+const DMS = [
+  {
+    from: 'jaylen 🏀', meta: 'Snapchat',
+    text: 'yo i accidentally sent my login code to ur number 😅 can u send it back real quick?',
+    punish: 'cracker',
+    replies: [
+      { text: 'ok here it is: 482913', safe: false, why: 'That code is for YOUR account. Whoever has it can log in as you. This is a common account takeover trick, even from a friend\'s hacked account.' },
+      { text: 'nah, I never share codes. I\'ll ask you at school', safe: true, why: 'Login codes are never sent to the wrong person by accident. Never share them, and check with your friend in person.' },
+    ],
+  },
+  {
+    from: 'FreeSkinz Bot', meta: 'Discord DM',
+    text: '🔥 FREE Fortnite skins for the first 100 people! Log in with your Epic account here:',
+    link: 'freeskinz.gg/epic-login',
+    punish: 'phisher',
+    replies: [
+      { text: 'Log in to claim my skins', safe: false, why: 'Free skins for your login is phishing. The site steals your Epic account and everything in it.' },
+      { text: 'Ignore it and report the bot', safe: true, why: 'Free stuff + a login link from a bot = phishing. Reporting helps protect other players.' },
+    ],
+  },
+  {
+    from: 'Mom', meta: 'Text message (saved contact)',
+    text: 'Can you grab milk on the way home? Love you ❤️',
+    punish: 'phisher',
+    replies: [
+      { text: 'ok! 👍', safe: true, why: 'It\'s from Mom\'s saved number, asking something normal, with no link, money or secrets. Not everything is a scam!' },
+      { text: 'Block this number, it\'s a scam', safe: false, why: 'Being careful is good, but this is a normal message from a saved contact. Look for real red flags: links, money, secrets and rushing.' },
+    ],
+  },
+  {
+    from: 'teen.model.scout', meta: 'Instagram DM',
+    text: 'You have the perfect look for our teen modeling agency!! Send a few pics + your age and city 📸',
+    punish: 'catfish',
+    replies: [
+      { text: 'Send pics, age and city', safe: false, why: 'Real agencies don\'t recruit kids through DMs. This is a stranger collecting photos and where you live.' },
+      { text: 'Don\'t reply, block and tell a trusted adult', safe: true, why: 'Strangers asking for photos and location are a serious red flag. Blocking and telling an adult is exactly right.' },
+    ],
+  },
+  {
+    from: 'Sam', meta: 'Discord DM',
+    text: 'send me ur password and ill grind ur account to lvl 50 tonight 💪',
+    punish: 'cracker',
+    replies: [
+      { text: 'bet, it\'s Dragon2011', safe: false, why: 'Never share passwords, even with friends. Friends fall out, and their accounts get hacked too.' },
+      { text: 'thx but I don\'t share passwords', safe: true, why: 'Your password is only for you. A real friend will understand.' },
+    ],
+  },
+  {
+    from: 'Roblox Admin', meta: 'Roblox chat',
+    text: '⚠️ Your account will be BANNED in 10 minutes unless you confirm your password in this chat.',
+    punish: 'phisher',
+    replies: [
+      { text: 'Type my password to confirm', safe: false, why: 'Admins and support teams NEVER ask for your password. Pressure plus a deadline is a classic scam.' },
+      { text: 'Report it, real admins never ask for passwords', safe: true, why: 'Exactly. No real company will ever ask for your password in a chat.' },
+    ],
+  },
+  {
+    from: '+1 (702) 555-0117', meta: 'Text message',
+    text: 'hey it\'s your cousin Dev! lost my phone 😭 can u buy a $50 gift card and text me the code? pay u back',
+    punish: 'phisher',
+    replies: [
+      { text: 'Call Dev or a parent on a number you already know', safe: true, why: 'Always verify with a number you already have. Gift card requests are almost always scams.' },
+      { text: 'Buy the gift card and send the code', safe: false, why: 'Gift card codes are like cash, and they can\'t be traced or refunded. That\'s why scammers ask for them.' },
+    ],
+  },
+  {
+    from: 'Coach Rivera', meta: 'Team app',
+    text: 'Practice moved to 4pm today because of the field trip. See you there!',
+    punish: 'phisher',
+    replies: [
+      { text: 'Got it, thanks coach!', safe: true, why: 'It\'s from your coach in your team\'s app, about something normal, with no link or request. It\'s real.' },
+      { text: 'Report it as a scam', safe: false, why: 'Not every message is a scam! This one has no link, no money and no request for info.' },
+    ],
+  },
+  {
+    from: 'Nitro Gifts', meta: 'Discord DM',
+    text: '🎁 You\'ve been gifted 1 month of Discord Nitro! Claim before it expires:',
+    link: 'discord-gift.ru/claim',
+    punish: 'worm',
+    replies: [
+      { text: 'Claim my Nitro!', safe: false, why: 'Real Discord gifts appear inside the app as a gift card, not as a link to discord-gift.ru. That site steals accounts or installs malware.' },
+      { text: 'Ignore it, real gifts show up in the app', safe: true, why: 'Right! Check the domain: discord-gift.ru isn\'t discord.com.' },
+    ],
+  },
+  {
+    from: 'gamergirl_14', meta: 'Instagram DM (account made last week)',
+    text: 'ur so cool!! lets move to snap 😊 whats ur address? i wanna send u a gift',
+    punish: 'catfish',
+    replies: [
+      { text: 'Give my address and Snapchat', safe: false, why: 'A brand-new account, flattery, and a push to a private app are catfish red flags. Never give your address to online-only friends.' },
+      { text: 'No thanks, I don\'t share my address online', safe: true, why: 'Keep your address private. If someone keeps pushing, block them and tell a trusted adult.' },
+    ],
+  },
+  {
+    from: 'Mod Hub', meta: 'Discord DM',
+    text: 'try this minecraft x-ray mod 😎 just run MinecraftXray.exe',
+    punish: 'worm',
+    replies: [
+      { text: 'Run the file', safe: false, why: 'An .exe from a stranger can be anything, including malware. Get mods only from official, trusted sites.' },
+      { text: 'Don\'t run it, only get mods from trusted sites', safe: true, why: 'Exactly. Game cheats and mods are one of the most common ways malware spreads.' },
+    ],
+  },
+];
+
+// ---------- Tower upgrade questions ----------
+// Upgrading a tower costs bytes AND a right answer to a deeper question about its habit.
+const UPGRADES = {
+  linkcheck: [
+    {
+      prompt: 'In this link, what is the REAL domain?',
+      msg: { from: 'Link', link: 'login.secure-paypal.com.verify-acct.net/home' },
+      options: [
+        { text: 'paypal.com', correct: false, why: '"paypal.com" is only a disguise at the start.' },
+        { text: 'verify-acct.net', correct: true, why: 'Right! The real domain is the last part before the first single slash: verify-acct.net.' },
+        { text: 'secure-paypal.com', correct: false, why: 'Close, but the domain keeps going. The real one is verify-acct.net.' },
+      ],
+    },
+    {
+      prompt: 'A friend sends a short link: bit.ly/3xYz9. What\'s the safest move?',
+      options: [
+        { text: 'Click it, short links are always safe', correct: false, why: 'Short links hide where they really go, so scammers love them.' },
+        { text: 'Ask what it is, or use a link preview to see where it really goes', correct: true, why: 'Right! Check where a short link really leads before you open it.' },
+        { text: 'Forward it to everyone first', correct: false, why: 'If it\'s a scam, you just spread it to all your friends.' },
+      ],
+    },
+    {
+      prompt: 'The address bar shows a 🔒 padlock (https). What does that mean?',
+      options: [
+        { text: 'The website is safe and real', correct: false, why: 'Scam sites can get a padlock too. It doesn\'t prove the site is real.' },
+        { text: 'The connection is encrypted, but scam sites can have it too', correct: true, why: 'Right! The padlock means nobody can snoop on the connection. You still need to check the domain.' },
+        { text: 'The site is run by Google', correct: false, why: 'The padlock has nothing to do with who owns the site.' },
+      ],
+    },
+  ],
+  twofa: [
+    {
+      prompt: 'Which kind of 2-step verification is hardest for hackers to steal?',
+      options: [
+        { text: 'A code sent by text message', correct: false, why: 'Text codes are better than nothing, but hackers can steal phone numbers (called SIM swapping).' },
+        { text: 'An authenticator app or a security key', correct: true, why: 'Right! Codes from an app or a physical key never travel over your phone number.' },
+        { text: 'A security question, like your pet\'s name', correct: false, why: 'Answers like your pet\'s name are often easy to find on social media.' },
+      ],
+    },
+    {
+      prompt: 'Your phone gets a login code you didn\'t ask for. What does that probably mean?',
+      options: [
+        { text: 'Someone has your password. Change it now', correct: true, why: 'Right! Someone got past your password and 2FA stopped them. Change your password right away.' },
+        { text: 'It\'s a glitch, ignore it forever', correct: false, why: 'It\'s a warning sign. Someone is probably trying to get in.' },
+        { text: 'Send it to whoever asks for it', correct: false, why: 'Never share login codes. That\'s exactly what the hacker needs.' },
+      ],
+    },
+    {
+      prompt: 'Why should you use a different password for every account?',
+      options: [
+        { text: 'If one site gets hacked, your other accounts stay safe', correct: true, why: 'Right! Hackers try leaked passwords on lots of sites. Different passwords stop that.' },
+        { text: 'Websites check if you reuse them', correct: false, why: 'They can\'t see your other passwords. It\'s about leaks.' },
+        { text: 'It makes logging in faster', correct: false, why: 'It\'s about safety. A password manager makes it easy to remember them all.' },
+      ],
+    },
+  ],
+  update: [
+    {
+      prompt: 'Why do software updates protect you?',
+      options: [
+        { text: 'They fix security holes that hackers already know about', correct: true, why: 'Right! Once a hole is public, hackers race to use it on devices that haven\'t updated.' },
+        { text: 'They only add new emojis', correct: false, why: 'Lots of updates are mostly security fixes you never see.' },
+        { text: 'They don\'t, they just slow your phone down', correct: false, why: 'Skipping updates leaves known holes open for hackers.' },
+      ],
+    },
+    {
+      prompt: 'An email attachment is called "invoice.pdf.exe". What is it?',
+      options: [
+        { text: 'A normal PDF file', correct: false, why: 'The real file type is the LAST part: .exe, a program.' },
+        { text: 'A program pretending to be a PDF. Don\'t open it!', correct: true, why: 'Right! ".exe" is a program. The ".pdf" in the middle is a disguise.' },
+        { text: 'A picture', correct: false, why: 'It\'s a program (.exe) pretending to be a document.' },
+      ],
+    },
+    {
+      prompt: 'Where is the safest place to download apps?',
+      options: [
+        { text: 'Any website that shows up on Google', correct: false, why: 'Fake download sites often top the search results.' },
+        { text: 'The official app store for your device', correct: true, why: 'Right! Official stores check apps for malware.' },
+        { text: 'A file someone shared in a group chat', correct: false, why: 'You can\'t know what\'s inside a shared file.' },
+      ],
+    },
+  ],
+  verify: [
+    {
+      prompt: 'Which is a red flag on a new online "friend\'s" profile?',
+      options: [
+        { text: 'The account is a week old, has few posts and no mutual friends', correct: true, why: 'Right! Fake accounts are usually new and empty.' },
+        { text: 'They like the same games as you', correct: false, why: 'That\'s normal, though catfish do pretend to like what you like.' },
+        { text: 'They post memes', correct: false, why: 'Everyone posts memes. Look at how old the account is and who they know.' },
+      ],
+    },
+    {
+      prompt: 'An online friend asks you to keep your chats a secret from your parents. What does that mean?',
+      options: [
+        { text: 'They\'re just shy', correct: false, why: 'Asking for secrets is a big warning sign, not shyness.' },
+        { text: 'It\'s a big red flag. Tell a trusted adult', correct: true, why: 'Right! Safe people don\'t ask you to hide things from your family.' },
+        { text: 'It\'s normal for online friends', correct: false, why: 'It\'s not normal. It\'s a common grooming tactic.' },
+      ],
+    },
+    {
+      prompt: 'How can you check if someone\'s profile photo is stolen?',
+      options: [
+        { text: 'Do a reverse image search', correct: true, why: 'Right! A reverse image search shows if the photo belongs to someone else online.' },
+        { text: 'Ask them if it\'s really them', correct: false, why: 'A catfish will just say yes.' },
+        { text: 'You can\'t check', correct: false, why: 'You can! A reverse image search (like Google Lens) finds where else the photo appears.' },
+      ],
+    },
+  ],
+};
+
+// ---------- Ransomware boss questions ----------
+// The boss encrypts your towers. Answer one of these to restore a tower from backup.
+const BOSS_QUESTIONS = [
+  {
+    prompt: 'Ransomware locked your files and wants $500 in Bitcoin. What should you do?',
+    options: [
+      { text: 'Pay right away to get the files back', correct: false, why: 'Paying funds criminals, and many people who pay never get their files back.' },
+      { text: 'Don\'t pay. Tell an adult or IT, and restore from a backup', correct: true, why: 'Right! Backups mean you don\'t need the hacker at all.' },
+      { text: 'Email the hacker and ask nicely', correct: false, why: 'Contacting them doesn\'t help, and it shows them you\'re a target.' },
+    ],
+  },
+  {
+    prompt: 'What\'s the best protection against losing your files to ransomware?',
+    options: [
+      { text: 'Regular backups kept somewhere else, like the cloud or an external drive', correct: true, why: 'Right! If your files are locked, you just restore your copy.' },
+      { text: 'Keeping everything on your desktop', correct: false, why: 'Ransomware would lock that too. You need a separate copy.' },
+      { text: 'A cool wallpaper', correct: false, why: 'Nice try! Backups are what save you.' },
+    ],
+  },
+  {
+    prompt: 'How does ransomware usually get onto a computer?',
+    options: [
+      { text: 'Email attachments, fake downloads and out-of-date software', correct: true, why: 'Right! That\'s why you don\'t open surprise attachments and you keep things updated.' },
+      { text: 'Charging your phone too long', correct: false, why: 'Charging can\'t give you ransomware. Dodgy files and links can.' },
+      { text: 'Watching videos on YouTube', correct: false, why: 'Normal streaming is fine. Watch out for downloads and attachments.' },
+    ],
+  },
+  {
+    prompt: 'The ransomware note says "Pay and we PROMISE to unlock your files." Can you trust it?',
+    options: [
+      { text: 'Yes, they promised', correct: false, why: 'Criminals don\'t keep promises. Lots of people pay and get nothing.' },
+      { text: 'No. Many people who pay never get their files back', correct: true, why: 'Right! That\'s why backups matter so much.' },
+    ],
+  },
+  {
+    prompt: 'Your school laptop shows a ransomware message. What\'s the FIRST thing to do?',
+    options: [
+      { text: 'Tell a teacher or the school IT team right away', correct: true, why: 'Right! Telling IT fast stops it from spreading to other computers.' },
+      { text: 'Hide it and hope it goes away', correct: false, why: 'It won\'t go away, and it might spread. Tell someone right away.' },
+      { text: 'Try to pay with your own money', correct: false, why: 'Never pay. Get help from an adult or IT.' },
+    ],
+  },
+  {
+    prompt: 'Why does updating your computer help stop ransomware?',
+    options: [
+      { text: 'Updates patch the holes ransomware uses to sneak in', correct: true, why: 'Right! Lots of big ransomware attacks hit computers that skipped updates.' },
+      { text: 'Updates delete every virus forever', correct: false, why: 'Updates close holes. They don\'t remove everything, so backups still matter.' },
+      { text: 'They don\'t help', correct: false, why: 'They help a lot. Many attacks use holes that were already fixed by an update.' },
+    ],
+  },
 ];
 
 // ---------- Tower unlock challenges ----------
