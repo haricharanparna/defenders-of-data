@@ -168,6 +168,92 @@ const QUIZ = [
   { from: 'Minecraft', meta: 'Microsoft Store', text: 'Minecraft update 1.22 is ready to install.', answer: 'real', why: 'Updates from the official app store are safe and keep your game secure.' },
 ];
 
+// ---------- Flashcards (the Study tab) ----------
+// The words players need to know. "example" is optional.
+const FLASHCARDS = [
+  {
+    emoji: '🎣',
+    term: 'Phishing',
+    def: 'A fake message, email or text pretending to be someone you trust, so you\'ll click a bad link or give away your password.',
+    example: 'A text from "USPS" with a link to usps-redelivery-help.com',
+  },
+  {
+    emoji: '🚩',
+    term: 'Red flag',
+    def: 'A warning sign that something might be a scam: rushing you, prizes you never entered for, spelling mistakes, or asking for private info.',
+    example: '"Claim your FREE Robux in the next 60 minutes!"',
+  },
+  {
+    emoji: '🌐',
+    term: 'Domain',
+    def: 'The real name of a website: the part right before the first single "/". Scammers make fake domains that look almost right.',
+    example: 'In roblox.com.free-robux.net/login, the real domain is free-robux.net',
+  },
+  {
+    emoji: '🔓',
+    term: 'Password attack',
+    def: 'When someone tries to break into your account by guessing your password, or by using one that leaked from another site.',
+    example: 'A login code you didn\'t ask for shows up on your phone.',
+  },
+  {
+    emoji: '💥',
+    term: 'Data breach',
+    def: 'When a company gets hacked and people\'s info, like emails and passwords, gets leaked.',
+    example: 'If a site you used gets breached, change that password everywhere you used it.',
+  },
+  {
+    emoji: '🔑',
+    term: 'Strong password',
+    def: 'A long password (12+ characters) that\'s different for every account. Three or four random words together is strong and easy to remember.',
+    example: 'Purple-Taco-Rocket-42',
+  },
+  {
+    emoji: '🔐',
+    term: '2-step verification (2FA)',
+    def: 'A second check when you log in, like a code sent to your phone. Even if someone steals your password, they can\'t get in without it.',
+    example: 'Never share your 2FA code, not even with "friends".',
+  },
+  {
+    emoji: '🐛',
+    term: 'Malware',
+    def: 'Harmful software hidden in downloads, game cheats, mods or fake apps. It can spy on you or steal your info.',
+    example: 'A file called Homework_Final.pdf.exe',
+  },
+  {
+    emoji: '🔄',
+    term: 'Software update',
+    def: 'A free fix from the company that made your device or app. Updates patch security holes that hackers use.',
+    example: 'Update from Settings or the official app store, never from a pop-up.',
+  },
+  {
+    emoji: '🎭',
+    term: 'Catfish',
+    def: 'Someone online pretending to be a different person, often someone your age, to win your trust.',
+    example: 'A brand-new account that can never video call.',
+  },
+  {
+    emoji: '✅',
+    term: 'Verify',
+    def: 'Checking that someone or something is real before you trust it, like asking a friend in person or going to the official website yourself.',
+  },
+  {
+    emoji: '🪪',
+    term: 'Personal info',
+    def: 'Details that can identify or find you: your full name, address, school, birthday, passwords and photos. Keep them private online.',
+  },
+  {
+    emoji: '⚙️',
+    term: 'Privacy settings',
+    def: 'Options in apps that control who can see your posts and message you. Set accounts to private and only accept people you know.',
+  },
+  {
+    emoji: '💸',
+    term: 'Money mule',
+    def: 'Someone who moves money for strangers, which is usually stolen money. It\'s illegal, even if you didn\'t know.',
+    example: '"Earn $500/week! Just receive money and send it on."',
+  },
+];
+
 // ---------- Tower unlock challenges ----------
 // Each tower is locked until you prove you know the safety habit it stands for.
 const CHALLENGES = {

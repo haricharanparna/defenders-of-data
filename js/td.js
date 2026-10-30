@@ -192,6 +192,7 @@ function updateHud() {
     costLabels[id].textContent = locked ? '🔒 Click to unlock' : `💾 ${tower.cost}`;
     toolButtons[id].disabled = !locked && state.bytes < tower.cost;
   }
+  saveGame();
 }
 
 let toastTimer;
@@ -804,4 +805,5 @@ function loop(now) {
 }
 
 newGame();
+loadSave();
 requestAnimationFrame(loop);

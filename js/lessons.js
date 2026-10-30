@@ -51,6 +51,14 @@ function renderMessage(box, msg) {
   }
 }
 
+// Every wrong answer this game, newest last. The Study tab's "Missed" list reads this.
+const missed = [];
+
+function recordMiss(miss) {
+  missed.push(miss);
+  if (typeof updateMissedBadge === 'function') updateMissedBadge();
+}
+
 function showResult(box, good, html) {
   box.hidden = false;
   box.className = `result ${good ? 'good' : 'bad'}`;
@@ -115,6 +123,13 @@ function answerScan(button, guess, type, msg, firstTime) {
     }
   } else {
     html += `<p class="penalty">That threat got away and sped up! Try scanning another one.</p>`;
+    recordMiss({
+      kind: '📩 Threat scan',
+      msg,
+      yours: `${THREATS[guess].emoji} ${THREATS[guess].kind}`,
+      right: `${threat.emoji} ${threat.kind}`,
+      why: msg.flags,
+    });
   }
 
   showResult($('scan-result'), correct, html);
@@ -176,6 +191,9 @@ function answerQuiz(guess) {
   $(guess === 'real' ? 'quiz-real' : 'quiz-scam').classList.add(correct ? 'right' : 'wrong');
 
   const label = q.answer === 'real' ? '✅ Real' : '🚩 Scam';
+  if (!correct) {
+    recordMiss({ kind: '✅ Real or Scam', msg: q, yours: guess === 'real' ? '✅ Real' : '🚩 Scam', right: label, why: q.why });
+  }
   showResult($('quiz-result'), correct,
     `<p class="verdict">${correct ? 'Correct!' : 'Not quite.'} It's <strong>${label}</strong>.</p><p>${q.why}</p>`);
 
@@ -237,7 +255,7 @@ function openChallenge(towerId, done) {
       const btn = document.createElement('button');
       btn.className = 'choice';
       btn.textContent = opt.text;
-      btn.addEventListener('click', () => answerChallenge(btn, opt));
+      btn.addEventListener('click', () => answerChallenge(btn, opt, ch));
       options.appendChild(btn);
     }
   }
@@ -245,8 +263,17 @@ function openChallenge(towerId, done) {
   if (ch.password) $('ch-pw').focus();
 }
 
-function answerChallenge(button, opt) {
+function answerChallenge(button, opt, ch) {
   button.classList.add(opt.correct ? 'right' : 'wrong');
+  if (!opt.correct) {
+    recordMiss({
+      kind: `🔒 Challenge: ${ch.title}`,
+      msg: { from: 'Question', text: ch.prompt },
+      yours: opt.text,
+      right: ch.options.find(o => o.correct).text,
+      why: opt.why,
+    });
+  }
   button.disabled = true;
   showResult($('ch-result'), opt.correct, `<p>${opt.correct ? '✅' : '❌'} ${opt.why}</p>${opt.correct ? '' : '<p>Try again!</p>'}`);
   if (opt.correct) {

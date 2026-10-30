@@ -193,6 +193,98 @@ body.td {
 .rules li.ok::before { content: '✔ '; color: #7cff6b; }
 .rules label { cursor: pointer; }
 
+/* ---------- Study tab ---------- */
+.study-tool { border-color: var(--gold); border-style: solid; }
+.study-tool .tool-cost { color: var(--cyan); }
+
+.tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--cyan-dim); }
+.tab {
+  flex: 1;
+  padding: 0.7rem;
+  font: inherit;
+  font-weight: 800;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+.tab:hover, .tab:focus-visible { color: var(--text); outline: none; }
+.badge {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0 0.4em;
+  margin-left: 0.3rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-dim);
+}
+.badge.has-missed { background: var(--pink); color: #fff; }
+
+/* Flip card */
+.flashcard {
+  display: block;
+  width: 100%;
+  height: 240px;
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  perspective: 1000px;
+}
+.flashcard:focus-visible { outline: 3px solid var(--cyan); outline-offset: 4px; border-radius: 12px; }
+.card-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s;
+  transform-style: preserve-3d;
+}
+.flashcard.flipped .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.2rem 1.5rem;
+  text-align: center;
+  border: 3px solid var(--cyan);
+  border-radius: 12px;
+  backface-visibility: hidden;
+}
+.card-front { background: linear-gradient(160deg, #16205a, #0e1538); }
+.card-back { background: #f3f5fb; color: #1b2030; border-color: var(--gold); transform: rotateY(180deg); }
+.card-emoji { font-size: 3.2rem; line-height: 1; }
+.card-term { font-family: var(--pixel); font-size: 1.1rem; color: var(--gold); line-height: 1.4; }
+.card-term.small { font-family: var(--body); font-weight: 800; font-size: 1.05rem; color: #1b2030; }
+.card-hint { font-size: 0.85rem; color: var(--text-dim); }
+.card-def { font-size: 1.05rem; line-height: 1.5; }
+.card-example { font-size: 0.9rem; font-style: italic; color: #5b6478; }
+.card-nav { display: flex; align-items: center; justify-content: center; gap: 1.2rem; margin-top: 1rem; font-weight: 800; }
+.tip.center { text-align: center; }
+
+@media (prefers-reduced-motion: reduce) { .card-inner { transition: none; } }
+
+/* Missed list */
+#missed-list { display: grid; gap: 1rem; max-height: 50vh; overflow-y: auto; padding-right: 0.3rem; }
+.empty { text-align: center; font-size: 1.1rem; color: var(--text-dim); padding: 2rem 0; }
+.missed-item { padding: 0.8rem 1rem; background: rgba(7, 11, 31, 0.6); border: 1px solid var(--cyan-dim); border-radius: 8px; }
+.missed-item .message { margin: 0.4rem 0 0.6rem; }
+.missed-kind { margin: 0; font-weight: 800; color: var(--cyan); font-size: 0.9rem; }
+.missed-answers { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin: 0.3rem 0; font-weight: 700; }
+.missed-answers .yours { color: #ffb3cf; }
+.missed-answers .right { color: #7cff6b; }
+.missed-why { margin: 0.3rem 0 0; }
+
 /* ---------- End screen ---------- */
 .end-stats { text-align: center; font-weight: 700; color: var(--cyan); }
 .new-tag {

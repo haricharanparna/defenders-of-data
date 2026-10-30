@@ -81,6 +81,57 @@
     </div>
   </dialog>
 
+  <!-- Study: flashcards and everything you got wrong -->
+  <dialog id="dlg-study" class="panel lesson" aria-labelledby="study-title">
+    <h2 id="study-title">📚 Study</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-cards" aria-controls="panel-cards">🃏 Flashcards</button>
+      <button class="tab" role="tab" id="tab-missed" aria-controls="panel-missed">❌ Missed <span class="badge" id="missed-count">0</span></button>
+    </div>
+
+    <section id="panel-cards" role="tabpanel" aria-labelledby="tab-cards">
+      <button class="flashcard" id="flashcard" aria-live="polite">
+        <span class="card-inner">
+          <span class="card-face card-front">
+            <span class="card-emoji" id="card-emoji"></span>
+            <span class="card-term" id="card-term"></span>
+            <span class="card-hint">Click to flip</span>
+          </span>
+          <span class="card-face card-back">
+            <span class="card-term small" id="card-term-back"></span>
+            <span class="card-def" id="card-def"></span>
+            <span class="card-example" id="card-example"></span>
+          </span>
+        </span>
+      </button>
+      <div class="card-nav">
+        <button class="btn btn-small" id="card-prev" aria-label="Previous card">◀ Prev</button>
+        <span id="card-count"></span>
+        <button class="btn btn-small" id="card-next" aria-label="Next card">Next ▶</button>
+      </div>
+      <p class="tip center">Keys: ← → to switch cards, Space to flip</p>
+    </section>
+
+    <section id="panel-missed" role="tabpanel" aria-labelledby="tab-missed" hidden>
+      <p class="tip center">Everything you got wrong this game, newest first. Read why, so you get it next time!</p>
+      <div id="missed-list"></div>
+    </section>
+
+    <button class="btn btn-primary close-btn" id="study-close">Back to the game</button>
+  </dialog>
+
+  <!-- Shown when you come back to a saved game -->
+  <dialog id="dlg-continue" class="panel" aria-labelledby="continue-title">
+    <div class="intro-emoji">💾</div>
+    <h2 id="continue-title">Welcome back, Defender!</h2>
+    <p id="continue-summary"></p>
+    <p class="tip center">Your game is saved on this computer.</p>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="btn-continue">▶ Continue</button>
+      <button class="btn" id="btn-fresh">New Game</button>
+    </div>
+  </dialog>
+
   <!-- Win or lose -->
   <dialog id="dlg-end" class="panel" aria-labelledby="end-title">
     <div class="intro-emoji" id="end-emoji"></div>
@@ -91,6 +142,7 @@
     <ul class="lessons" id="end-lessons"></ul>
     <div class="end-buttons">
       <button class="btn btn-primary" id="btn-again">Play Again</button>
+      <button class="btn" id="btn-review">📚 Review what I missed</button>
       <a class="btn" href="index.html">Main Menu</a>
     </div>
   </dialog>
@@ -100,6 +152,8 @@
   <script src="js/threats.js"></script>
   <script src="js/content.js"></script>
   <script src="js/lessons.js"></script>
+  <script src="js/save.js"></script>
   <script src="js/td.js"></script>
+  <script src="js/study.js"></script>
 </body>
 </html>
