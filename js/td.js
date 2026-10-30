@@ -64,8 +64,19 @@ const INTRO_WAVES = [
   [['catfish', 5, 1.6], ['phisher', 6, 0.7]],
   [['phisher', 8, 0.6], ['worm', 10, 0.35], ['cracker', 4, 1.6], ['catfish', 5, 1.2]],
 ];
+// Two ways to play (tower-defense.html?mode=levels or ?mode=endless):
+//  - Levels: 100 levels on a map that get tougher slowly. Clear level 100 to win!
+//  - Endless: waves never end and get tough fast. Beat your best.
+const MODE = new URLSearchParams(location.search).get('mode') === 'levels' ? 'levels' : 'endless';
+const LEVELS_MODE = MODE === 'levels';
+const LEVEL_COUNT = 100;
+
 const BOSS_EVERY = 10;
-const HP_GROWTH = 1.17;   // after the intro waves, threats get this much tougher every wave
+// After the intro waves, threats get tougher every wave. Endless multiplies (tough fast);
+// Levels adds a steady amount, so the middle levels stay a challenge and level 100 is still beatable.
+const HP_GROWTH = 1.17;
+const LEVEL_HP_STEP = 0.075;
+const COUNT_CAP = LEVELS_MODE ? 30 : Infinity;  // in Levels mode, waves stop getting longer after this
 const GROUP_GAP = 1.5;    // pause between groups in the same wave
 
 // How each threat type shows up in made-up waves: starting count, extra per wave, seconds apart
@@ -79,16 +90,20 @@ const WAVE_MIX = {
 // wave is counted from 0, so wave 9 is "Wave 10"
 const isBossWave = wave => (wave + 1) % BOSS_EVERY === 0;
 const bossNumber = wave => Math.floor((wave + 1) / BOSS_EVERY);  // 1 for the first boss, 2 for the second...
-const hpScale = wave => HP_GROWTH ** Math.max(0, wave - INTRO_WAVES.length + 1);
+function hpScale(wave) {
+  const extra = Math.max(0, wave - INTRO_WAVES.length + 1);
+  return LEVELS_MODE ? 1 + LEVEL_HP_STEP * extra : HP_GROWTH ** extra;
+}
 
 function makeWave(wave) {
   if (wave < INTRO_WAVES.length) return INTRO_WAVES[wave];
   const n = wave + 1;
+  const size = Math.min(n, COUNT_CAP);
   // More kinds of threats at once as the waves go on
   const kinds = shuffle(Object.keys(WAVE_MIX)).slice(0, Math.min(4, 2 + Math.floor(n / 8)));
   const groups = kinds.map(type => {
     const mix = WAVE_MIX[type];
-    return [type, Math.round(mix.count + n * mix.grow), mix.gap * Math.max(0.5, 1 - n * 0.01)];
+    return [type, Math.round(mix.count + size * mix.grow), mix.gap * Math.max(0.5, 1 - size * 0.01)];
   });
   if (isBossWave(wave)) groups.unshift(['ransomware', 1, 0]);
   return groups;
@@ -115,8 +130,16 @@ function runHooks(name, ...args) {
 
 // Towers you've unlocked stay unlocked if you play again
 const unlocked = new Set();
-let bestWave = 0;   // most waves ever survived (saved by save.js)
+let bestWave = 0;   // Endless: most waves ever survived. Levels: most levels cleared. (saved by save.js)
 const bestText = el('best');
+if (LEVELS_MODE) {
+  waveText.previousSibling.textContent = '🗺️ Level ';
+  bestText.previousSibling.textContent = '🏆 Cleared ';
+  bestText.parentElement.title = 'Levels you have cleared';
+  document.title = 'Levels - Defenders of the Data';
+} else {
+  document.title = 'Endless - Defenders of the Data';
+}
 
 let state;
 
@@ -232,11 +255,11 @@ function updateHud() {
   dataText.textContent = state.data;
   dataText.parentElement.classList.toggle('low', state.data <= 5);
   bytesText.textContent = state.bytes;
-  waveText.textContent = state.wave + 1;
+  waveText.textContent = LEVELS_MODE ? `${Math.min(state.wave + 1, LEVEL_COUNT)}/${LEVEL_COUNT}` : state.wave + 1;
   bestText.textContent = Math.max(bestWave, state.wave);
   waveButton.disabled = state.waveActive || state.over;
   waveButton.textContent = state.waveActive ? 'Wave in progress...'
-    : isBossWave(state.wave) ? '⚠️ Start BOSS Wave (Space)' : `Start Wave ${state.wave + 1} (Space)`;
+    : isBossWave(state.wave) ? `⚠️ Start BOSS ${LEVELS_MODE ? 'Level' : 'Wave'} (Space)` : `Start ${LEVELS_MODE ? 'Level' : 'Wave'} ${state.wave + 1} (Space)`;
   waveButton.classList.toggle('boss', !state.waveActive && isBossWave(state.wave));
   for (const [id, tower] of Object.entries(TOWERS)) {
     const locked = !unlocked.has(id);
@@ -280,6 +303,11 @@ function finishWave() {
   state.waveActive = false;
   state.wave++;
   runHooks('waveEnd');
+  // Levels mode: clearing level 100 wins the game!
+  if (LEVELS_MODE && state.wave >= LEVEL_COUNT) {
+    endGame(true);
+    return;
+  }
   state.bytes += WAVE_BONUS;
   updateHud();
 
@@ -634,22 +662,37 @@ function update(dt) {
 }
 
 // ---------- End of game ----------
-function endGame() {
+// won: only in Levels mode, after clearing level 100
+function endGame(won = false) {
   state.over = true;
   state.waveActive = false;
+  state.won = won;
   if (state.tool) selectTool(state.tool);
   updateHud();
 
   const stopped = Object.values(state.stopped).reduce((a, b) => a + b, 0);
-  // The waves never end, so the goal is to beat your best
   const record = state.wave > bestWave;
   bestWave = Math.max(bestWave, state.wave);
   saveGame();
-  el('end-emoji').textContent = record ? '🏆' : '💥';
-  el('end-title').textContent = record ? 'New Record!' : 'Data Leaked!';
-  el('end-summary').textContent =
-    `You survived ${state.wave} wave${state.wave === 1 ? '' : 's'} and stopped ${stopped} threats. ` +
-    (record ? 'That\'s your best ever!' : `Your best is ${bestWave} waves. Every leak is a lesson, so try again!`);
+  if (won) {
+    el('end-emoji').textContent = '🏆';
+    el('end-title').textContent = 'All 100 Levels Cleared!';
+    el('end-summary').textContent = `You stopped ${stopped} threats and defended your data through every level. You're a true Defender of the Data!`;
+  } else if (LEVELS_MODE) {
+    el('end-emoji').textContent = '💥';
+    el('end-title').textContent = `Level ${state.wave + 1} Failed`;
+    el('end-summary').textContent =
+      `You stopped ${stopped} threats. You've cleared ${bestWave} of ${LEVEL_COUNT} levels. Retry this level, or pick another on the Level Map!`;
+  } else {
+    // Endless: the waves never end, so the goal is to beat your best
+    el('end-emoji').textContent = record ? '🏆' : '💥';
+    el('end-title').textContent = record ? 'New Record!' : 'Data Leaked!';
+    el('end-summary').textContent =
+      `You survived ${state.wave} wave${state.wave === 1 ? '' : 's'} and stopped ${stopped} threats. ` +
+      (record ? 'That\'s your best ever!' : `Your best is ${bestWave} waves. Every leak is a lesson, so try again!`);
+  }
+  el('btn-retry').hidden = !LEVELS_MODE || won;
+  el('btn-end-levels').hidden = !LEVELS_MODE;
 
   const { scans, scansRight, quiz, quizRight } = state.stats;
   el('end-stats').textContent =

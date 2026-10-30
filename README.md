@@ -14,9 +14,9 @@ Hackers, phishers and malware are marching toward your Data Core. Stop them by b
 4. **Real or Scam?** Between waves, spot the scams to earn bytes.
 5. **Answer live DMs** that pop up mid-wave. A safe reply gives an Overclock boost, and a risky one lets more threats in.
 6. **Upgrade towers** by answering deeper questions, and build answer streaks to charge the 💥 Firewall Blast.
-7. **Survive as long as you can.** The waves never end and keep getting tougher. Every 10th wave is a **Ransomware Boss** that locks your towers, and you restore them by answering questions about backups. Try to beat your best wave!
+7. **Beat the bosses.** Every 10th wave is a **Ransomware Boss** that locks your towers, and you restore them by answering questions about backups.
 8. **Remember your password!** The practice password you make for the 2FA Lock comes back: every few waves, a surprise login check asks for it plus a 2-step code.
-9. **Skip ahead** from the 🗺️ Level Map by passing a Duolingo-style quiz (multiple choice, real or scam, true or false, spot the real link, build the rule, match pairs) with 3 hearts.
+9. **Two modes.** **Levels:** clear 100 levels (a boss every 10) on the 🗺️ Level Map. To jump ahead, pass a **Security Clearance** test: threat intel, intercepted messages, fact or myth, link scanner, repair the rule and reconnect the wires, with 3 firewall shields. **Endless:** the waves never stop, so beat your best.
 10. **Study** flashcards, review what you missed, and collect 🏅 badges.
 
 Questions get harder as the waves go up: easy, then medium, then hard.

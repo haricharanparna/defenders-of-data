@@ -31,12 +31,16 @@ function saveGame() {
   if (!saveReady) return;
   const save = readSave();
   save.unlocked = [...unlocked];
-  save.best = Math.max(save.best || 0, bestWave, state.wave);
+  // Each mode keeps its own record and its own game in progress
+  if (typeof save.best !== 'object') save.best = { endless: save.best || 0 };
+  save.best[MODE] = Math.max(save.best[MODE] || 0, bestWave, state.wave);
+  const slot = `game_${MODE}`;
+  if (MODE === 'endless') delete save.game;  // the old single slot, now moved to game_endless
 
   if (state.over) {
-    save.game = null;
+    save[slot] = null;
   } else if (!state.waveActive) {
-    save.game = {
+    save[slot] = {
       data: state.data,
       bytes: state.bytes,
       wave: state.wave,
@@ -61,12 +65,13 @@ function saveGame() {
 // Called once when the page opens. Restores unlocked towers, then offers to continue a saved game.
 function loadSave() {
   const save = readSave();
-  bestWave = save.best || 0;
+  bestWave = typeof save.best === 'object' ? save.best[MODE] || 0 : MODE === 'endless' ? save.best || 0 : 0;
   for (const id of save.unlocked || []) {
     if (TOWERS[id]) unlocked.add(id);
   }
 
-  const game = save.game;
+  // (Saves from before there were two modes used "game" for Endless)
+  const game = save[`game_${MODE}`] || (MODE === 'endless' ? save.game : null);
   const hasProgress = game && (game.wave > 0 || game.towers.length > 0);
   if (!hasProgress) {
     saveReady = true;
@@ -75,7 +80,7 @@ function loadSave() {
   }
 
   el('continue-summary').textContent =
-    `You were on Wave ${game.wave + 1} with ❤️ ${game.data} data, 💾 ${game.bytes} bytes and ${game.towers.length} tower${game.towers.length === 1 ? '' : 's'}.`;
+    `You were on ${LEVELS_MODE ? 'Level' : 'Wave'} ${game.wave + 1} with ❤️ ${game.data} data, 💾 ${game.bytes} bytes and ${game.towers.length} tower${game.towers.length === 1 ? '' : 's'}.`;
   const dialog = el('dlg-continue');
   dialog.showModal();
   el('btn-continue').focus();

@@ -74,6 +74,7 @@ const BADGES = [
   { id: 'boss', emoji: '👾', name: 'Ransomware Rescuer', how: 'Defeat the Ransomware Boss', test: () => state.bossBeaten },
   { id: 'perfect', emoji: '🛡️', name: 'Perfect Defense', how: 'Survive 10 waves without losing any data', test: () => state.wave >= 10 && state.data === START_DATA },
   { id: 'survivor', emoji: '🌊', name: 'Survivor', how: 'Survive 20 waves', test: () => state.wave >= 20 },
+  { id: 'champion', emoji: '🏆', name: 'Champion', how: 'Clear all 100 levels in Levels mode', test: () => state.won },
 ];
 
 const BADGE_KEY = 'defenders-of-data-badges';

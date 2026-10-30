@@ -172,8 +172,9 @@ kbd {
 .close-btn { display: block; margin: 1.2rem auto 0; }
 
 /* ---------- Mode select ---------- */
-.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 520px) { .modes { grid-template-columns: 1fr; } }
+#dlg-mode { width: min(820px, 94vw); }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+@media (max-width: 720px) { .modes { grid-template-columns: 1fr; } }
 
 .mode-card {
   display: flex;

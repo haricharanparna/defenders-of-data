@@ -229,12 +229,12 @@
     <div id="levels-map">
       <h2 id="levels-title">🗺️ Level Map</h2>
       <p class="tip center" id="levels-best"></p>
-      <p class="levels-key">📍 You are here · ✓ Reached before · 👾 Boss wave · The waves never end!</p>
+      <p class="levels-key">📍 You are here · ✓ Cleared · 👾 Boss level · 🔒 Needs a clearance test</p>
       <div class="levels-grid" id="levels-grid"></div>
       <button class="btn btn-primary close-btn" id="levels-close">Back to the game</button>
     </div>
     <div id="levels-confirm" hidden>
-      <div class="intro-emoji">🚀</div>
+      <div class="intro-emoji" id="confirm-emoji"></div>
       <h2 id="confirm-title"></h2>
       <p class="center" id="confirm-text"></p>
       <div class="end-buttons">
@@ -244,29 +244,38 @@
     </div>
   </dialog>
 
-  <!-- Skip-ahead quiz, Duolingo style (levels.js) -->
+  <!-- Security Clearance test to unlock a level (levels.js) -->
   <dialog id="dlg-skip" class="panel skip-panel" aria-labelledby="sq-target">
     <div id="sq-play">
       <div class="sq-top">
-        <button class="sq-quit" id="sq-quit" aria-label="Quit quiz">✕</button>
-        <div class="sq-progress" aria-hidden="true"><div id="sq-progress-fill"></div></div>
-        <span class="sq-hearts" id="sq-hearts" aria-label="Hearts left"></span>
+        <p class="sq-target" id="sq-target"></p>
+        <button class="sq-quit" id="sq-quit" aria-label="Quit the test">✕</button>
       </div>
-      <p class="sq-target" id="sq-target"></p>
+      <div class="sq-status">
+        <div>
+          <div class="sq-decrypt" id="sq-decrypt" aria-hidden="true"></div>
+          <p class="sq-count" id="sq-count"></p>
+        </div>
+        <div class="sq-shields-box">
+          <span class="sq-shields" id="sq-shields" aria-label="Firewall shields left"></span>
+          <p class="sq-count">FIREWALL</p>
+        </div>
+      </div>
       <h2 class="sq-label" id="sq-label"></h2>
       <div class="sq-body" id="sq-body"></div>
-      <div class="sq-footer" id="sq-footer">
-        <div class="sq-feedback" id="sq-feedback" aria-live="polite"></div>
-        <button class="sq-check" id="sq-check" disabled>Check</button>
+      <div class="sq-terminal" id="sq-terminal" aria-live="polite" hidden></div>
+      <div class="end-buttons">
+        <button class="btn btn-primary" id="sq-check" disabled>Submit ▶</button>
       </div>
+      <p class="sq-hint">Keys: A–D to pick, Enter to submit</p>
     </div>
     <div id="sq-end" hidden>
       <div class="intro-emoji" id="sq-end-emoji"></div>
       <h2 id="sq-end-title"></h2>
       <p class="center" id="sq-end-text"></p>
       <div class="end-buttons">
-        <button class="sq-check" id="sq-start">🚀 Let's go!</button>
-        <button class="sq-check" id="sq-retry">🔄 Try again</button>
+        <button class="btn btn-primary" id="sq-start">🚀 Start the level</button>
+        <button class="btn btn-primary" id="sq-retry">🔄 Try again</button>
         <button class="btn" id="sq-back">Back to map</button>
       </div>
     </div>
@@ -282,8 +291,9 @@
     <h3>What you learned</h3>
     <ul class="lessons" id="end-lessons"></ul>
     <div class="end-buttons">
+      <button class="btn btn-primary" id="btn-retry" hidden>🔄 Retry level</button>
       <button class="btn btn-primary" id="btn-again">Play Again</button>
-      <button class="btn" id="btn-end-levels">🗺️ Level map</button>
+      <button class="btn" id="btn-end-levels" hidden>🗺️ Level map</button>
       <button class="btn" id="btn-review">📚 Review what I missed</button>
       <a class="btn" href="index.html">Main Menu</a>
     </div>

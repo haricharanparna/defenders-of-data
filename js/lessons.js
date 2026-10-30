@@ -55,9 +55,10 @@ function renderMessage(box, msg) {
 // Questions have a level: 1 easy, 2 medium, 3 hard (no level means 1).
 const levelOf = q => q.level || 1;
 
-// How hard questions should be on a wave (wave counts from 0)
+// How hard questions should be on a wave (wave counts from 0). Levels mode ramps up more slowly.
 function tierFor(wave) {
-  return wave < 5 ? 1 : wave < 12 ? 2 : 3;
+  const [medium, hard] = LEVELS_MODE ? [10, 30] : [5, 12];
+  return wave < medium ? 1 : wave < hard ? 2 : 3;
 }
 
 // Picks `count` questions from `list` that haven't been asked yet, hardest allowed first,

@@ -1,30 +1,37 @@
-// Level map + skip-ahead quiz.
-// The 🗺️ Levels button shows every wave. To jump ahead, pass a quick Duolingo-style quiz:
-// a mix of question types, 3 hearts, a progress bar and combos. Higher waves = more and harder questions.
-// Pass it and you start a fresh game at that wave with bytes to build your defense.
+// Levels mode: the Level Map and the Security Clearance test.
+// The 🗺️ Levels button shows all 100 levels. Levels you've reached can be played any time.
+// To jump past them, pass a Security Clearance test: a mix of question types,
+// 3 firewall shields, and a decrypt bar. Higher levels = more and harder questions.
+// Pass it and you start at that level with bytes to build your defense.
 
-const SKIP_HEARTS = 3;
-const PRAISE = ['Nice!', 'Awesome!', 'You got it!', 'Great job!', 'Nailed it!', 'Correct!'];
+const SHIELDS = 3;
+const GRANTED = ['ACCESS GRANTED', 'THREAT BLOCKED', 'FIREWALL HOLDING', 'SCAN COMPLETE', 'DEFENSE CONFIRMED'];
 
 const levelsDialog = el('dlg-levels');
 const skipDialog = el('dlg-skip');
 
+// The map, its button and the clearance test are only in Levels mode
+el('btn-levels').hidden = !LEVELS_MODE;
+
+// Highest level you can play without a clearance test
+const reachedLevel = () => Math.min(LEVEL_COUNT, bestWave + 1);
+
 // ---------- Level map ----------
 function openLevels() {
-  const furthest = Math.max(bestWave, state.wave);
-  const shown = Math.max(30, Math.ceil((furthest + 10) / 10) * 10);
-  el('levels-best').textContent = `🏆 Your best: ${bestWave} wave${bestWave === 1 ? '' : 's'}. Pass a quick quiz to skip ahead!`;
+  el('levels-best').textContent = `🏆 Cleared ${bestWave} of ${LEVEL_COUNT} levels. Play any level you've reached, or pass a Security Clearance test to jump ahead!`;
 
   const grid = el('levels-grid');
   grid.innerHTML = '';
-  for (let wave = 1; wave <= shown; wave++) {
+  for (let level = 1; level <= LEVEL_COUNT; level++) {
     const btn = document.createElement('button');
-    const boss = isBossWave(wave - 1);
-    const current = wave === state.wave + 1;
-    btn.className = `level${boss ? ' boss' : ''}${wave <= bestWave ? ' cleared' : ''}${current ? ' current' : ''}`;
-    btn.innerHTML = `<span class="level-num">${wave}</span><span class="level-icon">${current ? '📍' : boss ? '👾' : wave <= bestWave ? '✓' : ''}</span>`;
-    btn.setAttribute('aria-label', `Wave ${wave}${boss ? ', boss wave' : ''}${current ? ', you are here' : ''}`);
-    btn.addEventListener('click', () => chooseLevel(wave));
+    const boss = isBossWave(level - 1);
+    const current = level === state.wave + 1 && !state.over;
+    const cleared = level <= bestWave;
+    const locked = level > reachedLevel();
+    btn.className = `level${boss ? ' boss' : ''}${cleared ? ' cleared' : ''}${locked ? ' locked' : ''}${current ? ' current' : ''}`;
+    btn.innerHTML = `<span class="level-num">${level}</span><span class="level-icon">${current ? '📍' : boss ? '👾' : cleared ? '✓' : locked ? '🔒' : ''}</span>`;
+    btn.setAttribute('aria-label', `Level ${level}${boss ? ', boss level' : ''}${current ? ', you are here' : cleared ? ', cleared' : locked ? ', locked' : ''}`);
+    btn.addEventListener('click', () => chooseLevel(level));
     grid.appendChild(btn);
   }
   showLevelsPanel('levels-map');
@@ -39,72 +46,75 @@ function showLevelsPanel(id) {
 
 let skipTarget = 1;
 
-function chooseLevel(wave) {
-  if (wave === state.wave + 1 && !state.over) {
+function chooseLevel(level) {
+  if (level === state.wave + 1 && !state.over) {
     levelsDialog.close();
     return;
   }
-  skipTarget = wave;
-  const count = skipQuestionCount(wave);
-  el('confirm-title').textContent = wave === 1 ? 'Start Over at Wave 1?' : `Skip to Wave ${wave}?`;
-  el('confirm-text').textContent = wave === 1
-    ? 'Your current game will end and you\'ll start fresh at wave 1.'
-    : `Answer ${count} questions without losing all ${SKIP_HEARTS} hearts. Higher waves have harder questions! If you pass, you start a new game at wave ${wave} with 💾 ${bytesForWave(wave)} bytes to build with.`;
-  el('confirm-go').textContent = wave === 1 ? '🔄 Start over' : '🚀 Start the quiz';
+  skipTarget = level;
+  const locked = level > reachedLevel();
+  el('confirm-emoji').textContent = locked ? '🔐' : '🚀';
+  el('confirm-title').textContent = locked ? `Level ${level} Is Locked` : `Play Level ${level}?`;
+  el('confirm-text').textContent = locked
+    ? `Pass a Security Clearance test to unlock it: ${skipQuestionCount(level)} questions, and you can only lose ${SHIELDS - 1} firewall shields. Higher levels have harder questions! If you pass, you start at level ${level} with 💾 ${bytesForWave(level)} bytes to build with.`
+    : `Your current game will end and you'll start at level ${level}${level > 1 ? ` with 💾 ${bytesForWave(level)} bytes to build with` : ''}.`;
+  el('confirm-go').textContent = locked ? '🔐 Start clearance test' : '▶ Play';
+  el('confirm-go').dataset.locked = locked;
   showLevelsPanel('levels-confirm');
   el('confirm-go').focus();
 }
 
 el('confirm-go').addEventListener('click', () => {
   levelsDialog.close();
-  if (skipTarget === 1) startAtWave(1);
-  else startSkipQuiz(skipTarget);
+  if (el('confirm-go').dataset.locked === 'true') startSkipQuiz(skipTarget);
+  else startAtWave(skipTarget);
 });
 el('confirm-back').addEventListener('click', () => showLevelsPanel('levels-map'));
 el('levels-close').addEventListener('click', () => levelsDialog.close());
 el('btn-levels').addEventListener('click', () => { if (!anyDialogOpen()) openLevels(); });
 el('btn-end-levels').addEventListener('click', () => { endDialog.close(); openLevels(); });
+el('btn-retry').addEventListener('click', () => startAtWave(state.wave + 1));
 document.addEventListener('keydown', e => {
-  if ((e.key === 'v' || e.key === 'V') && !anyDialogOpen()) openLevels();
+  if ((e.key === 'v' || e.key === 'V') && LEVELS_MODE && !anyDialogOpen()) openLevels();
 });
 
-// Bytes you start with when you skip ahead, so you can build a defense that fits the wave
-function bytesForWave(wave) {
-  return START_BYTES + Math.round(95 * (wave - 1) + 4 * (wave - 1) ** 2);
+// Bytes you start with on a later level, so you can build a defense that fits it
+function bytesForWave(level) {
+  return START_BYTES + Math.round(95 * (level - 1) + 4 * (level - 1) ** 2);
 }
 
-function startAtWave(wave) {
+function startAtWave(level) {
   if (endDialog.open) endDialog.close();
   newGame();
-  if (wave > 1) {
+  if (level > 1) {
     // You proved you know your stuff, so every tower is unlocked
     Object.keys(TOWERS).forEach(id => unlocked.add(id));
-    state.wave = wave - 1;
-    state.bytes = bytesForWave(wave);
+    state.wave = level - 1;
+    state.bytes = bytesForWave(level);
     state.lastLogin = state.wave;
   }
   updateHud();
-  showToast(wave > 1 ? `🚀 Welcome to Wave ${wave}! Build your towers, then press Start Wave.` : 'Fresh start! Good luck, Defender.');
+  showToast(level > 1 ? `🚀 Level ${level}! Build your towers, then press Start Level.` : 'Fresh start! Good luck, Defender.');
 }
 
-// ---------- Skip quiz ----------
-const skipQuestionCount = wave => Math.min(12, 4 + Math.ceil(wave / 5));
+// ---------- Security Clearance test ----------
+const skipQuestionCount = level => Math.min(12, 4 + Math.ceil(level / 10));
 
-let skip = null;  // { target, questions, index, hearts, right, combo, answered }
+let skip = null;  // { target, questions, index, shields, right, chain, answered, pick }
 
-// Every multiple-choice question in the game, for the quiz to pick from
+// Every multiple-choice question in the game, for the test to pick from
 function mcPool() {
   const unlocks = Object.values(CHALLENGES).flat().filter(c => !c.password);
   return [...unlocks, ...Object.values(UPGRADES).flat(), ...BOSS_QUESTIONS];
 }
 
 // Builds the list of questions, mixing the types so it stays fun
-function buildSkipQuestions(wave) {
-  const tier = tierFor(wave - 1);
+function buildSkipQuestions(level) {
+  const tier = tierFor(level - 1);
   const makers = [makeChoice, makeRealScam, makeTrueFalse, makeLinks, makeSentence, makeMatch];
   const questions = [];
   let order = [];
-  while (questions.length < skipQuestionCount(wave)) {
+  while (questions.length < skipQuestionCount(level)) {
     if (order.length === 0) order = shuffle(makers);
     questions.push(order.pop()(tier));
   }
@@ -112,7 +122,7 @@ function buildSkipQuestions(wave) {
 }
 
 // Each maker returns { label, render(body), check() -> true/false, solution, why, msg }
-// render() calls ready(true/false) to turn the Check button on and off.
+// render() calls ready(true/false) to turn the Submit button on and off.
 
 function choiceButtons(body, texts, className = '') {
   const wrap = document.createElement('div');
@@ -120,7 +130,7 @@ function choiceButtons(body, texts, className = '') {
   texts.forEach((text, i) => {
     const btn = document.createElement('button');
     btn.className = 'sq-choice';
-    btn.innerHTML = `<span class="sq-key">${i + 1}</span><span></span>`;
+    btn.innerHTML = `<span class="sq-key">${String.fromCharCode(65 + i)}</span><span></span>`;
     btn.lastChild.textContent = text;
     btn.addEventListener('click', () => {
       wrap.querySelectorAll('.sq-choice').forEach(b => b.classList.toggle('picked', b === btn));
@@ -143,7 +153,7 @@ function makeChoice(tier) {
   const [q] = drawQuestions(mcPool(), tier, 1);
   const right = q.options.find(o => o.correct);
   return {
-    label: 'Select the correct answer',
+    label: '🧠 Threat intel',
     render(body) {
       promptText(body, q.prompt);
       if (q.msg) {
@@ -165,7 +175,7 @@ function makeRealScam(tier) {
   const [q] = drawQuestions(QUIZ, tier, 1);
   const label = q.answer === 'real' ? '✅ Real' : '🚩 Scam';
   return {
-    label: 'Real or scam?',
+    label: '📡 Intercepted message: real or scam?',
     render(body) {
       const box = document.createElement('div');
       box.className = 'message';
@@ -182,32 +192,32 @@ function makeRealScam(tier) {
 
 function makeTrueFalse(tier) {
   const [q] = drawQuestions(TRUE_FALSE, tier, 1);
-  const label = q.answer ? '👍 True' : '👎 False';
+  const label = q.answer ? '✔ Fact' : '✖ Myth';
   return {
-    label: 'True or false?',
+    label: '⚖️ Fact or myth?',
     render(body) {
       promptText(body, `"${q.text}"`);
-      choiceButtons(body, ['👍 True', '👎 False'], 'two');
+      choiceButtons(body, ['✔ Fact', '✖ Myth'], 'two');
     },
     check: () => skip.pick === label,
     solution: label,
     why: q.why,
-    msg: { from: 'True or false?', text: q.text },
+    msg: { from: 'Fact or myth?', text: q.text },
   };
 }
 
 function makeLinks(tier) {
   const [q] = drawQuestions(LINK_SETS, tier, 1);
   return {
-    label: 'Tap the REAL link',
+    label: '🔗 Link scanner',
     render(body) {
-      promptText(body, 'Only one of these is the real website. Which one?');
+      promptText(body, 'Three of these are traps. Which link is the REAL website?');
       choiceButtons(body, shuffle([q.real, ...q.fakes]), 'links');
     },
     check: () => skip.pick === q.real,
     solution: q.real,
     why: 'Read the domain right before the first single "/", letter by letter. The fakes add extra words, swap letters, or hide the real name at the start.',
-    msg: { from: 'Tap the real link', text: [q.real, ...q.fakes].join('  ·  ') },
+    msg: { from: 'Link scanner', text: [q.real, ...q.fakes].join('  ·  ') },
   };
 }
 
@@ -215,11 +225,12 @@ function makeSentence(tier) {
   const [q] = drawQuestions(SENTENCES, tier, 1);
   const goal = q.words.join(' ');
   return {
-    label: 'Build the safety rule',
+    label: '🧩 Repair the security rule',
     render(body) {
-      promptText(body, 'Tap the words in the right order to make a safety rule.');
+      promptText(body, 'A hacker scrambled this safety rule (and added fake pieces). Put the right code blocks back in order.');
       const answer = document.createElement('div');
       answer.className = 'sq-answer';
+      answer.setAttribute('aria-label', 'Your rule');
       const bank = document.createElement('div');
       bank.className = 'sq-bank';
       const update = () => {
@@ -230,7 +241,7 @@ function makeSentence(tier) {
         const tile = document.createElement('button');
         tile.className = 'sq-tile';
         tile.textContent = word;
-        // Tap to move a word between the bank and the answer line
+        // Click to move a block between the pile and the rule
         tile.addEventListener('click', () => {
           if (skip.answered) return;
           (tile.parentElement === bank ? answer : bank).appendChild(tile);
@@ -244,16 +255,16 @@ function makeSentence(tier) {
     check: () => skip.pick === goal,
     solution: goal,
     why: 'Remember this rule. It keeps you safe in real life too!',
-    msg: { from: 'Build the rule', text: goal },
+    msg: { from: 'Repair the rule', text: goal },
   };
 }
 
 function makeMatch() {
   const cards = shuffle(FLASHCARDS).slice(0, 4);
   return {
-    label: 'Tap the matching pairs',
+    label: '🔌 Reconnect the wires',
     render(body) {
-      promptText(body, 'Match each word to what it means.');
+      promptText(body, 'The network got unplugged! Connect each term to what it means.');
       const grid = document.createElement('div');
       grid.className = 'sq-match';
       const left = document.createElement('div');
@@ -301,7 +312,7 @@ function makeMatch() {
       grid.append(left, right);
       body.appendChild(grid);
     },
-    // Matching never costs a heart, but a perfect match counts toward your combo
+    // Wiring never costs a shield, but only a perfect job keeps your chain going
     check: () => true,
     perfect: () => skip.matchMistakes === 0,
     solution: '',
@@ -309,14 +320,26 @@ function makeMatch() {
   };
 }
 
-// ---------- Running the quiz ----------
+// ---------- Running the test ----------
 function ready(on) {
   el('sq-check').disabled = !on;
 }
 
+function drawShields() {
+  el('sq-shields').innerHTML = Array.from({ length: SHIELDS }, (_, i) =>
+    `<span class="${i < skip.shields ? 'up' : 'down'}">${i < skip.shields ? '🛡️' : '💥'}</span>`).join('');
+}
+
+function drawDecrypt() {
+  const total = skip.questions.length;
+  el('sq-decrypt').innerHTML = skip.questions.map((_, i) =>
+    `<span class="${i < skip.index ? 'done' : i === skip.index ? 'now' : ''}"></span>`).join('');
+  el('sq-count').textContent = `DECRYPTING ${Math.min(skip.index + 1, total)}/${total}`;
+}
+
 function startSkipQuiz(target) {
-  skip = { target, questions: buildSkipQuestions(target), index: 0, hearts: SKIP_HEARTS, right: 0, combo: 0, answered: false };
-  el('sq-target').textContent = `Skip to Wave ${target}`;
+  skip = { target, questions: buildSkipQuestions(target), index: 0, shields: SHIELDS, right: 0, chain: 0, answered: false };
+  el('sq-target').textContent = `SECURITY CLEARANCE · LEVEL ${target}`;
   showSkipPanel('sq-play');
   skipDialog.showModal();
   showSkipQuestion();
@@ -330,17 +353,16 @@ function showSkipQuestion() {
   const q = skip.questions[skip.index];
   skip.pick = null;
   skip.answered = false;
-  el('sq-progress-fill').style.width = `${(skip.index / skip.questions.length) * 100}%`;
-  el('sq-hearts').textContent = `${'❤️'.repeat(skip.hearts)}${'🖤'.repeat(SKIP_HEARTS - skip.hearts)}`;
+  drawShields();
+  drawDecrypt();
   el('sq-label').textContent = q.label;
   const body = el('sq-body');
   body.innerHTML = '';
   q.render(body);
-  el('sq-footer').className = 'sq-footer';
-  el('sq-feedback').innerHTML = '';
-  el('sq-check').textContent = 'Check';
+  el('sq-terminal').hidden = true;
+  el('sq-terminal').className = 'sq-terminal';
+  el('sq-check').textContent = 'Submit ▶';
   ready(false);
-  // Fresh question: put focus on the first thing to tap
   body.querySelector('button')?.focus();
 }
 
@@ -356,49 +378,47 @@ function checkSkipAnswer() {
     if (text === q.solution) b.classList.add('right');
     else if (text === skip.pick) b.classList.add('wrong');
   });
-  const footer = el('sq-footer');
-  const feedback = el('sq-feedback');
 
-  // Sounds only: skip-quiz answers don't charge your in-game Firewall Blast
+  const terminal = el('sq-terminal');
+  terminal.hidden = false;
+  // Sounds only: test answers don't charge your in-game Firewall Blast
   playSound(correct ? 'right' : 'wrong');
   if (correct) {
     skip.right++;
-    skip.combo = perfect ? skip.combo + 1 : 0;
-    footer.className = 'sq-footer good';
-    feedback.innerHTML = `<strong>🎉 ${pickRandom(PRAISE)}</strong>${skip.combo >= 3 ? ` <span class="sq-combo">🔥 ${skip.combo} in a row!</span>` : ''}<p></p>`;
-    feedback.querySelector('p').textContent = q.why;
+    skip.chain = perfect ? skip.chain + 1 : 0;
+    terminal.className = 'sq-terminal good';
+    terminal.innerHTML = `<p class="sq-line">&gt; ${pickRandom(GRANTED)} ✔${skip.chain >= 3 ? ` <span class="sq-chain">⚡ CHAIN x${skip.chain}</span>` : ''}</p><p class="sq-why"></p>`;
   } else {
-    skip.combo = 0;
-    skip.hearts--;
-    el('sq-hearts').textContent = `${'❤️'.repeat(skip.hearts)}${'🖤'.repeat(SKIP_HEARTS - skip.hearts)}`;
-    el('sq-hearts').classList.add('ouch');
-    setTimeout(() => el('sq-hearts').classList.remove('ouch'), 500);
-    footer.className = 'sq-footer bad';
-    feedback.innerHTML = '<strong>❌ Correct answer:</strong> <span class="sq-solution"></span><p></p>';
-    feedback.querySelector('.sq-solution').textContent = q.solution;
-    feedback.querySelector('p').textContent = q.why;
-    recordMiss({ kind: '🗺️ Skip quiz', msg: q.msg, yours: skip.pick, right: q.solution, why: q.why });
+    skip.chain = 0;
+    skip.shields--;
+    drawShields();
+    el('sq-shields').classList.add('hit');
+    setTimeout(() => el('sq-shields').classList.remove('hit'), 500);
+    terminal.className = 'sq-terminal bad';
+    terminal.innerHTML = `<p class="sq-line">&gt; ACCESS DENIED ✖ Shield lost!</p><p class="sq-line">&gt; Answer: <span class="sq-solution"></span></p><p class="sq-why"></p>`;
+    terminal.querySelector('.sq-solution').textContent = q.solution;
+    recordMiss({ kind: '🔐 Security Clearance', msg: q.msg, yours: skip.pick, right: q.solution, why: q.why });
   }
-  el('sq-check').textContent = skip.hearts === 0 ? 'See results' : 'Continue';
+  terminal.querySelector('.sq-why').textContent = q.why;
+  el('sq-check').textContent = skip.shields === 0 ? 'See results ▶' : 'Next ▶';
   el('sq-check').disabled = false;
   el('sq-check').focus();
 }
 
 function nextSkipQuestion() {
   skip.index++;
-  if (skip.hearts === 0 || skip.index >= skip.questions.length) finishSkipQuiz();
+  if (skip.shields === 0 || skip.index >= skip.questions.length) finishSkipQuiz();
   else showSkipQuestion();
 }
 
 function finishSkipQuiz() {
-  const passed = skip.hearts > 0;
-  el('sq-progress-fill').style.width = passed ? '100%' : el('sq-progress-fill').style.width;
-  const total = skip.index + (passed ? 0 : 1);
-  el('sq-end-emoji').textContent = passed ? '🎉' : '💔';
-  el('sq-end-title').textContent = passed ? `Wave ${skip.target} Unlocked!` : 'Out of Hearts!';
+  const passed = skip.shields > 0;
+  const answered = Math.min(skip.index, skip.questions.length);
+  el('sq-end-emoji').textContent = passed ? '🔓' : '🚨';
+  el('sq-end-title').textContent = passed ? 'Clearance Granted' : 'Clearance Denied';
   el('sq-end-text').textContent = passed
-    ? `You got ${skip.right} of ${skip.questions.length} right and earned ⚡ ${skip.right * 10} XP. Time to defend!`
-    : `You got ${skip.right} of ${Math.min(total, skip.questions.length)} right. Check the 📚 Study tab (your mistakes are in Missed), then try again!`;
+    ? `You answered ${skip.right} of ${skip.questions.length} right. Level ${skip.target} is unlocked. Time to defend!`
+    : `Your firewall went down after ${answered} questions (${skip.right} right). Check the 📚 Study tab (your mistakes are in Missed), then try again!`;
   el('sq-start').hidden = !passed;
   el('sq-retry').hidden = passed;
   showSkipPanel('sq-end');
@@ -418,12 +438,12 @@ el('sq-start').addEventListener('click', () => {
 el('sq-retry').addEventListener('click', () => startSkipQuiz(skip.target));
 el('sq-back').addEventListener('click', () => { skipDialog.close(); openLevels(); });
 
-// Keys: 1-4 pick an answer, Enter checks / continues
+// Keys: A-D pick an answer, Enter submits / goes on
 skipDialog.addEventListener('keydown', e => {
-  if (el('sq-play').hidden) return;
-  const num = parseInt(e.key, 10);
+  if (el('sq-play').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
   const choices = el('sq-body').querySelectorAll('.sq-choice');
-  if (num >= 1 && num <= choices.length && !skip.answered) choices[num - 1].click();
+  const index = e.key.length === 1 ? e.key.toUpperCase().charCodeAt(0) - 65 : -1;
+  if (index >= 0 && index < choices.length && !skip.answered) choices[index].click();
   else if (e.key === 'Enter' && !el('sq-check').disabled && e.target.id !== 'sq-check') {
     e.preventDefault();
     el('sq-check').click();

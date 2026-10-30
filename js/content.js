@@ -906,7 +906,7 @@ const LINK_SETS = [
   { level: 3, real: 'www.paypal.com/signin', fakes: ['www.paypal.com.signin-secure.info', 'paypa1.com/signin', 'paypal-resolution-center.com/signin'] },
 ];
 
-// Build a safety rule from word tiles, Duolingo style
+// Repair a safety rule from scrambled code blocks
 const SENTENCES = [
   { level: 1, words: ['Never', 'share', 'your', 'password'], extra: ['always', 'post'] },
   { level: 1, words: ['Think', 'before', 'you', 'click'], extra: ['never', 'download'] },
