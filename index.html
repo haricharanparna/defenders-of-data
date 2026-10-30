@@ -73,26 +73,42 @@
 
   <!-- Choose a mode -->
   <dialog id="dlg-mode" class="panel" aria-labelledby="mode-title">
-    <h2 id="mode-title">Choose Your Mode</h2>
-    <div class="modes">
-      <a class="mode-card" href="tower-defense.html?mode=levels">
-        <span class="mode-emoji">🗺️</span>
-        <strong>Levels</strong>
-        <span>Tower Defense: fight through 100 levels with a boss every 10. Pass a Security Clearance test to jump ahead.</span>
-      </a>
-      <a class="mode-card" href="tower-defense.html?mode=endless">
-        <span class="mode-emoji">♾️</span>
-        <strong>Endless</strong>
-        <span>Tower Defense: the waves never stop and get tough fast. How long can you survive?</span>
-      </a>
-      <button class="mode-card" id="btn-adventure" disabled>
-        <span class="mode-emoji">⚔️</span>
-        <strong>Adventure</strong>
-        <span>Explore the internet, battle hackers and collect them in your Threat Index.</span>
-        <span class="soon">Coming soon</span>
-      </button>
+    <!-- Step 1: pick a game -->
+    <div id="mode-games">
+      <h2 id="mode-title">Choose Your Mode</h2>
+      <div class="modes">
+        <button class="mode-card" id="btn-tower-defense">
+          <span class="mode-emoji">🏰</span>
+          <strong>Tower Defense</strong>
+          <span>Build safety habits as towers and stop waves of threats before they reach your data.</span>
+        </button>
+        <button class="mode-card" id="btn-adventure" disabled>
+          <span class="mode-emoji">⚔️</span>
+          <strong>Adventure</strong>
+          <span>Explore the internet, battle hackers and collect them in your Threat Index.</span>
+          <span class="soon">Coming soon</span>
+        </button>
+      </div>
+      <button class="btn close-btn">Back</button>
     </div>
-    <button class="btn close-btn">Back</button>
+
+    <!-- Step 2: pick how to play Tower Defense -->
+    <div id="mode-td" hidden>
+      <h2>🏰 Tower Defense</h2>
+      <div class="modes">
+        <a class="mode-card" href="tower-defense.html#levels">
+          <span class="mode-emoji">🗺️</span>
+          <strong>Levels</strong>
+          <span>Fight through 100 levels with a boss every 10. Pass a Security Clearance test to jump ahead.</span>
+        </a>
+        <a class="mode-card" href="tower-defense.html#endless">
+          <span class="mode-emoji">♾️</span>
+          <strong>Endless</strong>
+          <span>The waves never stop and get tough fast. How long can you survive?</span>
+        </a>
+      </div>
+      <button class="btn step-back" id="btn-mode-back">Back</button>
+    </div>
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>

@@ -589,3 +589,60 @@ body.td {
   .sq-shields.hit, .sq-tile.nope, .sq-decrypt span.now { animation: none; }
 }
 @media (max-width: 520px) { .sq-choices.two, .sq-match { grid-template-columns: 1fr 1fr; gap: 0.6rem; } }
+
+/* ---------- Level 100: the final boss (levels.js, boss.js) ---------- */
+.level.final {
+  grid-column: 1 / -1;
+  justify-self: center;
+  flex-direction: row;
+  gap: 1rem;
+  width: min(360px, 100%);
+  height: 84px;
+  margin-top: 0.6rem;
+  border: 3px solid transparent;
+  border-radius: 14px;
+  /* animated rainbow-ish border: a gradient behind a dark inner fill */
+  background:
+    linear-gradient(#12081f, #12081f) padding-box,
+    linear-gradient(120deg, #ff2020, #ff3d8b, #c58bff, #ff2020) border-box;
+  background-size: 100% 100%, 300% 300%;
+  box-shadow: 0 0 24px rgba(255, 32, 80, 0.6), inset 0 0 20px rgba(255, 32, 80, 0.25);
+  animation: final-border 3s linear infinite, final-pulse 1.6s ease-in-out infinite;
+}
+.level.final.locked { opacity: 1; border-style: solid; }
+.level.final:hover, .level.final:focus-visible { transform: translateY(-2px) scale(1.03); }
+.final-skull { font-size: 2rem; }
+.final-text { display: flex; flex-direction: column; align-items: center; }
+.final-tag { font-size: 0.72rem; font-weight: 800; color: #ffb3cf; text-transform: uppercase; letter-spacing: 0.1em; }
+.final-name {
+  font-family: var(--pixel);
+  font-size: 1.3rem;
+  color: #fff;
+  text-shadow: 0 0 10px #ff3d8b, 0 0 22px #ff2020;
+  letter-spacing: 0.15em;
+}
+@keyframes final-border { to { background-position: 0 0, 300% 0; } }
+@keyframes final-pulse { 50% { box-shadow: 0 0 40px rgba(255, 32, 80, 0.9), inset 0 0 26px rgba(255, 32, 80, 0.4); } }
+
+.final-confirm h2 { color: #ff3d8b; text-shadow: 0 0 12px rgba(255, 61, 139, 0.7); }
+.final-confirm .intro-emoji { animation: final-throb 1.2s ease-in-out infinite; }
+@keyframes final-throb { 50% { transform: scale(1.15); } }
+
+#btn-wave.final {
+  color: #fff;
+  background: linear-gradient(90deg, #ff2020, #ff3d8b, #c58bff);
+  box-shadow: 0 3px 0 #7a0f3a, 0 0 18px rgba(255, 32, 80, 0.8);
+  animation: final-pulse 1.6s ease-in-out infinite;
+}
+
+#board.shake { animation: board-shake 0.5s; }
+@keyframes board-shake {
+  20% { transform: translate(-6px, 3px); }
+  40% { transform: translate(6px, -3px); }
+  60% { transform: translate(-4px, -2px); }
+  80% { transform: translate(4px, 2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level.final, #btn-wave.final, .final-confirm .intro-emoji, #board.shake { animation: none; }
+}

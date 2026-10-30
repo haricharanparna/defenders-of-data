@@ -81,6 +81,24 @@ const THREATS = {
     spot: 'Surprise attachments, files ending in .exe, and pop-ups demanding payment.',
     defense: 'Back up your files, keep your devices updated, don\'t open surprise attachments, and never pay a ransom.',
   },
+  // The final boss of Levels mode (level 100). It has 3 phases and only asks the hardest questions (boss.js).
+  omega: {
+    name: 'Omega Ransomware',
+    plural: 'Omega Ransomware',
+    emoji: '☠️',
+    kind: 'Ransomware',
+    short: 'The ultimate ransomware: it steals, locks and spreads',
+    boss: true,
+    final: true,
+    hp: 11000,
+    speed: 16,
+    reward: 500,
+    damage: 99,
+    weakTo: 'update',
+    fact: 'Modern ransomware gangs sneak in, hide for days, delete backups, steal data and only then lock everything, threatening to leak what they stole.',
+    spot: 'Unexpected logins, "Enable content" documents, fake decryptors and backups that suddenly go missing.',
+    defense: 'Keep offline backups, use a normal (not admin) account, never enable macros in surprise documents, disconnect infected devices fast and never pay.',
+  },
 };
 
 const TOWERS = {

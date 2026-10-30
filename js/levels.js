@@ -28,9 +28,13 @@ function openLevels() {
     const current = level === state.wave + 1 && !state.over;
     const cleared = level <= bestWave;
     const locked = level > reachedLevel();
-    btn.className = `level${boss ? ' boss' : ''}${cleared ? ' cleared' : ''}${locked ? ' locked' : ''}${current ? ' current' : ''}`;
-    btn.innerHTML = `<span class="level-num">${level}</span><span class="level-icon">${current ? '📍' : boss ? '👾' : cleared ? '✓' : locked ? '🔒' : ''}</span>`;
-    btn.setAttribute('aria-label', `Level ${level}${boss ? ', boss level' : ''}${current ? ', you are here' : cleared ? ', cleared' : locked ? ', locked' : ''}`);
+    const final = level === LEVEL_COUNT;
+    btn.className = `level${final ? ' final' : boss ? ' boss' : ''}${cleared ? ' cleared' : ''}${locked ? ' locked' : ''}${current ? ' current' : ''}`;
+    btn.innerHTML = final
+      // The last level gets its own big tile in the middle
+      ? `<span class="final-skull">☠️</span><span class="final-text"><span class="final-tag">Level ${level} · Final Boss</span><span class="final-name">OMEGA</span></span><span class="final-skull">${cleared ? '🏆' : locked ? '🔒' : current ? '📍' : '☠️'}</span>`
+      : `<span class="level-num">${level}</span><span class="level-icon">${current ? '📍' : boss ? '👾' : cleared ? '✓' : locked ? '🔒' : ''}</span>`;
+    btn.setAttribute('aria-label', `Level ${level}${final ? ', final boss: Omega Ransomware' : boss ? ', boss level' : ''}${current ? ', you are here' : cleared ? ', cleared' : locked ? ', locked' : ''}`);
     btn.addEventListener('click', () => chooseLevel(level));
     grid.appendChild(btn);
   }
@@ -53,12 +57,17 @@ function chooseLevel(level) {
   }
   skipTarget = level;
   const locked = level > reachedLevel();
-  el('confirm-emoji').textContent = locked ? '🔐' : '🚀';
-  el('confirm-title').textContent = locked ? `Level ${level} Is Locked` : `Play Level ${level}?`;
+  const final = level === LEVEL_COUNT;
+  el('confirm-emoji').textContent = final ? '☠️' : locked ? '🔐' : '🚀';
+  el('confirm-title').textContent = final ? 'Final Boss: Omega Ransomware' : locked ? `Level ${level} Is Locked` : `Play Level ${level}?`;
+  el('levels-confirm').classList.toggle('final-confirm', final);
   el('confirm-text').textContent = locked
     ? `Pass a Security Clearance test to unlock it: ${skipQuestionCount(level)} questions, and you can only lose ${SHIELDS - 1} firewall shields. Higher levels have harder questions! If you pass, you start at level ${level} with 💾 ${bytesForWave(level)} bytes to build with.`
     : `Your current game will end and you'll start at level ${level}${level > 1 ? ` with 💾 ${bytesForWave(level)} bytes to build with` : ''}.`;
-  el('confirm-go').textContent = locked ? '🔐 Start clearance test' : '▶ Play';
+  if (final) {
+    el('confirm-text').textContent = `The ultimate ransomware. It has 3 phases, calls in reinforcements and locks your towers fast. Only the hardest questions can restore them. ${el('confirm-text').textContent}`;
+  }
+  el('confirm-go').textContent = locked ? '🔐 Start clearance test' : final ? '☠️ Face the final boss' : '▶ Play';
   el('confirm-go').dataset.locked = locked;
   showLevelsPanel('levels-confirm');
   el('confirm-go').focus();
@@ -80,7 +89,7 @@ document.addEventListener('keydown', e => {
 
 // Bytes you start with on a later level, so you can build a defense that fits it
 function bytesForWave(level) {
-  return START_BYTES + Math.round(95 * (level - 1) + 4 * (level - 1) ** 2);
+  return START_BYTES + Math.round(110 * (level - 1) + 4.5 * (level - 1) ** 2);
 }
 
 function startAtWave(level) {

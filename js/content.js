@@ -732,6 +732,75 @@ const BOSS_QUESTIONS = [
   },
 ];
 
+// ---------- Final boss questions (level 100: Omega Ransomware) ----------
+// The hardest questions in the game, only asked in the final battle.
+const FINAL_BOSS_QUESTIONS = [
+  {
+    prompt: 'Ransomware gangs now STEAL a copy of your files before locking them, then threaten to leak them. Why don\'t backups fully protect you from this?',
+    options: [
+      { text: 'Backups get your files back, but they can\'t un-leak data that was already stolen', correct: true, why: 'Right! This is called double extortion. That\'s why you also limit what private info you store and share.' },
+      { text: 'Backups always stop hackers from stealing anything', correct: false, why: 'Backups restore files. They don\'t stop someone from copying them first.' },
+      { text: 'Backups make the files leak faster', correct: false, why: 'Backups don\'t cause leaks, but they can\'t stop stolen data from being posted either.' },
+    ],
+  },
+  {
+    prompt: 'What is "Ransomware-as-a-Service"?',
+    options: [
+      { text: 'A company that removes ransomware for free', correct: false, why: 'It\'s the opposite: it\'s a criminal business.' },
+      { text: 'Criminals renting out ready-made ransomware kits to other criminals for a cut of the money', correct: true, why: 'Right! It means even people with no hacking skills can launch attacks, which is why basic defenses matter for everyone.' },
+      { text: 'A cloud backup service', correct: false, why: 'It\'s criminals renting ransomware kits to each other.' },
+    ],
+  },
+  {
+    prompt: 'Your family computer has malware on it. Why is it worse if you were using an ADMIN account when it got in?',
+    options: [
+      { text: 'Malware gets the same power as the account, so admin lets it change and lock everything', correct: true, why: 'Right! This is called "least privilege": use a normal account day to day, and admin only when you need it.' },
+      { text: 'Admin accounts are slower', correct: false, why: 'Speed isn\'t the problem. Admin accounts give malware full control.' },
+      { text: 'It makes no difference', correct: false, why: 'It makes a big difference: malware can only do what the account is allowed to do.' },
+    ],
+  },
+  {
+    prompt: 'Which backup is MOST likely to survive a ransomware attack?',
+    options: [
+      { text: 'A USB drive that\'s always plugged in', correct: false, why: 'Ransomware can lock anything that\'s connected.' },
+      { text: 'A copy in the same folder, named "backup"', correct: false, why: 'Same computer, same folder: it gets locked too.' },
+      { text: 'An offline copy that\'s unplugged, or a cloud backup with version history that can\'t be overwritten', correct: true, why: 'Right! If the attacker can\'t reach it or change it, you can always restore.' },
+    ],
+  },
+  {
+    prompt: 'A computer at school starts showing a ransom note. What should happen FIRST?',
+    options: [
+      { text: 'Disconnect it from the network (Wi-Fi and cables) and tell IT right away', correct: true, why: 'Right! Cutting it off stops the ransomware spreading to other computers. Don\'t wipe it: IT needs to investigate.' },
+      { text: 'Keep using it and hope it stops', correct: false, why: 'Every second it stays connected, it can spread to other computers.' },
+      { text: 'Pay the ransom from the school account', correct: false, why: 'Never pay. Disconnect it and get IT involved.' },
+    ],
+  },
+  {
+    prompt: 'An email attachment opens a Word document that says "Click ENABLE CONTENT to view this invoice". What is happening?',
+    options: [
+      { text: 'Word needs an update', correct: false, why: 'It\'s a trick to get you to run hidden code.' },
+      { text: 'It wants you to turn on macros (hidden code) that can install ransomware', correct: true, why: 'Right! Never enable content or macros in documents you weren\'t expecting.' },
+      { text: 'The document is broken', correct: false, why: 'It\'s working exactly as the attacker planned. Don\'t click Enable.' },
+    ],
+  },
+  {
+    prompt: 'A random website offers a free "decryptor" that promises to unlock your ransomware files. What\'s true?',
+    options: [
+      { text: 'All free decryptors are real', correct: false, why: 'Fake decryptors are a common way to install even more malware.' },
+      { text: 'Fake decryptors can be more malware. Real free ones come from trusted projects like No More Ransom, run by police and security companies', correct: true, why: 'Right! Only use tools from trusted sources, and let an adult or IT handle it.' },
+      { text: 'Decryptors don\'t exist', correct: false, why: 'Some real ones do exist for older ransomware. They come from trusted security groups, not random sites.' },
+    ],
+  },
+  {
+    prompt: 'Attackers often hide inside a network for DAYS before launching ransomware. Why?',
+    options: [
+      { text: 'To find and delete the backups and steal data first', correct: true, why: 'Right! That\'s why backups need to be offline or unchangeable, and why unusual logins should be checked fast.' },
+      { text: 'They are waiting for a holiday sale', correct: false, why: 'They\'re hunting for backups and data to steal before they strike.' },
+      { text: 'Ransomware needs to charge up', correct: false, why: 'It doesn\'t charge. Attackers use the time to sabotage backups and steal files.' },
+    ],
+  },
+];
+
 // ---------- Tower unlock challenges ----------
 // Each tower is locked until you prove you know the safety habit it stands for.
 // Every tower has several challenges, and one is picked at random each time.

@@ -64,10 +64,11 @@ const INTRO_WAVES = [
   [['catfish', 5, 1.6], ['phisher', 6, 0.7]],
   [['phisher', 8, 0.6], ['worm', 10, 0.35], ['cracker', 4, 1.6], ['catfish', 5, 1.2]],
 ];
-// Two ways to play (tower-defense.html?mode=levels or ?mode=endless):
+// Two ways to play (tower-defense.html#levels or #endless):
 //  - Levels: 100 levels on a map that get tougher slowly. Clear level 100 to win!
 //  - Endless: waves never end and get tough fast. Beat your best.
-const MODE = new URLSearchParams(location.search).get('mode') === 'levels' ? 'levels' : 'endless';
+// (The mode is in the # part of the link, because some servers drop the ?part when they redirect)
+const MODE = location.hash === '#levels' ? 'levels' : 'endless';
 const LEVELS_MODE = MODE === 'levels';
 const LEVEL_COUNT = 100;
 
@@ -75,8 +76,8 @@ const BOSS_EVERY = 10;
 // After the intro waves, threats get tougher every wave. Endless multiplies (tough fast);
 // Levels adds a steady amount, so the middle levels stay a challenge and level 100 is still beatable.
 const HP_GROWTH = 1.17;
-const LEVEL_HP_STEP = 0.075;
-const COUNT_CAP = LEVELS_MODE ? 30 : Infinity;  // in Levels mode, waves stop getting longer after this
+const LEVEL_HP_STEP = 0.055;
+const COUNT_CAP = LEVELS_MODE ? 25 : Infinity;  // in Levels mode, waves stop getting longer after this
 const GROUP_GAP = 1.5;    // pause between groups in the same wave
 
 // How each threat type shows up in made-up waves: starting count, extra per wave, seconds apart
@@ -90,6 +91,7 @@ const WAVE_MIX = {
 // wave is counted from 0, so wave 9 is "Wave 10"
 const isBossWave = wave => (wave + 1) % BOSS_EVERY === 0;
 const bossNumber = wave => Math.floor((wave + 1) / BOSS_EVERY);  // 1 for the first boss, 2 for the second...
+const isFinalLevel = wave => LEVELS_MODE && wave === LEVEL_COUNT - 1;
 function hpScale(wave) {
   const extra = Math.max(0, wave - INTRO_WAVES.length + 1);
   return LEVELS_MODE ? 1 + LEVEL_HP_STEP * extra : HP_GROWTH ** extra;
@@ -105,6 +107,10 @@ function makeWave(wave) {
     const mix = WAVE_MIX[type];
     return [type, Math.round(mix.count + size * mix.grow), mix.gap * Math.max(0.5, 1 - size * 0.01)];
   });
+  if (isFinalLevel(wave)) {
+    // The final battle: Omega Ransomware plus an escort of every kind of threat
+    return [['omega', 1, 0], ...Object.keys(WAVE_MIX).map(type => [type, Math.round(WAVE_MIX[type].count * 1.5), WAVE_MIX[type].gap])];
+  }
   if (isBossWave(wave)) groups.unshift(['ransomware', 1, 0]);
   return groups;
 }
@@ -259,8 +265,10 @@ function updateHud() {
   bestText.textContent = Math.max(bestWave, state.wave);
   waveButton.disabled = state.waveActive || state.over;
   waveButton.textContent = state.waveActive ? 'Wave in progress...'
+    : isFinalLevel(state.wave) ? '☠️ FACE THE FINAL BOSS (Space)'
     : isBossWave(state.wave) ? `⚠️ Start BOSS ${LEVELS_MODE ? 'Level' : 'Wave'} (Space)` : `Start ${LEVELS_MODE ? 'Level' : 'Wave'} ${state.wave + 1} (Space)`;
   waveButton.classList.toggle('boss', !state.waveActive && isBossWave(state.wave));
+  waveButton.classList.toggle('final', !state.waveActive && isFinalLevel(state.wave));
   for (const [id, tower] of Object.entries(TOWERS)) {
     const locked = !unlocked.has(id);
     toolButtons[id].classList.toggle('locked', locked);
@@ -823,7 +831,7 @@ function drawEnemy(e) {
       ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
       ctx.stroke();
     }
-    drawEmoji(t.emoji, e.x, e.y, t.boss ? 54 : 24);
+    drawEmoji(t.emoji, e.x, e.y, t.final ? 72 : t.boss ? 54 : 24);
   } else {
     // Unknown threat: a sealed message with a "?" badge. Click it to scan!
     drawEmoji('📩', e.x, e.y, 24);

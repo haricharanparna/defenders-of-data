@@ -27,7 +27,18 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
+// Play: first pick a game, then (for Tower Defense) pick Levels or Endless
 const modeDialog = document.getElementById('dlg-mode');
-document.getElementById('btn-play').addEventListener('click', () => modeDialog.showModal());
+function showModeStep(step) {
+  document.getElementById('mode-games').hidden = step !== 'games';
+  document.getElementById('mode-td').hidden = step !== 'td';
+  modeDialog.querySelector(`#mode-${step} .mode-card`).focus();
+}
+document.getElementById('btn-play').addEventListener('click', () => {
+  modeDialog.showModal();
+  showModeStep('games');
+});
+document.getElementById('btn-tower-defense').addEventListener('click', () => showModeStep('td'));
+document.getElementById('btn-mode-back').addEventListener('click', () => showModeStep('games'));
 // Start with the Play button focused so keyboard players can press Enter right away
 document.getElementById('btn-play').focus();
