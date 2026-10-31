@@ -334,3 +334,110 @@ kbd {
 .modes.three { grid-template-columns: repeat(3, 1fr); }
 #dlg-mode:has(#mode-games:not([hidden])) { width: min(820px, 94vw); }
 @media (max-width: 720px) { .modes.three { grid-template-columns: 1fr; } }
+
+/* ---------- You've been hacked! (hacked.js) ---------- */
+.hacked {
+  width: min(900px, 96vw);
+  max-height: 94vh;
+  padding: 1.4rem 1.6rem;
+  overflow: auto;
+  color: var(--text);
+  background: #12030a;
+  border: 3px solid #ff2050;
+  border-radius: 10px;
+  box-shadow: 0 0 60px rgba(255, 32, 80, 0.6), inset 0 0 60px rgba(255, 32, 80, 0.15);
+}
+.hacked::backdrop { background: rgba(40, 0, 10, 0.85); }
+.hacked[open] { animation: hack-in 0.5s steps(6); }
+@keyframes hack-in {
+  0% { opacity: 0; transform: translateX(-12px) skewX(10deg); }
+  50% { opacity: 1; transform: translateX(10px) skewX(-6deg); }
+}
+.hack-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(transparent 0 3px, rgba(255, 32, 80, 0.06) 3px 4px);
+}
+
+.hack-title {
+  position: relative;
+  margin: 0;
+  font-family: var(--pixel);
+  font-size: clamp(1.1rem, 3.4vw, 1.9rem);
+  text-align: center;
+  color: #ff2050;
+  text-shadow: 0 0 16px rgba(255, 32, 80, 0.9);
+  animation: glitch 2.4s infinite;
+}
+.hack-title::before, .hack-title::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0.7;
+}
+.hack-title::before { color: var(--cyan); animation: glitch-a 1.6s infinite; }
+.hack-title::after { color: var(--gold); animation: glitch-b 2s infinite; }
+@keyframes glitch { 92% { transform: none; } 94% { transform: translateX(-4px) skewX(8deg); } 96% { transform: translateX(4px); } }
+@keyframes glitch-a { 0%, 85%, 100% { clip-path: inset(0 0 100% 0); } 88% { clip-path: inset(10% 0 55% 0); transform: translateX(-5px); } 92% { clip-path: inset(60% 0 10% 0); transform: translateX(5px); } }
+@keyframes glitch-b { 0%, 80%, 100% { clip-path: inset(0 0 100% 0); } 84% { clip-path: inset(40% 0 30% 0); transform: translateX(4px); } }
+.hack-sub { margin: 0.6rem auto 1rem; max-width: 40rem; text-align: center; color: #ffb3c4; }
+
+.hack-grid { position: relative; display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 1rem; }
+@media (max-width: 680px) { .hack-grid { grid-template-columns: 1fr; } }
+
+.hack-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  background: #050208;
+  border: 2px solid #4a0c1c;
+  border-radius: 8px;
+}
+.hack-files { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+.hack-file {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: rgba(46, 230, 255, 0.08);
+  border: 1px solid var(--cyan-dim);
+  border-radius: 6px;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+.hack-file.locked { color: #ff6b8a; background: rgba(255, 32, 80, 0.15); border-color: #ff2050; text-decoration: line-through; }
+.hack-file.locked::after { content: ' 🔓 stolen'; text-decoration: none; display: inline-block; margin-left: 0.2rem; font-size: 0.72rem; }
+.hack-log { min-height: 9.5rem; font-family: Consolas, 'Courier New', monospace; font-size: 0.8rem; color: #3dff7a; }
+.hack-log p { margin: 0.15rem 0; animation: type-in 0.4s steps(12); white-space: nowrap; overflow: hidden; }
+.hack-log p.good { color: var(--cyan); }
+.hack-log p.bad { color: #ff2050; }
+@keyframes type-in { from { max-width: 0; } to { max-width: 100%; } }
+
+.hack-meter { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.6rem; font-weight: 800; font-size: 0.9rem; color: #ffb3c4; }
+.hack-bar { height: 14px; background: #2a0812; border: 1px solid #ff2050; border-radius: 8px; overflow: hidden; }
+.hack-bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ff7a3d, #ff2050); transition: width 0.1s linear; }
+.hack-meter strong { font-family: var(--pixel); font-size: 0.9rem; color: #ff2050; min-width: 3ch; text-align: right; }
+.hacked.panic .hack-meter strong { animation: panic 0.5s ease-in-out infinite; }
+.hacked.panic { animation: panic-border 0.5s ease-in-out infinite; }
+@keyframes panic { 50% { transform: scale(1.25); } }
+@keyframes panic-border { 50% { box-shadow: 0 0 90px rgba(255, 32, 80, 0.95), inset 0 0 80px rgba(255, 32, 80, 0.3); } }
+
+.hack-count { display: flex; justify-content: space-between; align-items: center; margin: 0.8rem 0 0; font-family: var(--pixel); font-size: 0.72rem; color: var(--gold); }
+#hack-dots { display: flex; gap: 0.35rem; }
+#hack-dots span { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--cyan); }
+#hack-dots span.on { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+.hacked .message { margin: 0.6rem 0; }
+.hack-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.hack-feedback { min-height: 1.5em; margin: 0.5rem 0 0; font-weight: 800; text-align: center; }
+.hack-feedback.good { color: #7cff6b; }
+.hack-feedback.bad { color: #ff6b8a; }
+
+.hack-end { text-align: center; padding-top: 1rem; }
+.hack-end-title { margin: 0 0 0.5rem; font-family: var(--pixel); font-size: 1.1rem; }
+.hacked.won { border-color: var(--cyan); box-shadow: 0 0 60px rgba(46, 230, 255, 0.5); }
+.hacked.won .hack-end-title { color: var(--cyan); }
+.hacked.lost .hack-end-title { color: #ff2050; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hacked[open], .hack-title, .hack-title::before, .hack-title::after, .hacked.panic, .hacked.panic .hack-meter strong, .hack-log p { animation: none; }
+}

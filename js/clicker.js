@@ -515,7 +515,7 @@ function loop(now) {
   const elapsed = (now - last) / 1000;
   const dt = Math.min(1, elapsed);
   last = now;
-  const paused = askDialog.open || $('dlg-help').open;
+  const paused = document.querySelector('dialog[open]') !== null;
 
   earn(perSecond() * elapsed);
 
@@ -572,4 +572,18 @@ if (game.clicks > 0) $('click-hint').classList.add('gone');
 render(true);
 if (firstVisit) helpDialog.showModal();
 else if (awayEarned >= 1) showToast(`Welcome back! Your defenders earned ${fmt(awayEarned)} bytes while you were away.`);
+// Every few minutes a hacker breaks in (hacked.js). Too slow, and they take 3/4 of your bytes.
+const hackAttack = setupHackAttack({
+  isPlaying: () => !document.hidden && !document.querySelector('dialog[open]'),
+  lossText: 'they steal 3/4 of your bytes',
+  lose: () => {
+    const lost = Math.floor(game.bytes * 0.75);
+    game.bytes -= lost;
+    render();
+    saveClicker();
+    return `${fmt(lost)} bytes, 3/4 of everything you had`;
+  },
+  onAnswer: correct => answered(correct),
+});
+
 requestAnimationFrame(loop);
