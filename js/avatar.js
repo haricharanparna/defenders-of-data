@@ -143,7 +143,7 @@ const COSMETICS = [
 
   // Sidekicks
   { id: 'pet-none', slot: 'pet', name: 'Nobody', price: 0 },
-  { id: 'pet-duck', slot: 'pet', name: 'Rubber Duck', price: 10, emoji: '🦆', note: 'Coders explain bugs to a rubber duck. It really works!' },
+  { id: 'pet-duck', slot: 'pet', name: 'Rubber Duck', price: 0, emoji: '🦆', note: 'Your starter sidekick! Coders explain bugs to a rubber duck. It really works!' },
   { id: 'pet-cat', slot: 'pet', name: 'Keyboard Cat', price: 20, emoji: '🐱' },
   { id: 'pet-robot', slot: 'pet', name: 'Robo Buddy', price: 35, emoji: '🤖', rarity: 'rare' },
   { id: 'pet-owl', slot: 'pet', name: 'Night Owl', price: 50, emoji: '🦉', rarity: 'epic' },
@@ -160,7 +160,7 @@ const cosmetic = id => COSMETICS.find(item => item.id === id);
 const DEFAULT_LOOK = {
   outfit: 'outfit-hoodie', face: 'face-none', neck: 'neck-none',
   hoodie: 'hoodie-blue', hair: 'hair-short', hairColor: 'hc-brown', skin: 'skin-2',
-  hat: 'hat-none', glasses: 'glasses-none', laptop: 'laptop-silver', bg: 'bg-navy', pet: 'pet-none',
+  hat: 'hat-none', glasses: 'glasses-none', laptop: 'laptop-silver', bg: 'bg-navy', pet: 'pet-duck',
 };
 
 // ---------- Saving ----------
@@ -170,7 +170,18 @@ function loadCoder() {
   const look = { ...DEFAULT_LOOK, ...saved.look };
   // Ignore anything that no longer exists
   for (const slot of Object.keys(look)) if (!cosmetic(look[slot])) look[slot] = DEFAULT_LOOK[slot];
-  return { look, owned: saved.owned || [], spent: saved.spent || 0 };
+  let owned = saved.owned || [];
+  let spent = saved.spent || 0;
+  // The rubber duck became everyone's free starter sidekick: give it to older coders too,
+  // and refund the 10 stars if they had already bought it
+  if (!saved.starterDuck) {
+    if (look.pet === 'pet-none') look.pet = 'pet-duck';
+    if (owned.includes('pet-duck')) {
+      owned = owned.filter(id => id !== 'pet-duck');
+      spent = Math.max(0, spent - 10);
+    }
+  }
+  return { look, owned, spent, starterDuck: true };
 }
 
 let coder = loadCoder();
