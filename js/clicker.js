@@ -437,13 +437,23 @@ for (const btn of $('scam-buttons').children) {
     $('scam-buttons').hidden = true;
     result.hidden = false;
     result.className = `result ${right ? 'good' : 'bad'}`;
-    result.innerHTML = `<p class="verdict">${right ? '✅ Correct!' : '❌ Not quite.'} It was ${scam.item.answer === 'scam' ? 'a scam' : 'real'}.</p><p></p>${line}`;
+    result.innerHTML = `<p class="verdict">${right ? '✅ Correct!' : '❌ Not quite.'} It was ${scam.item.answer === 'scam' ? 'a scam' : 'real'}.</p><p></p>${line}<p class="scam-dismiss">Click anywhere to keep playing</p>`;
     result.children[1].textContent = scam.item.why;
-    scam.left = 6;          // stay up long enough to read why
-    scam.answered = true;
+    // The answer makes the pop-up taller, so slide it up if it would go off screen
+    const room = playArea.clientHeight - popup.offsetHeight - 8;
+    popup.style.top = `${Math.max(8, Math.min(popup.offsetTop, room))}px`;
+    scam.left = 8;          // closes by itself if you don't click
+    // Wait for this click to finish, so it doesn't close the pop-up straight away
+    setTimeout(() => { if (scam) scam.answered = true; });
     render();
   });
 }
+
+// Once you've answered, any click (on the pop-up or anywhere else) closes it.
+// A click outside still counts, so clicking the shield closes it and earns bytes.
+document.addEventListener('pointerdown', () => {
+  if (scam && scam.answered) closeScam();
+}, true);
 
 function closeScam() {
   popup.hidden = true;

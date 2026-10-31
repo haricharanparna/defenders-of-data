@@ -267,3 +267,5 @@ body.clicker { display: flex; flex-direction: column; height: 100vh; }
 @media (prefers-reduced-motion: reduce) {
   .big-shield, .click-hint, .secret-bubble, .secret-bubble span, .overdrive, .upgrade, .helper { animation: none; }
 }
+.scam-popup .scam-dismiss { margin-top: 0.4rem; font-size: 0.8rem; color: var(--text-dim); text-align: center; }
+.scam-popup:has(.scam-dismiss) { cursor: pointer; }
