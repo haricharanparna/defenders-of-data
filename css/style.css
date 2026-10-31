@@ -331,3 +331,6 @@ kbd {
 .locker-name { font-weight: 800; font-size: 0.82rem; line-height: 1.2; text-align: center; }
 .locker-price { font-family: var(--pixel); font-size: 0.55rem; color: var(--gold); }
 .locker-item.wearing .locker-price { color: var(--cyan); }
+.modes.three { grid-template-columns: repeat(3, 1fr); }
+#dlg-mode:has(#mode-games:not([hidden])) { width: min(820px, 94vw); }
+@media (max-width: 720px) { .modes.three { grid-template-columns: 1fr; } }

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clicker - Defenders of the Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/td.css">
+  <link rel="stylesheet" href="css/clicker.css">
+</head>
+<body class="clicker">
+  <header class="hud">
+    <div class="hud-left">
+      <a class="btn btn-small" href="index.html" aria-label="Back to main menu">&#8592; Menu</a>
+      <a class="hud-coder" id="hud-coder" href="index.html#coder" title="Your coder. Spend your stars on new looks in the Coder Locker" aria-label="Your coder: open the Coder Locker"></a>
+    </div>
+    <div class="stats">
+      <span class="stat" title="Total clicks">👆 Clicks <strong id="clicks">0</strong></span>
+      <span class="stat" title="Correct answers in a row">🔥 Streak <strong id="streak">0</strong></span>
+    </div>
+    <div class="controls">
+      <button class="btn btn-small" id="btn-help" title="How to play" aria-label="How to play">?</button>
+      <button class="btn btn-small" id="btn-mute" title="Sound (M)">🔊</button>
+    </div>
+  </header>
+
+  <main class="clicker-main">
+    <!-- Where you click (and where surprises pop up) -->
+    <section class="play-area" id="play-area">
+      <div class="bank">
+        <p class="bank-bytes"><strong id="bytes">0</strong> bytes</p>
+        <p class="bank-rate"><span id="rate">0</span> per second · <span id="per-click">1</span> per click</p>
+      </div>
+
+      <button class="big-shield" id="big-shield" aria-label="Click to defend your data and earn bytes">
+        <svg viewBox="0 0 100 116" aria-hidden="true">
+          <path d="M50 4 L94 20 V56 C94 84 74 104 50 112 C26 104 6 84 6 56 V20 Z" class="shield-outline"/>
+          <rect x="33" y="52" width="34" height="28" rx="4" class="lock-body"/>
+          <path d="M39 52 V42 C39 34 61 34 61 42 V52" class="lock-shackle"/>
+          <circle cx="50" cy="64" r="4" class="lock-hole"/>
+          <rect x="48" y="64" width="4" height="9" class="lock-hole"/>
+        </svg>
+      </button>
+      <p class="click-hint" id="click-hint">Click the shield to earn bytes!</p>
+
+      <div class="overdrive" id="overdrive" hidden>
+        <span>⚡ OVERDRIVE x<span id="overdrive-x"></span></span>
+        <span class="overdrive-bar"><span id="overdrive-fill"></span></span>
+      </div>
+
+      <!-- A scam pop-up window (clicker.js) -->
+      <div class="scam-popup" id="scam-popup" hidden role="dialog" aria-labelledby="scam-title">
+        <div class="scam-bar"><span id="scam-title">📨 Incoming message</span><span class="scam-timer" id="scam-timer"></span></div>
+        <div class="scam-body">
+          <p class="scam-ask">Real or scam?</p>
+          <div class="message" id="scam-message"></div>
+          <div class="scam-buttons" id="scam-buttons">
+            <button class="choice big" data-answer="real">✅ Real</button>
+            <button class="choice big" data-answer="scam">🚩 Scam</button>
+          </div>
+          <div class="result" id="scam-result" hidden></div>
+        </div>
+      </div>
+
+      <button class="secret-bubble" id="secret-bubble" hidden aria-label="Secret message! Click it for an Overdrive bonus"><span></span><span></span><span></span></button>
+    </section>
+
+    <!-- The shop -->
+    <aside class="shop" aria-label="Shop">
+      <h2 class="shop-title">Upgrades</h2>
+      <div class="upgrades" id="upgrades"></div>
+      <p class="shop-empty" id="upgrades-empty">Earn more bytes to see upgrades.</p>
+      <h2 class="shop-title">Defenders</h2>
+      <div class="helpers" id="helpers"></div>
+    </aside>
+  </main>
+
+  <footer class="ticker" aria-live="off"><span class="ticker-tag">Safety tip</span><span id="ticker-text"></span></footer>
+
+  <!-- First time here: how to play (clicker.js) -->
+  <dialog id="dlg-help" class="panel how-panel" aria-labelledby="help-title">
+    <div class="how-icon" aria-hidden="true">🛡️</div>
+    <h2 id="help-title">Data Clicker</h2>
+    <ol class="clicker-steps">
+      <li><strong>Click the shield</strong> to earn bytes.</li>
+      <li><strong>Hire defenders</strong> in the shop. They earn bytes for you, even while you're away! Answer a question to unlock each one.</li>
+      <li><strong>Scam pop-ups</strong> will show up. Decide if they're real or a scam. Get it right for bonus bytes. Fall for a scam and you lose some!</li>
+      <li><strong>Watch for a tiny secret message</strong> bubble. Click it and answer right for a super-fast Overdrive.</li>
+    </ol>
+    <div class="end-buttons"><button class="btn btn-primary" id="help-go">Let's go!</button></div>
+  </dialog>
+
+  <!-- Questions: unlocking defenders, upgrades and secret messages -->
+  <dialog id="dlg-ask" class="panel lesson" aria-labelledby="ask-title">
+    <p class="brief-tag" id="ask-tag"></p>
+    <h2 id="ask-title"></h2>
+    <p id="ask-prompt"></p>
+    <div class="message" id="ask-message" hidden></div>
+    <div class="choices" id="ask-options"></div>
+    <div class="result" id="ask-result" hidden></div>
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="ask-done" hidden></button>
+      <button class="btn" id="ask-cancel">Not now</button>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/content.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/clicker.js"></script>
+</body>
+</html>
