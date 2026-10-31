@@ -294,3 +294,35 @@ body.adventure { display: flex; flex-direction: column; height: 100vh; }
 .stamina span.tired { background: var(--pink); animation: tired-blink 0.5s steps(2) infinite; }
 @keyframes tired-blink { 50% { opacity: 0.4; } }
 .run-btn.on .stamina { background: rgba(7, 11, 31, 0.5); }
+
+/* ---------- Settings (adventure.js) ---------- */
+.settings-panel { width: min(560px, 94vw); }
+.settings-head { margin: 1rem 0 0.3rem; font-family: var(--pixel); font-size: 0.75rem; color: var(--cyan); }
+.settings-hint { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--text-dim); }
+.controls-table { display: grid; gap: 0.35rem; }
+.control-row { display: grid; grid-template-columns: 1fr 7.5rem 7.5rem; align-items: center; gap: 0.5rem; }
+.control-name { font-weight: 700; }
+.key-btn {
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--bg-2);
+  border: 2px solid var(--cyan-dim);
+  border-bottom-width: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.key-btn:hover, .key-btn:focus-visible { border-color: var(--cyan); outline: none; }
+.key-btn:active { transform: translateY(2px); }
+.key-btn.listening { color: var(--bg); background: var(--gold); border-color: var(--gold); animation: listening 0.8s ease-in-out infinite; }
+@keyframes listening { 50% { box-shadow: 0 0 14px rgba(255, 210, 63, 0.9); } }
+.setting-row { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.4rem; font-weight: 700; }
+.setting-row strong { color: var(--gold); }
+.setting-row input[type="range"] { width: 100%; accent-color: var(--cyan); }
+.setting-row.check { flex-direction: row; align-items: center; gap: 0.6rem; font-weight: 600; }
+.setting-row.check input { width: 18px; height: 18px; accent-color: var(--cyan); }
+.fov-hint { display: flex; justify-content: space-between; font-size: 0.75rem; }
+@media (max-width: 520px) { .control-row { grid-template-columns: 1fr 5.5rem 5.5rem; } }

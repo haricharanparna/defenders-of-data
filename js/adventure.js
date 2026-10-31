@@ -207,7 +207,7 @@ function movePlayer(dt) {
   const speed = Math.hypot(player.vx, player.vy);
   // Face the mouse, like in Zombs Royale. Without a mouse (keys or touch only), face where you walk.
   let target = null;
-  if (mouse.active && !busy()) target = Math.atan2(mouse.y - view.y - player.y, mouse.x - view.x - player.x);
+  if (mouse.active && !busy()) target = Math.atan2(mouse.y / zoom() - view.y - player.y, mouse.x / zoom() - view.x - player.x);
   else if (speed > 20) target = Math.atan2(player.vy, player.vx);
   if (target !== null) {
     const diff = Math.atan2(Math.sin(target - player.angle), Math.cos(target - player.angle));
@@ -940,26 +940,146 @@ function makeConfetti() {
 
 // ---------- Input ----------
 const busy = () => !!battle || !!talkLines || !!document.querySelector('dialog[open]');
-const KEYS = { ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down', ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right' };
+// Higher field of view = zoomed out (see more); 100% is normal
+const zoom = () => 100 / settings.fov;
+
+// ---------- Settings: controls and field of view ----------
+// Every control has two keys you can change. Saved on this computer.
+const SETTINGS_KEY = 'defenders-of-data-settings';
+const ACTIONS = [
+  { id: 'up', name: 'Walk up' },
+  { id: 'down', name: 'Walk down' },
+  { id: 'left', name: 'Walk left' },
+  { id: 'right', name: 'Walk right' },
+  { id: 'sprint', name: 'Sprint (hold)' },
+  { id: 'interact', name: 'Talk / interact' },
+  { id: 'index', name: 'Threat Index' },
+];
+const DEFAULT_SETTINGS = {
+  keys: {
+    up: ['w', 'ArrowUp'], down: ['s', 'ArrowDown'], left: ['a', 'ArrowLeft'], right: ['d', 'ArrowRight'],
+    sprint: ['Shift', ''], interact: [' ', 'e'], index: ['i', ''],
+  },
+  fov: 100,        // field of view in %: higher shows more of the map
+  minimap: true,
+  pad: true,       // on-screen movement buttons
+};
+const copySettings = s => JSON.parse(JSON.stringify(s));
+let settings = copySettings(DEFAULT_SETTINGS);
+try {
+  const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+  if (saved) settings = { ...settings, ...saved, keys: { ...settings.keys, ...saved.keys } };
+} catch { /* storage blocked */ }
+
+function saveSettings() {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* storage blocked */ }
+}
+
+// Letters count the same with or without Shift/Caps Lock
+const normKey = key => (key.length === 1 ? key.toLowerCase() : key);
+const actionFor = key => ACTIONS.find(a => settings.keys[a.id].includes(normKey(key)))?.id;
+const ARROWS = { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
+const keyLabel = key => (!key ? '—' : key === ' ' ? 'Space' : ARROWS[key] || (key.length === 1 ? key.toUpperCase() : key));
+const MOVES = ['up', 'down', 'left', 'right'];
 
 document.addEventListener('keydown', e => {
-  if (document.querySelector('dialog[open]')) return;
-  if (KEYS[e.key] && !battle) {
+  if (rebinding || document.querySelector('dialog[open]')) return;
+  const action = actionFor(e.key);
+  if (!action) return;
+  if (MOVES.includes(action)) {
+    if (battle) return;
     e.preventDefault();
-    if (!talkLines) held.add(KEYS[e.key]);
-  } else if ((e.key === ' ' || e.key === 'Enter' || e.key === 'e' || e.key === 'E') && !battle) {
+    if (!talkLines) held.add(action);
+  } else if (action === 'sprint') {
+    sprintHeld = true;
+  } else if (action === 'interact') {
+    if (battle) return;
     e.preventDefault();
     interact();
-  } else if ((e.key === 'i' || e.key === 'I') && !busy()) {
+  } else if (action === 'index' && !busy()) {
     openIndex();
   }
 });
 document.addEventListener('keyup', e => {
-  if (KEYS[e.key]) held.delete(KEYS[e.key]);
-  if (e.key === 'Shift') shiftHeld = false;
+  const action = actionFor(e.key);
+  if (MOVES.includes(action)) held.delete(action);
+  if (action === 'sprint') sprintHeld = false;
 });
 
-// Sprinting, like in Fortnite: hold Shift (or turn on Sprint) to run fast. It uses stamina, which
+// The settings panel
+const settingsDialog = $('dlg-settings');
+let rebinding = null;   // { action, slot, button } while waiting for you to press a key
+
+function renderSettings() {
+  const table = $('controls');
+  table.innerHTML = '';
+  for (const a of ACTIONS) {
+    const row = document.createElement('div');
+    row.className = 'control-row';
+    row.innerHTML = '<span class="control-name"></span>';
+    row.firstChild.textContent = a.name;
+    [0, 1].forEach(slot => {
+      const btn = document.createElement('button');
+      btn.className = 'key-btn';
+      btn.textContent = keyLabel(settings.keys[a.id][slot]);
+      btn.setAttribute('aria-label', `${a.name}, key ${slot + 1}: ${keyLabel(settings.keys[a.id][slot])}. Click to change.`);
+      btn.addEventListener('click', () => {
+        rebinding = { action: a.id, slot, button: btn };
+        btn.textContent = 'Press a key…';
+        btn.classList.add('listening');
+      });
+      row.appendChild(btn);
+    });
+    table.appendChild(row);
+  }
+  $('fov').value = settings.fov;
+  $('fov-value').textContent = `${settings.fov}%`;
+  $('opt-minimap').checked = settings.minimap;
+  $('opt-pad').checked = settings.pad;
+  document.querySelector('.pad').hidden = !settings.pad;
+}
+
+// While rebinding, the next key you press becomes the new key (Esc cancels, Backspace clears it)
+window.addEventListener('keydown', e => {
+  if (!rebinding) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const { action, slot } = rebinding;
+  rebinding = null;
+  if (e.key === 'Escape') return renderSettings();
+  const key = e.key === 'Backspace' || e.key === 'Delete' ? '' : normKey(e.key);
+  // One key can only do one thing, so take it off anything else that used it
+  if (key) for (const a of ACTIONS) settings.keys[a.id] = settings.keys[a.id].map(k => (k === key ? '' : k));
+  settings.keys[action][slot] = key;
+  saveSettings();
+  renderSettings();
+  showToast(key ? `${ACTIONS.find(a => a.id === action).name} is now ${keyLabel(key)}` : 'Key cleared');
+}, true);
+
+$('fov').addEventListener('input', e => {
+  settings.fov = Number(e.target.value);
+  $('fov-value').textContent = `${settings.fov}%`;
+  saveSettings();
+});
+$('opt-minimap').addEventListener('change', e => { settings.minimap = e.target.checked; saveSettings(); });
+$('opt-pad').addEventListener('change', e => { settings.pad = e.target.checked; saveSettings(); renderSettings(); });
+$('settings-reset').addEventListener('click', () => {
+  settings = copySettings(DEFAULT_SETTINGS);
+  saveSettings();
+  renderSettings();
+  showToast('Settings reset to default');
+});
+$('btn-settings').addEventListener('click', e => {
+  e.currentTarget.blur();
+  if (battle) return;
+  held.clear();
+  renderSettings();
+  settingsDialog.showModal();
+});
+$('settings-close').addEventListener('click', () => settingsDialog.close());
+settingsDialog.addEventListener('close', () => { rebinding = null; });
+
+// Sprinting, like in Fortnite: hold the sprint key (Shift unless you change it) or turn on Sprint to run fast. It uses stamina, which
 // drains while you sprint and refills when you stop. Run it all the way out and you're tired:
 // you have to wait until it's partly refilled before you can sprint again.
 const SPRINT_KEY = 'defenders-of-data-sprint';
@@ -968,13 +1088,13 @@ const STAMINA_REFILL = 1 / 4;    // and takes 4 seconds to fill back up
 const REFILL_DELAY = 0.6;        // seconds after sprinting before it starts refilling
 const TIRED_UNTIL = 0.35;        // when it runs out, you can't sprint again until it's this full
 const stamina = { value: 1, tired: false, rest: 0, sprinting: false };
-let shiftHeld = false;
+let sprintHeld = false;
 let runOn = false;
 try { runOn = localStorage.getItem(SPRINT_KEY) === '1'; } catch { /* storage blocked */ }
 
 // Called every frame from movePlayer: are you sprinting right now?
 function updateStamina(dt, moving) {
-  const want = (shiftHeld || runOn) && moving;
+  const want = (sprintHeld || runOn) && moving;
   stamina.sprinting = want && !stamina.tired && stamina.value > 0;
   if (stamina.sprinting) {
     stamina.value = Math.max(0, stamina.value - STAMINA_DRAIN * dt);
@@ -1002,8 +1122,7 @@ function setRun(on) {
 // (Blur it after clicking so Space still talks instead of pressing the button again)
 $('btn-sprint').addEventListener('click', e => { setRun(!runOn); e.currentTarget.blur(); });
 setRun(runOn);
-document.addEventListener('keydown', e => { if (e.key === 'Shift') shiftHeld = true; });
-window.addEventListener('blur', () => { held.clear(); shiftHeld = false; });
+window.addEventListener('blur', () => { held.clear(); sprintHeld = false; });
 
 // On-screen pad: hold a direction to keep walking
 for (const btn of document.querySelectorAll('.pad button')) {
@@ -1252,19 +1371,23 @@ function draw(time, dt) {
   const follow = 1 - Math.exp(-8 * dt);
   camera.x += (player.x - camera.x) * follow;
   camera.y += (player.y - camera.y) * follow;
+  // Field of view: the world is drawn smaller to show more of it (vw/vh are in world pixels)
+  const z = zoom();
+  const vw = viewW / z, vh = viewH / z;
   const mapW = MAP_W * TILE, mapH = MAP_H * TILE;
-  const offX = mapW < viewW ? (viewW - mapW) / 2 : -Math.max(0, Math.min(mapW - viewW, camera.x - viewW / 2));
-  const offY = mapH < viewH ? (viewH - mapH) / 2 : -Math.max(0, Math.min(mapH - viewH, camera.y - viewH / 2));
+  const offX = mapW < vw ? (vw - mapW) / 2 : -Math.max(0, Math.min(mapW - vw, camera.x - vw / 2));
+  const offY = mapH < vh ? (vh - mapH) / 2 : -Math.max(0, Math.min(mapH - vh, camera.y - vh / 2));
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = '#070b1f';
   ctx.fillRect(0, 0, viewW, viewH);
   ctx.save();
+  ctx.scale(z, z);
   view.x = Math.round(offX);
   view.y = Math.round(offY);
   ctx.translate(view.x, view.y);
-  const x0 = Math.max(0, Math.floor(-offX / TILE)), x1 = Math.min(MAP_W, Math.ceil((viewW - offX) / TILE));
-  const y0 = Math.max(0, Math.floor(-offY / TILE)), y1 = Math.min(MAP_H, Math.ceil((viewH - offY) / TILE));
+  const x0 = Math.max(0, Math.floor(-offX / TILE)), x1 = Math.min(MAP_W, Math.ceil((vw - offX) / TILE));
+  const y0 = Math.max(0, Math.floor(-offY / TILE)), y1 = Math.min(MAP_H, Math.ceil((vh - offY) / TILE));
   drawTiles(time, x0, x1, y0, y1);
   // Whoever is lower on the screen is drawn in front
   if (pet.y > player.y) { drawPlayer(); drawPet(time); } else { drawPet(time); drawPlayer(); }
@@ -1275,7 +1398,7 @@ function draw(time, dt) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
   ZONES.forEach((z, i) => ctx.fillText(z.name.toUpperCase(), (i * ZONE_W + ZONE_W / 2) * TILE, TILE * (MAP_H - 0.5)));
   ctx.restore();
-  drawMinimap();
+  if (settings.minimap) drawMinimap();
 }
 
 // A small map of the area you're in, in the top-right corner
@@ -1346,6 +1469,7 @@ window.addEventListener('beforeunload', saveAdventure);
 
 resize();
 $('hud-coder').innerHTML = avatarSvg();
+renderSettings();
 updateHud();
 if (firstVisit) $('dlg-help').showModal();
 else if (mapChanged) say(['🌐 The internet got a LOT bigger! There are now 6 areas and 60 threats to find.', 'You are back home to start the new journey, and every threat you quarantined is still in your Index.']);
