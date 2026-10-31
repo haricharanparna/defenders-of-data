@@ -1,6 +1,5 @@
 // Saving: progress is kept in this browser's localStorage, so it stays on the computer you play on.
-// - Unlocked towers are saved as soon as you unlock them.
-// - The game itself (wave, data, bytes, towers, Threat Index, missed answers) is saved between waves.
+// - The game itself (wave, unlocked towers, data, bytes, towers, Threat Index, missed answers) is saved between waves.
 //   If you leave in the middle of a wave, you come back to the start of that wave.
 // Loaded before td.js, which calls saveGame() from updateHud(). main.js calls loadSave() at the start.
 // (Badges and the mute button are saved separately, in rewards.js and sound.js.)
@@ -30,7 +29,6 @@ function writeSave(save) {
 function saveGame() {
   if (!saveReady) return;
   const save = readSave();
-  save.unlocked = [...unlocked];
   // Each mode keeps its own record and its own game in progress
   if (typeof save.best !== 'object') save.best = { endless: save.best || 0 };
   save.best[MODE] = Math.max(save.best[MODE] || 0, bestWave, state.wave);
@@ -44,6 +42,7 @@ function saveGame() {
       data: state.data,
       bytes: state.bytes,
       wave: state.wave,
+      unlocked: [...unlocked],
       towers: state.towers.map(t => ({ type: t.type, c: t.c, r: t.r, level: t.level, spent: t.spent })),
       streak: state.streak,
       charge: state.charge,
@@ -62,13 +61,10 @@ function saveGame() {
   writeSave(save);
 }
 
-// Called once when the page opens. Restores unlocked towers, then offers to continue a saved game.
+// Called once when the page opens. Offers to continue a saved game.
 function loadSave() {
   const save = readSave();
   bestWave = typeof save.best === 'object' ? save.best[MODE] || 0 : MODE === 'endless' ? save.best || 0 : 0;
-  for (const id of save.unlocked || []) {
-    if (TOWERS[id]) unlocked.add(id);
-  }
 
   // (Saves from before there were two modes used "game" for Endless)
   const game = save[`game_${MODE}`] || (MODE === 'endless' ? save.game : null);
@@ -87,7 +83,7 @@ function loadSave() {
 
   el('btn-continue').onclick = () => {
     saveReady = true;
-    restoreGame(game);
+    restoreGame(game, save.unlocked);
     dialog.close();
     showToast(`Welcome back! Ready for Wave ${game.wave + 1}.`);
   };
@@ -95,13 +91,15 @@ function loadSave() {
     saveReady = true;
     dialog.close();
     newGame();
-    showToast('New game started. Your unlocked towers are still unlocked!');
+    showToast('New game started. Answer the questions to unlock your towers!');
   };
   // Esc means "continue": the safer choice, so nobody loses progress by accident
   dialog.oncancel = e => { e.preventDefault(); el('btn-continue').click(); };
 }
 
-function restoreGame(game) {
+// oldUnlocked: saves from before unlocks were kept per game
+function restoreGame(game, oldUnlocked = []) {
+  for (const id of game.unlocked || oldUnlocked) if (TOWERS[id]) unlocked.add(id);
   state.data = game.data;
   state.bytes = game.bytes;
   state.wave = game.wave;

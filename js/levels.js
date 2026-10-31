@@ -111,8 +111,6 @@ function startAtWave(level) {
   if (endDialog.open) endDialog.close();
   newGame();
   if (level > 1) {
-    // You proved you know your stuff, so every tower is unlocked
-    Object.keys(TOWERS).forEach(id => unlocked.add(id));
     state.wave = level - 1;
     state.bytes = bytesForWave(level);
     state.lastLogin = state.wave;

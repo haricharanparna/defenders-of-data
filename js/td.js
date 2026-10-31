@@ -137,12 +137,12 @@ const toast = el('toast');
 const anyDialogOpen = () => document.querySelector('dialog[open]') !== null;
 
 // The other game files (dm.js, boss.js, rewards.js) plug into the game through these
-const hooks = { newGame: [], hud: [], waveStart: [], waveEnd: [], afterQuiz: [], update: [], draw: [], end: [] };
+const hooks = { newGame: [], unlock: [], hud: [], waveStart: [], waveEnd: [], afterQuiz: [], update: [], draw: [], end: [] };
 function runHooks(name, ...args) {
   for (const fn of hooks[name]) fn(...args);
 }
 
-// Towers you've unlocked stay unlocked if you play again
+// Towers unlocked in this game. Every new game starts with them locked, so you answer the questions again.
 const unlocked = new Set();
 let bestWave = 0;   // Endless: most waves ever survived. Levels: most levels cleared. (saved by save.js)
 const bestText = el('best');
@@ -158,6 +158,7 @@ if (LEVELS_MODE) {
 let state;
 
 function newGame() {
+  unlocked.clear();
   state = {
     data: START_DATA,
     bytes: START_BYTES,
@@ -246,6 +247,7 @@ function selectTool(id) {
     openChallenge(id, ok => {
       if (!ok) return;
       unlocked.add(id);
+      runHooks('unlock', id);
       showToast(`${TOWERS[id].emoji} ${TOWERS[id].name} unlocked! Click it to place one.`);
       updateHud();
     });

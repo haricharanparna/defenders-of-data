@@ -850,3 +850,56 @@ body.td {
 }
 .how-skip:hover, .how-skip:focus-visible { color: var(--text); }
 @media (prefers-reduced-motion: reduce) { .how-page.slide { animation: none; } }
+
+/* ---------- Feedback that makes the game feel alive (juice.js) ---------- */
+.stat { position: relative; display: inline-block; }
+.stat strong { display: inline-block; transition: color 0.2s; }
+.stat.gain strong { animation: stat-pop 0.35s ease-out; }
+.stat.loss strong { animation: stat-hit 0.35s ease-out; }
+@keyframes stat-pop { 40% { transform: scale(1.35); color: #7cff6b; } }
+@keyframes stat-hit { 25% { transform: translateX(-3px); color: var(--pink); } 75% { transform: translateX(3px); color: var(--pink); } }
+.stat-chip {
+  position: absolute;
+  right: -0.4rem;
+  top: 0;
+  font-family: var(--pixel);
+  font-size: 0.6rem;
+  pointer-events: none;
+  animation: chip-float 0.9s ease-out forwards;
+}
+.stat-chip.gain { color: #7cff6b; }
+.stat-chip.loss { color: var(--pink); }
+@keyframes chip-float { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-22px); } }
+
+.hud-coder.cheer { animation: coder-hop 0.5s ease-out; border-color: #7cff6b; }
+.hud-coder.oops { animation: coder-wobble 0.45s ease-in-out; border-color: var(--pink); }
+@keyframes coder-hop { 40% { transform: translateY(-8px) scale(1.12); } }
+@keyframes coder-wobble { 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+
+/* The next thing to click glows so new players always know what to do */
+.tool.nudge { animation: nudge-glow 1.4s ease-in-out infinite; }
+#btn-wave.nudge { animation: nudge-glow-gold 1.2s ease-in-out infinite; }
+@keyframes nudge-glow { 50% { border-color: var(--cyan); box-shadow: 0 0 18px rgba(46, 230, 255, 0.7); } }
+@keyframes nudge-glow-gold { 50% { box-shadow: 0 3px 0 #b38a00, 0 0 26px rgba(255, 210, 63, 0.9); transform: translateY(-2px); } }
+
+/* A tower bursting open when you unlock it */
+.tool.unlocking { animation: unlock-burst 0.8s ease-out; z-index: 1; }
+.tool.unlocking .tool-emoji { animation: unlock-spin 0.8s ease-out; }
+@keyframes unlock-burst {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(124, 255, 107, 0); }
+  30% { transform: scale(1.12); border-color: #7cff6b; box-shadow: 0 0 30px rgba(124, 255, 107, 0.9); }
+  100% { transform: scale(1); }
+}
+@keyframes unlock-spin { 30% { transform: scale(1.4) rotate(-15deg); } 60% { transform: scale(1.2) rotate(10deg); } }
+
+/* Smoother interface: everything eases instead of snapping */
+.tool { transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.25s ease; }
+.tool-emoji { transition: filter 0.3s ease, opacity 0.3s ease; }
+.btn { transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, opacity 0.2s ease; }
+.panel::backdrop { animation: backdrop-in 0.2s ease-out; }
+@keyframes backdrop-in { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .stat.gain strong, .stat.loss strong, .stat-chip, .hud-coder.cheer, .hud-coder.oops,
+  .tool.nudge, #btn-wave.nudge, .tool.unlocking, .tool.unlocking .tool-emoji { animation: none; }
+}
