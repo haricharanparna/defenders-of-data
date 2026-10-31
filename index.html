@@ -35,6 +35,7 @@
 
     <nav class="menu" aria-label="Main menu">
       <button class="btn btn-primary" id="btn-play">&#9654; PLAY</button>
+      <button class="btn coder-btn" id="btn-coder"><span class="coder-mini" id="coder-mini" aria-hidden="true"></span>My Coder</button>
       <button class="btn" id="btn-how">How to Play</button>
       <button class="btn" id="btn-why">Why It Matters</button>
     </nav>
@@ -54,6 +55,7 @@
       <li><span class="icon">⭐</span><div><strong>Upgrade and blast.</strong> Click a tower to upgrade it with a harder question. Right answers in a row charge your 💥 Firewall Blast.</div></li>
       <li><span class="icon">👾</span><div><strong>Survive forever.</strong> The waves never end and get tougher. Every 10th wave, the Ransomware Boss locks your towers. Answer its questions to restore them. Beat your best and earn 🏅 badges!</div></li>
       <li><span class="icon">🗺️</span><div><strong>Pick your mode.</strong> Levels: clear 100 levels, and pass a Security Clearance test to jump ahead. Endless: survive as long as you can. Remember your practice password, you'll need it for surprise login checks!</div></li>
+      <li><span class="icon">★</span><div><strong>Dress up your coder.</strong> Earn up to 3 stars on every level, then spend them in My Coder on hoodies, hair, glasses, laptops and sidekicks.</div></li>
     </ol>
     <button class="btn btn-primary close-btn">Got it!</button>
   </dialog>
@@ -111,9 +113,33 @@
     </div>
   </dialog>
 
+  <!-- Coder Locker: spend stars on cosmetics (locker.js) -->
+  <dialog id="dlg-coder" class="panel locker" aria-labelledby="coder-title">
+    <h2 id="coder-title">Coder Locker</h2>
+    <div class="locker-body">
+      <div class="locker-side">
+        <div class="locker-preview" id="locker-preview"></div>
+        <p class="locker-stars"><span class="star-icon">★</span> <strong id="locker-balance">0</strong> to spend</p>
+        <p class="locker-earned" id="locker-earned"></p>
+        <div class="locker-buy" id="locker-buy" hidden>
+          <p id="locker-buy-name"></p>
+          <button class="btn btn-primary" id="locker-buy-btn"></button>
+          <button class="btn btn-small" id="locker-buy-cancel">Take it off</button>
+        </div>
+      </div>
+      <div class="locker-shop">
+        <div class="locker-tabs" id="locker-tabs" role="tablist" aria-label="Cosmetic types"></div>
+        <div class="locker-grid" id="locker-grid"></div>
+      </div>
+    </div>
+    <button class="btn close-btn">Done</button>
+  </dialog>
+
   <div id="toast" role="status" aria-live="polite"></div>
 
   <script src="js/background.js"></script>
   <script src="js/menu.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/locker.js"></script>
 </body>
 </html>

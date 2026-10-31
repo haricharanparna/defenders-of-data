@@ -773,3 +773,32 @@ body.td {
 .score-detail { font-size: 0.85rem; color: var(--text-dim); text-align: right; }
 .score-bytes { margin: 0.3rem 0 0; text-align: center; font-weight: 700; color: var(--gold); }
 @media (max-width: 520px) { .score-row { grid-template-columns: 1fr 5rem; } .score-bar { grid-column: 1 / -1; grid-row: 2; } }
+
+/* ---------- Your coder (avatar.js) ---------- */
+.hud-left { display: flex; align-items: center; gap: 0.6rem; }
+.hud-coder {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--cyan-dim);
+  transition: transform 0.12s, border-color 0.12s;
+}
+.hud-coder:hover, .hud-coder:focus-visible { border-color: var(--gold); transform: translateY(-2px); outline: none; }
+.cleared-coder {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 0.4rem;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid var(--gold);
+  animation: coder-cheer 0.6s ease-in-out 3;
+}
+@keyframes coder-cheer {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  30% { transform: translateY(-10px) rotate(-4deg); }
+  60% { transform: translateY(0) rotate(4deg); }
+}
+.score-bank { margin: 0.2rem 0 0; text-align: center; font-size: 0.9rem; color: var(--text-dim); }
+.cleared-stats .score-bank strong { font-family: var(--body); font-size: 1rem; color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { .cleared-coder { animation: none; } }

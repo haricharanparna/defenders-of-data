@@ -240,3 +240,94 @@ kbd {
   .screen { gap: 1.2rem; }
   .shield { width: 56px; }
 }
+
+/* ---------- Your coder (avatar.js) ---------- */
+.avatar-svg { display: block; width: 100%; height: 100%; }
+
+.coder-btn { display: flex; align-items: center; justify-content: center; gap: 0.7rem; padding-top: 0.55rem; padding-bottom: 0.55rem; }
+.coder-mini { width: 38px; height: 38px; flex: none; }
+
+/* ---------- Coder Locker (locker.js) ---------- */
+.locker { width: min(900px, 94vw); }
+.locker-body { display: grid; grid-template-columns: 220px 1fr; gap: 1.4rem; }
+@media (max-width: 680px) { .locker-body { grid-template-columns: 1fr; } }
+
+.locker-side { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.locker-preview {
+  width: 200px;
+  height: 200px;
+  border-radius: 22px;
+  border: 3px solid var(--cyan);
+  box-shadow: 0 0 24px rgba(46, 230, 255, 0.35);
+  overflow: hidden;
+}
+.locker-preview.trying { border-color: var(--gold); box-shadow: 0 0 24px rgba(255, 210, 63, 0.5); }
+.locker-stars { margin: 0.9rem 0 0; font-weight: 800; }
+.locker-stars strong { font-family: var(--pixel); font-size: 1.1rem; color: var(--gold); }
+.star-icon { color: var(--gold); font-size: 1.3rem; }
+.locker-earned { margin: 0.3rem 0 0; font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; }
+.locker-buy {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  width: 100%;
+  display: grid;
+  gap: 0.5rem;
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  background: rgba(255, 210, 63, 0.08);
+}
+.locker-buy p { margin: 0; font-weight: 800; font-size: 0.95rem; line-height: 1.35; }
+.locker-buy .btn-primary { font-size: 0.72rem; padding: 0.75rem 0.6rem; }
+.locker-buy .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.locker-buy .btn-small { font-size: 0.6rem; padding: 0.55rem; }
+
+.locker-shop { min-width: 0; }
+.locker-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.locker-tab {
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  color: var(--text-dim);
+  background: rgba(7, 11, 31, 0.8);
+  border: 2px solid var(--cyan-dim);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.locker-tab[aria-selected="true"] { color: var(--bg); background: var(--cyan); border-color: var(--cyan); }
+.locker-tab:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.locker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 0.6rem;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding: 0.2rem;
+}
+.locker-item {
+  --rarity: var(--cyan-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.4rem 0.6rem;
+  font: inherit;
+  color: var(--text);
+  background: rgba(7, 11, 31, 0.8);
+  border: 3px solid var(--rarity);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.locker-item.rare { --rarity: #4db8ff; }
+.locker-item.epic { --rarity: #a66bff; }
+.locker-item.legendary { --rarity: var(--gold); }
+.locker-item:hover, .locker-item:focus-visible { transform: translateY(-2px); box-shadow: 0 0 14px var(--rarity); outline: none; }
+.locker-item.wearing { background: rgba(46, 230, 255, 0.14); border-color: var(--cyan); }
+.locker-item.trying { box-shadow: 0 0 16px rgba(255, 210, 63, 0.7); border-color: var(--gold); }
+.locker-thumb { width: 72px; height: 72px; }
+.locker-item.for-sale .locker-thumb { opacity: 0.8; }
+.locker-name { font-weight: 800; font-size: 0.82rem; line-height: 1.2; text-align: center; }
+.locker-price { font-family: var(--pixel); font-size: 0.55rem; color: var(--gold); }
+.locker-item.wearing .locker-price { color: var(--cyan); }

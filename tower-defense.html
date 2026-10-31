@@ -12,7 +12,10 @@
 </head>
 <body class="td">
   <header class="hud">
-    <a class="btn btn-small" href="index.html" aria-label="Back to main menu">&#8592; Menu</a>
+    <div class="hud-left">
+      <a class="btn btn-small" href="index.html" aria-label="Back to main menu">&#8592; Menu</a>
+      <a class="hud-coder" id="hud-coder" href="index.html#coder" title="Your coder. Spend your stars on new looks in the Coder Locker" aria-label="Your coder: open the Coder Locker"></a>
+    </div>
     <div class="stats">
       <span class="stat" title="Data left. If it hits 0, your data is leaked!">❤️ Data <strong id="data">20</strong></span>
       <span class="stat" title="Bytes. Spend them on towers.">💾 Bytes <strong id="bytes">150</strong></span>
@@ -155,7 +158,7 @@
   <!-- Between levels in Levels mode (briefing.js) -->
   <dialog id="dlg-cleared" class="panel cleared-panel" aria-labelledby="cleared-title">
     <div class="confetti" id="confetti" aria-hidden="true"></div>
-    <div class="intro-emoji">🎉</div>
+    <div class="cleared-coder" id="cleared-coder" aria-hidden="true"></div>
     <h2 id="cleared-title"></h2>
     <p class="cleared-stars" id="cleared-stars"></p>
     <p class="center" id="cleared-praise"></p>
@@ -353,6 +356,7 @@
     </span>
   </div>
 
+  <script src="js/avatar.js"></script>
   <script src="js/threats.js"></script>
   <script src="js/content.js"></script>
   <script src="js/sound.js"></script>

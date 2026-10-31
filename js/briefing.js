@@ -103,7 +103,9 @@ function showCleared(level, result, bytesEarned) {
     meter('Questions right', parts.questions, `${result.right}/${result.answered}`) +
     meter('Data kept', parts.data, result.lost ? `lost ${result.lost}` : 'none lost') +
     meter('Threats stopped', parts.stopped, `${result.stopped}/${result.stopped + result.leaked}`) +
-    `<p class="score-bytes">+${bytesEarned} bonus bytes</p>`;
+    `<p class="score-bytes">+${bytesEarned} bonus bytes</p>` +
+    `<p class="score-bank">You have <strong>★ ${starsToSpend()}</strong> to spend on your coder in the Coder Locker</p>`;
+  el('cleared-coder').innerHTML = avatarSvg();
   el('cleared-next').textContent = `Move on to Level ${level + 1}`;
   makeConfetti();
   clearedDialog.showModal();
