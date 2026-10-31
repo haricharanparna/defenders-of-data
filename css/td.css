@@ -903,3 +903,19 @@ body.td {
   .stat.gain strong, .stat.loss strong, .stat-chip, .hud-coder.cheer, .hud-coder.oops,
   .tool.nudge, #btn-wave.nudge, .tool.unlocking, .tool.unlocking .tool-emoji { animation: none; }
 }
+
+/* Which stars count: your best run on each level (briefing.js) */
+.cleared-best {
+  margin: 0.4rem auto 0;
+  padding: 0.55rem 0.9rem;
+  max-width: 30rem;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border-radius: 8px;
+}
+.cleared-best.up { background: rgba(124, 255, 107, 0.1); border: 2px solid rgba(124, 255, 107, 0.5); }
+.cleared-best.same { background: rgba(159, 176, 216, 0.08); border: 2px solid #2a3570; color: var(--text-dim); }
+.cleared-best strong { color: var(--gold); }
+.mini-stars { white-space: nowrap; letter-spacing: 0.05em; color: #3a4a8a; }
+.mini-stars .on { color: var(--gold); }

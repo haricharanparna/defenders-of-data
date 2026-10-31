@@ -67,8 +67,9 @@ hooks.afterQuiz.push((right, total, bytesEarned) => {
   if (!LEVELS_MODE || state.over || !levelStart) return;
   const result = levelResult();
   levelStart = null;
+  const before = levelStars[state.wave] || 0;
   saveLevelStars(state.wave, result.stars);
-  showCleared(state.wave, result, bytesEarned);
+  showCleared(state.wave, result, bytesEarned, before);
 });
 
 // Level 100 ends the game right away, so save its stars there
@@ -82,16 +83,25 @@ function starRow(stars) {
   return [1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}">★</span>`).join('');
 }
 
-function showCleared(level, result, bytesEarned) {
+// before: your best stars on this level before this run. Only beating it earns new stars to spend.
+function showCleared(level, result, bytesEarned, before = 0) {
   const { stars, parts } = result;
-  const best = levelStars[level] || 0;
 
   el('cleared-title').textContent = `Level ${level} Cleared!`;
   el('cleared-stars').innerHTML = starRow(stars);
   el('cleared-stars').setAttribute('aria-label', `${stars} out of 3 stars`);
   el('cleared-praise').textContent =
     (stars === 3 ? 'Perfect run!' : stars === 2 ? 'Great job!' : 'You made it!') +
-    (best > stars ? ` Your best here is still ${best} stars.` : stars < 3 ? ' Replay it from the Level Map to earn more stars.' : '');
+    (stars < 3 ? ' Replay it from the Level Map to earn more stars.' : '');
+
+  // Be clear about which stars count: the map and the Coder Locker use your best run on each level
+  const best = el('cleared-best');
+  const gained = stars - before;
+  best.className = `cleared-best ${gained > 0 ? 'up' : 'same'}`;
+  best.innerHTML = gained > 0
+    ? (before ? `New best! Up from <span class="mini-stars">${starRow(before)}</span> to <span class="mini-stars">${starRow(stars)}</span>. ` : '') +
+      `You earned <strong>★ ${gained}</strong> to spend on your coder.`
+    : `Your best on Level ${level} is still <span class="mini-stars">${starRow(before)}</span>, so no new stars this time. Beat your best to earn more!`;
 
   const meter = (label, value, detail) => `
     <div class="score-row">
