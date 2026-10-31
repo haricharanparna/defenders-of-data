@@ -8,7 +8,7 @@ const ADVENTURE_KEY = 'defenders-of-data-adventure';
 const TILE = 48;
 const MAP_VERSION = 2;           // bump when the map changes, so old saves start at home
 const SPEED = 135;               // pixels per second
-const SPRINT = 1.75;             // how much faster you go while running (hold Shift or turn on Run)
+const SPRINT = 1.75;             // how much faster you go while sprinting (uses stamina)
 const ACCEL = 14;                // how quickly you speed up and slow down (higher = snappier)
 const RADIUS = 15;               // your size, for bumping into walls
 const BODY_SIZE = 19;            // how big you're drawn
@@ -192,7 +192,7 @@ function movePlayer(dt) {
   const len = Math.hypot(ix, iy) || 1;
   // Ease toward the target speed, so starting and stopping feel smooth
   const blend = 1 - Math.exp(-ACCEL * dt);
-  const top = SPEED * (sprinting() ? SPRINT : 1);
+  const top = SPEED * (updateStamina(dt, !!(ix || iy)) ? SPRINT : 1);
   player.vx += ((ix / len) * top - player.vx) * blend;
   player.vy += ((iy / len) * top - player.vy) * blend;
   if (Math.abs(player.vx) < 1 && !ix) player.vx = 0;
@@ -959,12 +959,40 @@ document.addEventListener('keyup', e => {
   if (e.key === 'Shift') shiftHeld = false;
 });
 
-// Running: hold Shift, or click Run to keep it on (remembered on this computer)
+// Sprinting, like in Fortnite: hold Shift (or turn on Sprint) to run fast. It uses stamina, which
+// drains while you sprint and refills when you stop. Run it all the way out and you're tired:
+// you have to wait until it's partly refilled before you can sprint again.
 const SPRINT_KEY = 'defenders-of-data-sprint';
+const STAMINA_DRAIN = 1 / 3.5;   // a full bar lasts 3.5 seconds of sprinting
+const STAMINA_REFILL = 1 / 4;    // and takes 4 seconds to fill back up
+const REFILL_DELAY = 0.6;        // seconds after sprinting before it starts refilling
+const TIRED_UNTIL = 0.35;        // when it runs out, you can't sprint again until it's this full
+const stamina = { value: 1, tired: false, rest: 0, sprinting: false };
 let shiftHeld = false;
 let runOn = false;
 try { runOn = localStorage.getItem(SPRINT_KEY) === '1'; } catch { /* storage blocked */ }
-const sprinting = () => runOn !== shiftHeld;   // Shift flips it either way
+
+// Called every frame from movePlayer: are you sprinting right now?
+function updateStamina(dt, moving) {
+  const want = (shiftHeld || runOn) && moving;
+  stamina.sprinting = want && !stamina.tired && stamina.value > 0;
+  if (stamina.sprinting) {
+    stamina.value = Math.max(0, stamina.value - STAMINA_DRAIN * dt);
+    stamina.rest = 0;
+    if (stamina.value === 0) {
+      stamina.tired = true;
+      stamina.sprinting = false;
+    }
+  } else if ((stamina.rest += dt) >= REFILL_DELAY) {
+    stamina.value = Math.min(1, stamina.value + STAMINA_REFILL * dt);
+  }
+  if (stamina.tired && stamina.value >= TIRED_UNTIL) stamina.tired = false;
+  const fill = $('stamina-fill');
+  fill.style.width = `${stamina.value * 100}%`;
+  fill.className = stamina.tired ? 'tired' : stamina.sprinting ? 'using' : '';
+  return stamina.sprinting;
+}
+
 function setRun(on) {
   runOn = on;
   $('btn-sprint').setAttribute('aria-pressed', on);
@@ -1145,6 +1173,15 @@ function drawPlayer() {
     ctx.clip();
     ctx.drawImage(coderImage, 22, 18, 76, 76, -R + 2, -R + 2, (R - 2) * 2, (R - 2) * 2);
     ctx.restore();
+  }
+
+  // Stamina bar under you while it isn't full
+  if (stamina.value < 1) {
+    const bw = 40, bx = x - bw / 2, by = y + R + 8;
+    ctx.fillStyle = 'rgba(7, 11, 31, 0.8)';
+    ctx.fillRect(bx - 2, by - 2, bw + 4, 8);
+    ctx.fillStyle = stamina.tired ? '#ff3d8b' : stamina.sprinting ? '#ffd23f' : '#7cff6b';
+    ctx.fillRect(bx, by, bw * stamina.value, 4);
   }
 }
 

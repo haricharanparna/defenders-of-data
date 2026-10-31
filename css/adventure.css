@@ -285,3 +285,12 @@ body.adventure { display: flex; flex-direction: column; height: 100vh; }
 .run-btn.on { color: var(--bg); background: #7cff6b; border-color: #7cff6b; box-shadow: 0 0 12px rgba(124, 255, 107, 0.6); }
 .dex-section { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #2a3570; padding-bottom: 0.25rem; }
 .dex-count { font-family: var(--body); font-size: 0.8rem; font-weight: 800; color: var(--text-dim); }
+
+/* Stamina bar inside the Sprint button (adventure.js) */
+.run-btn { display: inline-flex; flex-direction: column; align-items: stretch; gap: 0.3rem; }
+.stamina { display: block; height: 6px; min-width: 70px; background: #2a3570; border-radius: 4px; overflow: hidden; }
+.stamina span { display: block; height: 100%; width: 100%; background: #7cff6b; transition: background 0.2s; }
+.stamina span.using { background: var(--gold); }
+.stamina span.tired { background: var(--pink); animation: tired-blink 0.5s steps(2) infinite; }
+@keyframes tired-blink { 50% { opacity: 0.4; } }
+.run-btn.on .stamina { background: rgba(7, 11, 31, 0.5); }
