@@ -3,7 +3,9 @@
 
 const lockerDialog = document.getElementById('dlg-coder');
 const lockerEl = id => document.getElementById(id);
-let lockerSlot = SLOTS[0].id;
+// The Halloween tab collects every spooky item, whatever slot it goes in. It opens first this season.
+const LOCKER_TABS = [{ id: 'halloween', name: '🎃 Halloween', event: 'halloween' }, ...SLOTS];
+let lockerSlot = 'halloween';
 let tryingOn = null; // an item you're previewing but don't own yet
 
 function showCoderMini() {
@@ -41,9 +43,9 @@ function renderLocker() {
   // Tabs
   const tabs = lockerEl('locker-tabs');
   tabs.innerHTML = '';
-  for (const slot of SLOTS) {
+  for (const slot of LOCKER_TABS) {
     const tab = document.createElement('button');
-    tab.className = 'locker-tab';
+    tab.className = `locker-tab${slot.event ? ' event-tab' : ''}`;
     tab.setAttribute('role', 'tab');
     tab.setAttribute('aria-selected', slot.id === lockerSlot);
     tab.textContent = slot.name;
@@ -59,7 +61,10 @@ function renderLocker() {
   // Items in this tab, each shown on your own coder
   const grid = lockerEl('locker-grid');
   grid.innerHTML = '';
-  for (const item of COSMETICS.filter(c => c.slot === lockerSlot)) {
+  const tab = LOCKER_TABS.find(x => x.id === lockerSlot);
+  lockerEl('locker-grid').classList.toggle('halloween', !!tab.event);
+  const slotName = id => SLOTS.find(s => s.id === id).name;
+  for (const item of COSMETICS.filter(c => (tab.event ? c.event === tab.event : c.slot === lockerSlot))) {
     const owned = ownsCosmetic(item);
     const wearing = coder.look[item.slot] === item.id;
     const card = document.createElement('button');
@@ -68,6 +73,7 @@ function renderLocker() {
     card.innerHTML = `
       <span class="locker-thumb">${avatarSvg({ ...coder.look, [item.slot]: item.id })}</span>
       <span class="locker-name"></span>
+${tab.event ? `<span class="locker-slot">${slotName(item.slot)}</span>` : (item.event ? '<span class="locker-slot">🎃 Halloween</span>' : '')}
       <span class="locker-price">${wearing ? 'Wearing' : owned ? 'Owned' : `★ ${item.price}`}</span>`;
     card.querySelector('.locker-name').textContent = item.name;
     card.setAttribute('aria-label', `${item.name}, ${wearing ? 'wearing' : owned ? 'owned' : `costs ${item.price} stars`}${item.rarity ? `, ${item.rarity}` : ''}`);

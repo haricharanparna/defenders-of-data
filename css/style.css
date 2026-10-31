@@ -441,3 +441,9 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   .hacked[open], .hack-title, .hack-title::before, .hack-title::after, .hacked.panic, .hacked.panic .hack-meter strong, .hack-log p { animation: none; }
 }
+
+/* Halloween tab in the Coder Locker (locker.js) */
+.locker-tab.event-tab { color: #f07c12; border-color: #f07c12; }
+.locker-tab.event-tab[aria-selected="true"] { color: #1a0d05; background: #f07c12; border-color: #f07c12; box-shadow: 0 0 14px rgba(240, 124, 18, 0.6); }
+.locker-grid.halloween { padding: 0.5rem; border-radius: 12px; background: radial-gradient(ellipse at top, rgba(240, 124, 18, 0.15), transparent 70%); }
+.locker-slot { font-size: 0.65rem; font-weight: 800; color: #f07c12; text-transform: uppercase; letter-spacing: 0.04em; }
