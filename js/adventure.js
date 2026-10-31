@@ -838,21 +838,19 @@ function openIndex(focusId = null) {
     btn.addEventListener('click', () => showGuardian(g, have));
     dex.appendChild(btn);
   }
-  // Then every threat, from common to legendary
-  dex.insertAdjacentHTML('beforeend', '<p class="dex-section">Threats</p>');
-  const list = [...CREATURES].sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity));
-  for (const c of [...list, BOSS]) {
-    const caught = save.caught.includes(c.id) || (c === BOSS && save.beatBoss);
-    const seen = save.seen.includes(c.id);
-    const r = rarityOf(c);
-    const btn = document.createElement('button');
-    btn.className = `dex-entry ${caught ? 'caught' : seen ? 'seen' : 'unknown'}`;
-    btn.style.setProperty('--rarity', r.color);
-    btn.innerHTML = `<span class="dex-emoji">${caught || seen ? c.emoji : '❓'}</span><span class="dex-name">${caught || seen ? c.name : '???'}</span><span class="dex-rarity">${c === BOSS ? 'Boss' : r.name}</span>`;
-    btn.addEventListener('click', () => showDex(c, caught, seen));
-    dex.appendChild(btn);
-    if (c.id === focusId) setTimeout(() => btn.click());
-  }
+  // Then the threats, grouped by the area you find them in, from Common up to Mythic
+  ZONES.forEach((zone, i) => {
+    const list = CREATURES.filter(c => c.zone === i + 1)
+      .sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity));
+    const got = list.filter(c => save.caught.includes(c.id)).length;
+    const section = document.createElement('p');
+    section.className = 'dex-section';
+    section.textContent = `📍 ${zone.name}`;
+    section.insertAdjacentHTML('beforeend', `<span class="dex-count">${got}/${list.length}</span>`);
+    dex.appendChild(section);
+    // Omega waits at the end of the last area
+    for (const c of i === ZONES.length - 1 ? [...list, BOSS] : list) addDexEntry(c, focusId);
+  });
   const counts = RARITY_ORDER.map(k => {
     const all = CREATURES.filter(c => c.rarity === k);
     return `${RARITY[k].name} ${all.filter(c => save.caught.includes(c.id)).length}/${all.length}`;
@@ -860,6 +858,19 @@ function openIndex(focusId = null) {
   $('index-summary').textContent = `Quarantined ${save.caught.length} of ${CREATURES.length} threats · ${counts.join(' · ')}`;
   $('dex-detail').hidden = true;
   if (!indexDialog.open) indexDialog.showModal();
+}
+
+function addDexEntry(c, focusId) {
+  const caught = save.caught.includes(c.id) || (c === BOSS && save.beatBoss);
+  const seen = save.seen.includes(c.id);
+  const r = rarityOf(c);
+  const btn = document.createElement('button');
+  btn.className = `dex-entry ${caught ? 'caught' : seen ? 'seen' : 'unknown'}`;
+  btn.style.setProperty('--rarity', r.color);
+  btn.innerHTML = `<span class="dex-emoji">${caught || seen ? c.emoji : '❓'}</span><span class="dex-name">${caught || seen ? c.name : '???'}</span><span class="dex-rarity">${c === BOSS ? 'Boss' : r.name}</span>`;
+  btn.addEventListener('click', () => showDex(c, caught, seen));
+  $('dex').appendChild(btn);
+  if (c.id === focusId) setTimeout(() => btn.click());
 }
 
 function showDex(c, caught, seen) {
