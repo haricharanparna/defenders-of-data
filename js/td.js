@@ -179,6 +179,7 @@ function newGame() {
     streak: 0,          // right answers in a row
     charge: 0,          // Firewall Blast charge (rewards.js)
     overclock: 0,       // seconds of faster firing left
+    boosted: false,     // double damage this level, from a secret message (bonus.js)
     dmSafe: 0,          // live DMs answered safely
     perfectQuiz: false, // got every Real or Scam question right in a round
     blasts: 0,
@@ -569,7 +570,8 @@ function damage(e, towerType, amount) {
     e.lastFloat = state.time;
     addFloater(e.x, e.y - 18, 'Super effective!', '#7cff6b');
   }
-  hurt(e, amount * (strong ? STRONG : NORMAL));
+  // A secret message answered right doubles all damage for the level (bonus.js)
+  hurt(e, amount * (strong ? STRONG : NORMAL) * (state.boosted ? BONUS_DAMAGE : 1));
 }
 
 // Takes HP off a threat, and handles it being stopped

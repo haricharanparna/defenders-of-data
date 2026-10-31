@@ -919,3 +919,14 @@ body.td {
 .cleared-best strong { color: var(--gold); }
 .mini-stars { white-space: nowrap; letter-spacing: 0.05em; color: #3a4a8a; }
 .mini-stars .on { color: var(--gold); }
+
+/* Double damage from a secret message (bonus.js) */
+.stat.boost {
+  padding: 0.1rem 0.6rem;
+  color: var(--bg);
+  background: var(--gold);
+  border-radius: 999px;
+  animation: boost-glow 1.2s ease-in-out infinite;
+}
+@keyframes boost-glow { 50% { box-shadow: 0 0 14px rgba(255, 210, 63, 0.9); } }
+@media (prefers-reduced-motion: reduce) { .stat.boost { animation: none; } }

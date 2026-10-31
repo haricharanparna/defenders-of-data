@@ -23,7 +23,7 @@ const HOW_STEPS = [
   {
     icon: '▶️', title: 'Start the wave',
     text: 'Press <strong>Start</strong> (or the Space bar). The threats come, and your towers fight them by themselves.',
-    tip: 'Each tower is best against one kind of threat. The tower bar shows which one.',
+    tip: 'Watch the map for a tiny secret message bubble. Click it within 5 seconds and answer it for double damage!',
   },
   {
     icon: '🧠', title: 'Answer questions',
