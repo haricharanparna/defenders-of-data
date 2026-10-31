@@ -1,4 +1,4 @@
-// Adventure mode content: the threats you can meet and quarantine, the world map, and everyone in it.
+// Adventure mode content: the threats you can meet and quarantine, the six areas, and everyone in them.
 // Each threat has a type, and each type is beaten by one of your four defenses (the towers from
 // Tower Defense). Picking the right defense for each attack is how you win battles.
 
@@ -10,240 +10,281 @@ const DEFENSES = {
 };
 
 // Rarer threats are harder to find, tougher in battle and harder to quarantine.
-// hp and power multiply a threat's base stats; weight is how often it shows up in the wild.
+// hp and power multiply a threat's base stats; weight is how often it shows up in the wild;
+// tier is how hard the quarantine questions are.
 const RARITY = {
   common: { name: 'Common', color: '#9fb0d8', hp: 1, power: 1, weight: 50, tier: 1 },
   uncommon: { name: 'Uncommon', color: '#7cff6b', hp: 1.3, power: 1.15, weight: 25, tier: 1 },
   rare: { name: 'Rare', color: '#4db8ff', hp: 1.7, power: 1.3, weight: 10, tier: 2 },
   epic: { name: 'Epic', color: '#c58bff', hp: 2.2, power: 1.5, weight: 4, tier: 3 },
   legendary: { name: 'Legendary', color: '#ffd23f', hp: 3, power: 1.8, weight: 1.2, tier: 3 },
+  mythic: { name: 'Mythic', color: '#ff3d6e', hp: 4.5, power: 2.2, weight: 0.35, tier: 4 },
 };
 
-// beats: the defense that is super effective. zone: where it lives (1 to 4).
+// Base stats for a threat in each area (1 to 6), before rarity
+const zoneHp = zone => 50 + 14 * zone;
+const zonePower = zone => 10 + 3 * zone;
+
+// t(id, emoji, name, beats, zone, rarity, about, tip, attacks)
+const t = (id, emoji, name, beats, zone, rarity, about, tip, attacks) => ({ id, emoji, name, beats, zone, rarity, about, tip, attacks });
+
+// Ten different threats live in each area: 3 common, 2 uncommon, 2 rare, 1 epic, 1 legendary, 1 mythic
 const CREATURES = [
-  // ---------- Home Network ----------
-  {
-    id: 'phisher', emoji: '🎣', name: 'Phisher', beats: 'linkcheck', zone: 1, rarity: 'common',
-    about: 'Sends fake messages that look like they come from a real company, hoping you click a bad link.',
-    tip: 'Before you click, check the real domain: the part right before the first single slash.',
-    attacks: [
-      'casts a line: "Your Roblox account will be deleted! Log in now: roblox-security.help"',
-      'sends an email from "Netfl1x Billing": "Payment failed. Update your card here."',
-      'whispers: "Click fast, this offer ends in 10 minutes!"',
-    ],
-  },
-  {
-    id: 'smisher', emoji: '📱', name: 'Smisher', beats: 'linkcheck', zone: 1, rarity: 'common',
-    about: 'Phishing by text message. It pretends to be a delivery company, your bank or even a friend.',
-    tip: 'Delivery and bank texts with links are a classic scam. Open the real app instead.',
-    attacks: [
-      'texts: "USPS: your package is on hold. Confirm your address: usps-track.co"',
-      'texts: "Your bank card is locked. Tap here to unlock: bnk-verify.net"',
-    ],
-  },
-  {
-    id: 'adware', emoji: '📢', name: 'Adware Gremlin', beats: 'update', zone: 1, rarity: 'common',
-    about: 'Sneaks in with free downloads and fills your screen with pop-ups and fake virus warnings.',
-    tip: 'Only download apps from official stores, and keep your device updated.',
-    attacks: [
-      'flashes a pop-up: "WARNING! 37 viruses found! Download CleanerPro now!"',
-      'hides inside a "free" wallpaper app and floods your screen with ads.',
-    ],
-  },
-  {
-    id: 'quisher', emoji: '🔳', name: 'QR Quisher', beats: 'linkcheck', zone: 1, rarity: 'uncommon',
-    about: 'Sticks fake QR codes on posters and parking meters that lead to phishing sites.',
-    tip: 'After scanning a QR code, read the link your phone shows before you open it.',
-    attacks: [
-      'puts a sticker over the café menu: "Scan for free Wi-Fi!" It goes to wifi-login.click.',
-      'hides a QR code in an email: "Scan to keep your account active."',
-    ],
-  },
-  {
-    id: 'spear', emoji: '🎯', name: 'Spear Phisher', beats: 'linkcheck', zone: 1, rarity: 'rare',
-    about: 'A phisher that studies you first, then uses your name, school or team to make the trap believable.',
-    tip: 'Even if a message knows your name and school, check the link and the sender before trusting it.',
-    attacks: [
-      'emails: "Hi Jordan! Coach Kim here. Here\'s the new team schedule:" The link goes to team-docs.co.',
-      'messages: "Your Lincoln Middle School account expires today. Sign in here."',
-    ],
-  },
+  // ---------- 1. Home Network ----------
+  t('phisher', '🎣', 'Phisher', 'linkcheck', 1, 'common',
+    'Sends fake messages that look like they come from a real company, hoping you click a bad link.',
+    'Before you click, check the real domain: the part right before the first single slash.',
+    ['casts a line: "Your Roblox account will be deleted! Log in now: roblox-security.help"', 'sends an email from "Netfl1x Billing": "Payment failed. Update your card here."']),
+  t('smisher', '📱', 'Smisher', 'linkcheck', 1, 'common',
+    'Phishing by text message. It pretends to be a delivery company, your bank or even a friend.',
+    'Delivery and bank texts with links are a classic scam. Open the real app instead.',
+    ['texts: "USPS: your package is on hold. Confirm your address: usps-track.co"', 'texts: "Your bank card is locked. Tap here to unlock: bnk-verify.net"']),
+  t('adware', '📢', 'Adware Gremlin', 'update', 1, 'common',
+    'Sneaks in with free downloads and fills your screen with pop-ups and fake virus warnings.',
+    'Only download apps from official stores, and keep your device updated.',
+    ['flashes a pop-up: "WARNING! 37 viruses found! Download CleanerPro now!"', 'hides inside a "free" wallpaper app and floods your screen with ads.']),
+  t('quisher', '🔳', 'QR Quisher', 'linkcheck', 1, 'uncommon',
+    'Sticks fake QR codes on posters and menus that lead to phishing sites.',
+    'After scanning a QR code, read the link your phone shows before you open it.',
+    ['puts a sticker over the café menu: "Scan for free Wi-Fi!" It goes to wifi-login.click.', 'hides a QR code in an email: "Scan to keep your account active."']),
+  t('scareware', '😱', 'Scareware', 'update', 1, 'uncommon',
+    'Shows fake, scary virus alerts so you\'ll pay for or download a "fix" that is really malware.',
+    'Real security warnings come from your device\'s own settings, not from flashing website pop-ups.',
+    ['screams: "YOUR PHONE IS INFECTED! Tap here to clean it NOW!"', 'locks your browser with a siren sound and a fake "Microsoft Defender" page.']),
+  t('spear', '🎯', 'Spear Phisher', 'linkcheck', 1, 'rare',
+    'A phisher that studies you first, then uses your name, school or team to make the trap believable.',
+    'Even if a message knows your name and school, check the link and the sender before trusting it.',
+    ['emails: "Hi Jordan! Coach Kim here. Here\'s the new team schedule:" The link goes to team-docs.co.', 'messages: "Your Lincoln Middle School account expires today. Sign in here."']),
+  t('routerraider', '📶', 'Router Raider', 'twofa', 1, 'rare',
+    'Breaks into home Wi-Fi routers that still use the password printed on the box, like "admin".',
+    'Ask an adult to change the router\'s admin password from the default and keep its software updated.',
+    ['logs into your router with username "admin" and password "admin".', 'changes your Wi-Fi settings so all your traffic goes through it.']),
+  t('toysnoop', '🧸', 'Smart Toy Snoop', 'update', 1, 'epic',
+    'Hacks smart toys, cameras and speakers that never get updates, then listens in.',
+    'Smart devices need updates too. Change their default passwords and turn off features you don\'t use.',
+    ['takes over a talking teddy bear\'s microphone.', 'peeks through a baby monitor camera that hasn\'t been updated in years.']),
+  t('eviltwin', '🪤', 'Evil Twin Hotspot', 'verify', 1, 'legendary',
+    'Sets up a fake Wi-Fi network with the same name as a real one, then watches everything you do on it.',
+    'On public Wi-Fi, check the exact network name with staff, and avoid logging in to important accounts.',
+    ['creates a network called "Starbucks WiFi FREE" right next to the real one.', 'shows a fake login page: "Sign in with Google to use free Wi-Fi."']),
+  t('megalodon', '🦈', 'Megalodon Phish', 'linkcheck', 1, 'mythic',
+    'The biggest phisher ever seen. It sends perfect copies of real login pages to millions of people at once.',
+    'Never log in from a link in a message. Type the site yourself or use the official app.',
+    ['sends a flawless copy of the Google login page at g00gle-accounts.com.', 'floods every inbox: "Security alert! Verify your account in 1 hour or lose it forever."']),
 
-  // ---------- Social Media City ----------
-  {
-    id: 'giveaway', emoji: '🎁', name: 'Giveaway Bot', beats: 'linkcheck', zone: 2, rarity: 'common',
-    about: 'Promises free prizes, skins or money, but only after you "verify" with your login or card.',
-    tip: 'You can\'t win something you never entered. Real prizes never need your password.',
-    attacks: [
-      'comments: "FREE V-BUCKS! First 100 people only: vbucks-gift.xyz"',
-      'DMs: "You won an iPhone 16! Just pay $2.99 shipping here."',
-    ],
-  },
-  {
-    id: 'catfish', emoji: '🎭', name: 'Catfish', beats: 'verify', zone: 2, rarity: 'uncommon',
-    about: 'Pretends to be someone they\'re not, usually someone your age, to earn your trust.',
-    tip: 'If you\'ve never met them in person, you can\'t be sure who they are. Never share private info or photos.',
-    attacks: [
-      'messages: "hey! I\'m 14 too, we have so much in common. what school do you go to?"',
-      'says: "Let\'s keep our chats a secret from your parents, ok?"',
-    ],
-  },
-  {
-    id: 'impersonator', emoji: '🪞', name: 'Impersonator', beats: 'verify', zone: 2, rarity: 'uncommon',
-    about: 'Copies a friend\'s or a celebrity\'s profile, then asks for money, codes or favors.',
-    tip: 'If a "friend" asks for money or codes, call or ask them in person first.',
-    attacks: [
-      'messages from your "best friend\'s" new account: "Lost my phone, can you send me a $50 gift card?"',
-      'pretends to be a famous streamer: "Send me your login and I\'ll gift you a sub!"',
-    ],
-  },
-  {
-    id: 'techsupport', emoji: '🎧', name: 'Fake Tech Support', beats: 'verify', zone: 2, rarity: 'rare',
-    about: 'Pretends to be from Microsoft, Apple or your school\'s IT team so you\'ll give them control of your device.',
-    tip: 'Real tech companies don\'t call or pop up out of nowhere. Hang up and contact them through their official site.',
-    attacks: [
-      'calls: "This is Microsoft. Your computer has a virus. Install this app so we can fix it."',
-      'pops up: "Your PC is locked! Call this number now for support."',
-    ],
-  },
-  {
-    id: 'whale', emoji: '🐋', name: 'Whale Phisher', beats: 'linkcheck', zone: 2, rarity: 'epic',
-    about: 'Goes after the "big fish": it pretends to be a principal or a boss to trick people into acting fast.',
-    tip: 'If an important person asks for something urgent and unusual, check with them another way first.',
-    attacks: [
-      'emails as your principal: "Urgent! Everyone must log in here before 3pm or lose access."',
-      'writes as the school boss: "I need gift cards for the staff today. Keep it a surprise!"',
-    ],
-  },
-  {
-    id: 'deepfake', emoji: '🤖', name: 'Deepfake', beats: 'verify', zone: 2, rarity: 'legendary',
-    about: 'Uses AI to fake a real person\'s face or voice, so it looks and sounds like someone you trust.',
-    tip: 'If a video or call asks for money or secrets, verify it another way. Families can agree on a secret code word.',
-    attacks: [
-      'calls using your cousin\'s cloned voice: "I\'m in trouble, send money right now, don\'t tell anyone!"',
-      'posts a fake video of a famous YouTuber promoting a crypto giveaway.',
-    ],
-  },
+  // ---------- 2. Social Media City ----------
+  t('giveaway', '🎁', 'Giveaway Bot', 'linkcheck', 2, 'common',
+    'Promises free prizes, skins or money, but only after you "verify" with your login or card.',
+    'You can\'t win something you never entered. Real prizes never need your password.',
+    ['comments: "FREE V-BUCKS! First 100 people only: vbucks-gift.xyz"', 'DMs: "You won an iPhone 16! Just pay $2.99 shipping here."']),
+  t('chain', '⛓️', 'Chain Message', 'verify', 2, 'common',
+    'Spreads scary or exciting messages that tell you to forward them, often with false info or a bad link.',
+    'Don\'t forward messages that threaten bad luck or promise rewards. Check the facts first.',
+    ['says: "Forward this to 10 friends or your account will be deleted at midnight!"', 'claims: "Instagram is shutting down! Copy and paste this to keep your account."']),
+  t('likefarmer', '👍', 'Like Farmer', 'verify', 2, 'common',
+    'Runs fake accounts that offer free followers and likes, then asks for your login.',
+    'Free follower apps and sites steal accounts. Real growth never needs your password.',
+    ['DMs: "Get 10K followers FREE! Just log in to our app with your Instagram."', 'comments from 50 fake accounts at once: "Check my bio for free likes!"']),
+  t('catfish', '🎭', 'Catfish', 'verify', 2, 'uncommon',
+    'Pretends to be someone they\'re not, usually someone your age, to earn your trust.',
+    'If you\'ve never met them in person, you can\'t be sure who they are. Never share private info or photos.',
+    ['messages: "hey! I\'m 14 too, we have so much in common. what school do you go to?"', 'says: "Let\'s keep our chats a secret from your parents, ok?"']),
+  t('impersonator', '🪞', 'Impersonator', 'verify', 2, 'uncommon',
+    'Copies a friend\'s or a celebrity\'s profile, then asks for money, codes or favors.',
+    'If a "friend" asks for money or codes, call or ask them in person first.',
+    ['messages from your "best friend\'s" new account: "Lost my phone, can you send me a $50 gift card?"', 'pretends to be a famous streamer: "Send me your login and I\'ll gift you a sub!"']),
+  t('techsupport', '🎧', 'Fake Tech Support', 'verify', 2, 'rare',
+    'Pretends to be from Microsoft, Apple or your school\'s IT team so you\'ll give them control of your device.',
+    'Real tech companies don\'t call or pop up out of nowhere. Hang up and contact them through their official site.',
+    ['calls: "This is Microsoft. Your computer has a virus. Install this app so we can fix it."', 'pops up: "Your PC is locked! Call this number now for support."']),
+  t('doxxer', '📍', 'Doxxer', 'verify', 2, 'rare',
+    'Collects little bits of info you post, like your school, street and schedule, then shares it to scare you.',
+    'Keep your accounts private, turn off location tags, and don\'t post your school, address or schedule.',
+    ['pieces together your school logo, your street sign and your bus stop from old posts.', 'threatens: "I know where you live. Do what I say or I\'ll post it."']),
+  t('whale', '🐋', 'Whale Phisher', 'linkcheck', 2, 'epic',
+    'Goes after the "big fish": it pretends to be a principal or a boss to trick people into acting fast.',
+    'If an important person asks for something urgent and unusual, check with them another way first.',
+    ['emails as your principal: "Urgent! Everyone must log in here before 3pm or lose access."', 'writes as the school boss: "I need gift cards for the staff today. Keep it a surprise!"']),
+  t('deepfake', '🤖', 'Deepfake', 'verify', 2, 'legendary',
+    'Uses AI to fake a real person\'s face or voice, so it looks and sounds like someone you trust.',
+    'If a video or call asks for money or secrets, verify it another way. Families can agree on a secret code word.',
+    ['calls using your cousin\'s cloned voice: "I\'m in trouble, send money right now, don\'t tell anyone!"', 'posts a fake video of a famous YouTuber promoting a crypto giveaway.']),
+  t('trollkraken', '🐙', 'Troll Kraken', 'verify', 2, 'mythic',
+    'Controls thousands of fake accounts at once to spread lies, start fights and make fake things look popular.',
+    'Lots of likes doesn\'t make something true. Check trusted sources before you believe or share.',
+    ['makes 5,000 bot accounts all post the same fake news at once.', 'floods a comment section with fake "friends" who all agree with the scam.']),
 
-  // ---------- Download Woods ----------
-  {
-    id: 'worm', emoji: '🐛', name: 'Malware Worm', beats: 'update', zone: 3, rarity: 'common',
-    about: 'Spreads from device to device through security holes that haven\'t been patched.',
-    tip: 'Updates patch the holes worms crawl through. Turn on automatic updates.',
-    attacks: [
-      'crawls through an old app you never updated.',
-      'copies itself to every device on your Wi-Fi.',
-    ],
-  },
-  {
-    id: 'trojan', emoji: '🐴', name: 'Trojan Horse', beats: 'update', zone: 3, rarity: 'uncommon',
-    about: 'Hides malware inside something that looks useful, like a game mod or a free tool.',
-    tip: 'Free mods, cheats and cracked games from random sites often hide malware.',
-    attacks: [
-      'offers: "Minecraft super mod pack, totally free! Just run setup.exe"',
-      'disguises itself as a homework helper app from a random website.',
-    ],
-  },
-  {
-    id: 'cryptojacker', emoji: '⛏️', name: 'Cryptojacker', beats: 'update', zone: 3, rarity: 'uncommon',
-    about: 'Secretly uses your computer to mine cryptocurrency, making it slow, hot and loud.',
-    tip: 'If your device is suddenly slow and hot for no reason, run a scan and update everything.',
-    attacks: [
-      'sneaks into a browser extension and makes your laptop fan scream.',
-      'hides in a "free game booster" and uses all your computer\'s power.',
-    ],
-  },
-  {
-    id: 'keylogger', emoji: '⌨️', name: 'Keylogger', beats: 'twofa', zone: 3, rarity: 'uncommon',
-    about: 'Secretly records everything you type, including your passwords.',
-    tip: 'Even if a keylogger steals your password, 2-step verification stops the hacker at the second step.',
-    attacks: [
-      'quietly records every key you type, including your password.',
-      'sends your typed password to a hacker server.',
-    ],
-  },
-  {
-    id: 'spyware', emoji: '👁️', name: 'Spyware', beats: 'update', zone: 3, rarity: 'rare',
-    about: 'Watches what you do, where you go and who you talk to, then reports it to someone else.',
-    tip: 'Check which apps can use your camera, microphone and location, and remove apps you don\'t trust.',
-    attacks: [
-      'hides in a flashlight app that asks for your location, camera and contacts.',
-      'turns on your microphone without the light coming on.',
-    ],
-  },
-  {
-    id: 'rootkit', emoji: '🕳️', name: 'Rootkit', beats: 'update', zone: 3, rarity: 'epic',
-    about: 'Burrows deep into a device and hides itself from normal scans so it can stay for a long time.',
-    tip: 'Keep your system updated and use built-in security tools. If something is badly wrong, ask an adult to reset the device.',
-    attacks: [
-      'digs into your system files and hides from your antivirus.',
-      'gives a hacker secret control of your computer every time it starts.',
-    ],
-  },
+  // ---------- 3. Download Woods ----------
+  t('worm', '🐛', 'Malware Worm', 'update', 3, 'common',
+    'Spreads from device to device through security holes that haven\'t been patched.',
+    'Updates patch the holes worms crawl through. Turn on automatic updates.',
+    ['crawls through an old app you never updated.', 'copies itself to every device on your Wi-Fi.']),
+  t('bundleware', '📦', 'Bundleware Box', 'update', 3, 'common',
+    'Hides extra unwanted programs inside a normal-looking installer.',
+    'Read every installer screen, untick extra offers, and only download from official sites.',
+    ['installs a "free" video player plus three toolbars you never asked for.', 'sneaks "Optional: SuperSearch" into a pre-ticked checkbox.']),
+  t('fakemod', '🧩', 'Fake Mod', 'update', 3, 'common',
+    'Pretends to be a game mod or texture pack, but the download is malware.',
+    'Get mods only from the game\'s official store or well-known mod sites, and scan downloads.',
+    ['offers: "Ultra Realistic Shaders, download from my Google Drive!"', 'hides an .exe file inside a "skin pack".']),
+  t('trojan', '🐴', 'Trojan Horse', 'update', 3, 'uncommon',
+    'Hides malware inside something that looks useful, like a free tool.',
+    'Free cheats and cracked games from random sites often hide malware.',
+    ['offers: "Minecraft super mod pack, totally free! Just run setup.exe"', 'disguises itself as a homework helper app from a random website.']),
+  t('cryptojacker', '⛏️', 'Cryptojacker', 'update', 3, 'uncommon',
+    'Secretly uses your computer to mine cryptocurrency, making it slow, hot and loud.',
+    'If your device is suddenly slow and hot for no reason, run a scan and update everything.',
+    ['sneaks into a browser extension and makes your laptop fan scream.', 'hides in a "free game booster" and uses all your computer\'s power.']),
+  t('spyware', '👁️', 'Spyware', 'update', 3, 'rare',
+    'Watches what you do, where you go and who you talk to, then reports it to someone else.',
+    'Check which apps can use your camera, microphone and location, and remove apps you don\'t trust.',
+    ['hides in a flashlight app that asks for your location, camera and contacts.', 'turns on your microphone without the light coming on.']),
+  t('backdoor', '🚪', 'Backdoor', 'update', 3, 'rare',
+    'Leaves a secret way into your device so a hacker can come back whenever they want.',
+    'Keep your system and apps updated, and remove programs you don\'t recognize.',
+    ['opens a hidden door in a cracked game so the hacker can log in later.', 'stays behind after you delete the app it came with.']),
+  t('rootkit', '🕳️', 'Rootkit', 'update', 3, 'epic',
+    'Burrows deep into a device and hides itself from normal scans so it can stay for a long time.',
+    'Keep your system updated and use built-in security tools. If something is badly wrong, ask an adult to reset the device.',
+    ['digs into your system files and hides from your antivirus.', 'gives a hacker secret control of your computer every time it starts.']),
+  t('polymorph', '🦎', 'Polymorph', 'update', 3, 'legendary',
+    'Malware that changes its own code every time it spreads, like a chameleon, to slip past scanners.',
+    'Up-to-date security software looks at what programs do, not just how they look. Keep it updated.',
+    ['changes its shape so your antivirus doesn\'t recognize it.', 'rewrites itself every time it copies to a new computer.']),
+  t('wormageddon', '🐲', 'Wormageddon', 'update', 3, 'mythic',
+    'A super-worm that spreads around the world in minutes through one unpatched bug.',
+    'Big attacks like this hit devices that skipped updates. Install security updates as soon as they come out.',
+    ['spreads to a million computers in one hour through a bug that was patched last month.', 'jumps from your laptop to your phone to your smart TV.']),
 
-  // ---------- Dark Web Depths ----------
-  {
-    id: 'cracker', emoji: '🔓', name: 'Password Cracker', beats: 'twofa', zone: 4, rarity: 'common',
-    about: 'Guesses millions of passwords a second, starting with the most common ones.',
-    tip: 'Use long, unique passwords, and turn on 2-step verification.',
-    attacks: [
-      'tries "password123", "qwerty" and "iloveyou" on your account.',
-      'guesses your password using your pet\'s name and birthday.',
-    ],
-  },
-  {
-    id: 'stuffer', emoji: '🧦', name: 'Credential Stuffer', beats: 'twofa', zone: 4, rarity: 'rare',
-    about: 'Takes passwords leaked from one site and tries them on all your other accounts.',
-    tip: 'Never reuse passwords. A password manager can remember them all for you.',
-    attacks: [
-      'found your password in a leak from an old game site and is trying it on your email.',
-      'tries your leaked password on 500 other websites at once.',
-    ],
-  },
-  {
-    id: 'hijacker', emoji: '🍪', name: 'Session Hijacker', beats: 'twofa', zone: 4, rarity: 'rare',
-    about: 'Steals the "you\'re logged in" cookie from your browser so it can skip the password completely.',
-    tip: 'Log out on shared computers, don\'t install sketchy extensions, and keep 2-step verification on for sign-in alerts.',
-    attacks: [
-      'grabs the login cookie from a school computer you forgot to log out of.',
-      'uses a fake browser extension to copy your logged-in session.',
-    ],
-  },
-  {
-    id: 'simswap', emoji: '📶', name: 'SIM Swapper', beats: 'twofa', zone: 4, rarity: 'epic',
-    about: 'Tricks a phone company into moving your number to their SIM card, so they get your text codes.',
-    tip: 'Use an authenticator app for 2-step codes when you can, and ask your family to add a PIN to your phone account.',
-    attacks: [
-      'calls your phone company pretending to be you and steals your number.',
-      'now gets your text message codes and tries to reset your passwords.',
-    ],
-  },
-  {
-    id: 'ransomware', emoji: '👾', name: 'Ransomware', beats: 'update', zone: 4, rarity: 'epic',
-    about: 'Locks all your files and demands money to unlock them.',
-    tip: 'Keep backups and updates on, never open surprise attachments, and never pay.',
-    attacks: [
-      'locks every file: "Pay $500 in Bitcoin to get them back!"',
-      'sneaks in through an email attachment called invoice.pdf.exe.',
-    ],
-  },
-  {
-    id: 'zeroday', emoji: '💥', name: 'Zero-Day', beats: 'update', zone: 4, rarity: 'legendary',
-    about: 'Attacks a brand-new bug that nobody knew about yet, so there\'s no fix for it on day zero.',
-    tip: 'When an emergency update comes out, install it right away. That\'s the fix for a zero-day.',
-    attacks: [
-      'breaks in through a bug in your browser that was found this morning.',
-      'spreads before anyone has time to make a patch!',
-    ],
-  },
+  // ---------- 4. Gaming Galaxy ----------
+  t('skinscammer', '🎨', 'Skin Scammer', 'linkcheck', 4, 'common',
+    'Promises rare skins or items, then sends you to a fake site that steals your game login.',
+    'Rare items are never free from strangers. Only log in through the game itself.',
+    ['whispers: "Free legendary skin! Log in here to claim: epic-skins-free.gg"', 'posts: "Skin giveaway! Just sign in with Steam on my site."']),
+  t('cheatinjector', '💉', 'Cheat Injector', 'update', 4, 'common',
+    'Offers cheats and aimbots that secretly install malware, and can get your account banned too.',
+    'Cheat downloads are a top way kids get malware. They\'re not worth losing your account or device.',
+    ['offers: "Undetectable aimbot! Turn off your antivirus first, then run it."', 'hides a password stealer inside a "free wallhack" download.']),
+  t('accountseller', '💰', 'Account Seller', 'twofa', 4, 'common',
+    'Sells stolen game accounts, and steals new ones to sell.',
+    'Turn on 2-step verification for your game accounts so a stolen password isn\'t enough.',
+    ['tries the password you used on another site to steal your game account.', 'sells "max level accounts" that were stolen from other kids.']),
+  t('tradetrickster', '🤝', 'Trade Trickster', 'verify', 4, 'uncommon',
+    'Sets up "fair" trades, then swaps items at the last second or asks you to go first outside the game.',
+    'Only trade with the game\'s official trade window, and never give items "first" to someone you don\'t know.',
+    ['says: "You send yours first, I promise I\'ll send mine right after!"', 'switches the item to a cheap copy right before you click accept.']),
+  t('faketourney', '🏆', 'Fake Tournament', 'linkcheck', 4, 'uncommon',
+    'Invites you to a "pro tournament" that needs you to sign in on a fake site.',
+    'Check tournaments on the game\'s official site or social pages before you sign up.',
+    ['DMs: "You\'re invited to a $1,000 tournament! Log in to register: esports-cup.live"', 'sends a team invite link that asks for your Discord login.']),
+  t('keylogger', '⌨️', 'Keylogger', 'twofa', 4, 'rare',
+    'Secretly records everything you type, including your passwords.',
+    'Even if a keylogger steals your password, 2-step verification stops the hacker at the second step.',
+    ['quietly records every key you type, including your password.', 'sends your typed password to a hacker server.']),
+  t('nitrofaker', '🚀', 'Nitro Faker', 'linkcheck', 4, 'rare',
+    'Sends fake "free Discord Nitro" gifts that lead to look-alike login pages.',
+    'Check gift links carefully. "discorcl" and "dlscord" are not discord.com.',
+    ['sends: "Free Nitro for 3 months! Claim here: discorcl.gift"', 'messages from a friend\'s hacked account: "lol is this you in this video?"']),
+  t('recoveryscam', '🧾', 'Recovery Scammer', 'verify', 4, 'epic',
+    'Finds people who just got hacked and pretends to be a "hacker for hire" who can get the account back.',
+    'Only use the game\'s official account recovery. People who offer to "hack it back" are scammers.',
+    ['comments: "Got hacked? I can recover any account for $20!"', 'pretends to be game staff: "Send me your email and password so I can restore your account."']),
+  t('lootlich', '🧟', 'Loot Box Lich', 'linkcheck', 4, 'legendary',
+    'Lures players with fake loot box and gem sites that steal logins and card details.',
+    'Only buy game items inside the official game or app store, never on outside "cheap gems" sites.',
+    ['opens a site: "100,000 gems for $1! Enter your card and game login."', 'promises: "Legendary crate every day, just link your account here!"']),
+  t('glitchtitan', '🕹️', 'Glitch Titan', 'update', 4, 'mythic',
+    'Uses a bug in an old game launcher to take over every computer that hasn\'t updated it.',
+    'Update your game launchers and games too, not just your operating system.',
+    ['crashes your old game launcher and slips in through the bug.', 'turns every unpatched gaming PC into its servant.']),
+
+  // ---------- 5. Cloud Kingdom ----------
+  t('bruteforcer', '🔨', 'Brute Forcer', 'twofa', 5, 'common',
+    'Tries password after password on your account until one works.',
+    'Long passphrases take forever to guess, and 2-step verification stops guessing completely.',
+    ['tries 1,000 passwords a second on your cloud account.', 'guesses "summer2026", "Summer2026!" and "summer2026!!"']),
+  t('resetphisher', '🔁', 'Reset Phisher', 'linkcheck', 5, 'common',
+    'Sends fake "reset your password" emails that lead to a fake login page.',
+    'If you didn\'t ask for a reset, ignore it. If you did, go to the site yourself instead of clicking.',
+    ['emails: "Someone requested a password reset. Click here if it wasn\'t you: icloud-reset.co"', 'sends a fake "Your password expires today" message.']),
+  t('reuser', '♻️', 'Password Reuser', 'twofa', 5, 'common',
+    'Feeds on people who use the same password everywhere: one leak unlocks all their accounts.',
+    'Use a different password for every account. A password manager makes that easy.',
+    ['uses your leaked game password to open your email.', 'finds out your password is the same on 12 sites.']),
+  t('shouldersurfer', '👀', 'Shoulder Surfer', 'twofa', 5, 'uncommon',
+    'Watches you type your password or PIN in person, like on the bus or in class.',
+    'Cover your screen when you type passwords, and use 2-step verification so a peek isn\'t enough.',
+    ['peeks over your shoulder while you unlock your phone.', 'records your screen from across the room while you log in.']),
+  t('permissiongrabber', '📲', 'Permission Grabber', 'linkcheck', 5, 'uncommon',
+    'A fake app or quiz that asks to "connect with your account", then gets access to all your stuff.',
+    'Before you tap "Allow", read what an app wants. A quiz doesn\'t need your contacts or email.',
+    ['offers: "Which anime character are you? Sign in with Google to see!"', 'asks for permission to read and send your email.']),
+  t('hijacker', '🍪', 'Session Hijacker', 'twofa', 5, 'rare',
+    'Steals the "you\'re logged in" cookie from your browser so it can skip the password completely.',
+    'Log out on shared computers, don\'t install sketchy extensions, and keep 2-step verification on.',
+    ['grabs the login cookie from a school computer you forgot to log out of.', 'uses a fake browser extension to copy your logged-in session.']),
+  t('stuffer', '🧦', 'Credential Stuffer', 'twofa', 5, 'rare',
+    'Takes passwords leaked from one site and tries them on all your other accounts.',
+    'Never reuse passwords. A password manager can remember them all for you.',
+    ['found your password in a leak from an old game site and is trying it on your email.', 'tries your leaked password on 500 other websites at once.']),
+  t('simswap', '📞', 'SIM Swapper', 'twofa', 5, 'epic',
+    'Tricks a phone company into moving your number to their SIM card, so they get your text codes.',
+    'Use an authenticator app for 2-step codes when you can, and ask your family to add a PIN to your phone account.',
+    ['calls your phone company pretending to be you and steals your number.', 'now gets your text message codes and tries to reset your passwords.']),
+  t('mfabomber', '📳', 'MFA Fatigue Bomber', 'verify', 5, 'legendary',
+    'Has your password and spams "Approve sign-in?" alerts until you tap Approve just to make them stop.',
+    'Never approve a sign-in you didn\'t start. Deny it, then change your password.',
+    ['sends 40 "Is this you signing in?" alerts in a row at midnight.', 'messages: "IT here, just tap Approve to stop the alerts!"']),
+  t('phantom', '👻', 'Password Phantom', 'twofa', 5, 'mythic',
+    'A ghost that haunts huge databases of leaked passwords and tries every one of them, everywhere, forever.',
+    'Long, unique passwords plus 2-step verification make you invisible to it.',
+    ['tries 3 billion leaked passwords against your account.', 'whispers your old password from a 2019 data leak.']),
+
+  // ---------- 6. Dark Web Depths ----------
+  t('cracker', '🔓', 'Password Cracker', 'twofa', 6, 'common',
+    'Guesses millions of passwords a second, starting with the most common ones.',
+    'Use long, unique passwords, and turn on 2-step verification.',
+    ['tries "password123", "qwerty" and "iloveyou" on your account.', 'guesses your password using your pet\'s name and birthday.']),
+  t('databroker', '🗃️', 'Data Broker', 'verify', 6, 'common',
+    'Buys and sells info about people, like names, emails, addresses and what they buy.',
+    'Share less: skip optional form fields, keep profiles private and think before signing up for things.',
+    ['sells a list of 10,000 student emails to scammers.', 'builds a profile of you from every quiz and sign-up form you filled out.']),
+  t('combolister', '📜', 'Combo Lister', 'twofa', 6, 'common',
+    'Trades giant "combo lists" of leaked emails and passwords on the dark web.',
+    'Check if your email was in a leak with a trusted site, then change any reused passwords.',
+    ['posts a list of 1 million emails and passwords for sale.', 'adds your old password to its list.']),
+  t('botnet', '🧟‍♂️', 'Botnet Zombie', 'update', 6, 'uncommon',
+    'Turns infected devices into a zombie army that attacks websites together.',
+    'Updates and strong device passwords keep your devices from joining the zombie army.',
+    ['turns your old smart camera into one of its 100,000 zombies.', 'orders all its zombies to knock a game server offline.']),
+  t('malvertiser', '📰', 'Malvertiser', 'update', 6, 'uncommon',
+    'Hides malware inside online ads, even on normal websites.',
+    'Keep your browser updated, and never download "updates" that an ad tells you to install.',
+    ['shows an ad: "Your Flash Player is out of date! Update now."', 'hides a bad download behind a fake "Download" button on a real site.']),
+  t('exploitkit', '🧰', 'Exploit Kit', 'update', 6, 'rare',
+    'A hacker toolbox that tests your browser for old bugs and attacks the first one it finds.',
+    'An updated browser has no old bugs for it to use. Let your browser update itself.',
+    ['checks your browser for 50 old bugs in one second.', 'attacks the plug-in you forgot to update.']),
+  t('ransomware', '👾', 'Ransomware', 'update', 6, 'rare',
+    'Locks all your files and demands money to unlock them.',
+    'Keep backups and updates on, never open surprise attachments, and never pay.',
+    ['locks every file: "Pay $500 in Bitcoin to get them back!"', 'sneaks in through an email attachment called invoice.pdf.exe.']),
+  t('extortionist', '🕷️', 'Double Extortionist', 'update', 6, 'epic',
+    'Steals your files before locking them, then threatens to leak them if you don\'t pay.',
+    'Backups get your files back, and updates keep it out. Tell an adult right away, and never pay.',
+    ['copies all your files, then locks them: "Pay, or everyone sees them."', 'sends a countdown timer to your whole family.']),
+  t('zeroday', '💥', 'Zero-Day', 'update', 6, 'legendary',
+    'Attacks a brand-new bug that nobody knew about yet, so there\'s no fix for it on day zero.',
+    'When an emergency update comes out, install it right away. That\'s the fix for a zero-day.',
+    ['breaks in through a bug in your browser that was found this morning.', 'spreads before anyone has time to make a patch!']),
+  t('shadowadmin', '🌑', 'Shadow Admin', 'twofa', 6, 'mythic',
+    'A hacker who stole an administrator account and can now open every door in the system.',
+    'The most important accounts need the strongest protection: unique passwords and 2-step verification, always.',
+    ['logs in as the school\'s IT admin with a stolen password.', 'creates a secret admin account just for itself.']),
 ];
 
-// Base stats for a threat in each zone, before rarity
-const zoneHp = zone => 50 + 15 * zone;
-const zonePower = zone => 10 + 4 * zone;
-
 const BOSS = {
-  id: 'omega', emoji: '☠️', name: 'Omega Ransomware', beats: 'update', rarity: 'legendary', hp: 360, power: 30,
+  id: 'omega', emoji: '☠️', name: 'Omega Ransomware', beats: 'update', rarity: 'mythic', hp: 520, power: 38,
   about: 'The final boss of the internet. It steals files, then threatens to leak them.',
   tip: 'Backups, updates and never paying keep you safe, even from the worst ransomware.',
   attacks: [
@@ -257,9 +298,9 @@ const BOSS = {
 };
 
 // ---------- Guardians: the good guys ----------
-// They fight beside you in boss battles (hacker trainers and Omega). You start with Hoot and get
-// one more with each badge. A guardian takes hits for you, boosts its own defense, and has a
-// special move it can use once per battle.
+// They fight beside you in boss battles and against Legendary and Mythic threats. You start with
+// Hoot and get one more with each badge. A guardian takes hits for you, boosts its own defense,
+// and has a special move it can use once per battle.
 const GUARDIANS = [
   { id: 'hoot', emoji: '🦉', name: 'Hoot', type: 'linkcheck', about: 'A wise owl that spots fake links from a mile away.',
     special: 'Scan', specialText: 'Shows which defense beats the next attack' },
@@ -273,97 +314,27 @@ const GUARDIANS = [
 const GUARDIAN_HP = 70;
 const GUARDIAN_BOOST = 1.5;   // damage bonus when you use the guardian's own defense
 
-// ---------- The map ----------
-// Four zones, left to right. Each is 16 tiles wide and 14 tall.
-// # wall   . ground   , spam grass (wild threats)   ~ data stream   R restore point
-// S sign   N friendly person   T hacker trainer   G gate (needs that zone's badge)   B final boss   H home
+// ---------- The six areas ----------
+// Each area is built from a fixed seed (adventure.js), so the map is the same every time.
+const ZONE_W = 30;
+const ZONE_H = 22;
 const ZONES = [
-  {
-    name: 'Home Network', ground: '#1d3a2f', grass: '#2f6b3f', wall: '🌳',
-    rows: [
-      '################',
-      '#H....,,,,.....#',
-      '#.....,,,,..S..#',
-      '#..R..,,,,.....#',
-      '#..........~~..#',
-      '#.,,,......~~..#',
-      '#.,,,..N...~~..#',
-      '#.,,,..........G',
-      '#..........,,,.#',
-      '#..T.......,,,.#',
-      '#..........,,,.#',
-      '#..S...........#',
-      '#..............#',
-      '################',
-    ],
-  },
-  {
-    name: 'Social Media City', ground: '#2a2550', grass: '#4a3a8a', wall: '🏢',
-    rows: [
-      '################',
-      '#...,,,,,......#',
-      '#.S.,,,,,..N...#',
-      '#...,,,,,......#',
-      '#..............#',
-      '#.~~~...,,,,,..#',
-      '#.~~~...,,,,,..#',
-      '.....R..,,,,,..G',
-      '#..............#',
-      '#.,,,,......T..#',
-      '#.,,,,.........#',
-      '#.,,,,...S.....#',
-      '#..............#',
-      '################',
-    ],
-  },
-  {
-    name: 'Download Woods', ground: '#2e2a18', grass: '#5a4a1a', wall: '🌲',
-    rows: [
-      '################',
-      '#.,,,,....,,,,.#',
-      '#.,,,,....,,,,.#',
-      '#.,,,,.S..,,,,.#',
-      '#..............#',
-      '#...~~~~...N...#',
-      '#...~~~~.......#',
-      '.....R.........G',
-      '#.,,,,,....,,,.#',
-      '#.,,,,,....,,,.#',
-      '#.,,,,,..T.,,,.#',
-      '#..............#',
-      '#.....S........#',
-      '################',
-    ],
-  },
-  {
-    name: 'Dark Web Depths', ground: '#1f0d16', grass: '#4a1028', wall: '🧱',
-    rows: [
-      '################',
-      '#..,,,,,,,,....#',
-      '#..,,,,,,,,..S.#',
-      '#..,,,,,,,,....#',
-      '#..........~~..#',
-      '#.R........~~..#',
-      '#..........~~..#',
-      '...,,,,,.....B.#',
-      '#..,,,,,.......#',
-      '#..,,,,,..T....#',
-      '#..............#',
-      '#.N..,,,,,,....#',
-      '#....,,,,,,....#',
-      '################',
-    ],
-  },
+  { name: 'Home Network', ground: '#1d3a2f', grass: '#2f6b3f', wall: '🌳', person: '👩' },
+  { name: 'Social Media City', ground: '#2a2550', grass: '#4a3a8a', wall: '🏢', person: '🧑‍🎤' },
+  { name: 'Download Woods', ground: '#2e2a18', grass: '#5a4a1a', wall: '🌲', person: '🧑‍🔧' },
+  { name: 'Gaming Galaxy', ground: '#161838', grass: '#3a2a70', wall: '🪐', person: '🧑‍🚀' },
+  { name: 'Cloud Kingdom', ground: '#1c3247', grass: '#2f5c80', wall: '☁️', person: '🧙' },
+  { name: 'Dark Web Depths', ground: '#1f0d16', grass: '#4a1028', wall: '🧱', person: '🕵️‍♀️' },
 ];
 
-// Signs and friendly people, by zone. Each line is one page of dialogue.
+// Signs and friendly people, by area. Each line is one page of dialogue.
 const ZONE_TALK = [
   {
     S: [
       ['Welcome to the Home Network! Spam grass (the darker squares) hides wild threats.', 'Walk through it to find them, then battle with the right defense.'],
       ['Tip: every threat has a weakness. Phishing → Link Check. Password attacks → 2FA. Malware → Update. Fake people → Verify.'],
     ],
-    N: [['👩 Mom: Be careful out there! If anything online feels weird, come tell me. That\'s what "Ask for help" does in battle.', 'The 💾 Restore Point fixes your data if you get hurt.']],
+    N: [['👩 Mom: Be careful out there! If anything online feels weird, come tell me. That\'s what "Ask for help" does in battle.', 'The 💾 Restore Points fix your data if you get hurt.']],
   },
   {
     S: [
@@ -377,11 +348,28 @@ const ZONE_TALK = [
       ['Download Woods: free mods, free games, free... malware.', 'Only download from official app stores!'],
       ['Updates aren\'t annoying, they\'re armor. Each one patches holes that worms and trojans crawl through.'],
     ],
-    N: [['🧑‍🔧 IT Ranger: A keylogger can steal your password as you type it.', 'But with 2-step verification, the hacker still can\'t get in without your phone!']],
+    N: [['🧑‍🔧 IT Ranger: I once found a "free game" with three viruses inside it.', 'If a download asks you to turn off your antivirus, that\'s a giant red flag.']],
   },
   {
-    S: [['⚠️ Dark Web Depths. Leaked passwords are traded here.', 'Never reuse a password: one leak shouldn\'t unlock everything.']],
-    N: [['🕵️‍♀️ Security Researcher: Omega Ransomware lives at the end of this cave.', 'It changes tactics every turn. Read each attack carefully and pick the matching defense!']],
+    S: [
+      ['Gaming Galaxy: rare skins, big tournaments, and scammers everywhere.', 'Nothing rare is ever free from a stranger.'],
+      ['Turn on 2-step verification for every game account. Stolen accounts get sold in this galaxy.'],
+    ],
+    N: [['🧑‍🚀 Pro Gamer: I lost my best account to a "free skins" site once.', 'Now I only log in through the game itself, and I never download cheats.']],
+  },
+  {
+    S: [
+      ['Cloud Kingdom: all your photos, files and accounts live up here.', 'Guard the gates with long passwords and 2-step verification.'],
+      ['Never approve a sign-in request you didn\'t start, even if it pops up 50 times.'],
+    ],
+    N: [['🧙 Cloud Wizard: A password manager is a spell book that remembers every password for you.', 'One strong master password, and every account gets its own unique one.']],
+  },
+  {
+    S: [
+      ['⚠️ Dark Web Depths. Leaked passwords are traded here.', 'Never reuse a password: one leak shouldn\'t unlock everything.'],
+      ['Omega Ransomware waits at the far end. Make sure your guardians are ready.'],
+    ],
+    N: [['🕵️‍♀️ Security Researcher: Omega Ransomware changes tactics every turn.', 'Read each attack carefully and pick the matching defense!']],
   },
 ];
 
@@ -391,8 +379,12 @@ const TRAINERS = [
     intro: 'Heh, I bought a phishing kit online. Let\'s see if you can spot my tricks!', outro: 'Aw man, you saw right through me. Here, take the Spam Badge.' },
   { emoji: '🕶️', name: 'Influencer Ivy', team: ['giveaway', 'catfish', 'impersonator'], badge: '🎭 Truth Badge',
     intro: 'My followers believe anything I post. Will you?', outro: 'Okay, okay, you really do check who you\'re talking to. Truth Badge is yours.' },
-  { emoji: '🧪', name: 'Malware Mo', team: ['trojan', 'worm', 'keylogger'], badge: '🔄 Patch Badge',
+  { emoji: '🧪', name: 'Malware Mo', team: ['fakemod', 'trojan', 'worm'], badge: '🔄 Patch Badge',
     intro: 'Want a free game? It\'s totally safe. Probably.', outro: 'Your updates are too strong! Take the Patch Badge.' },
-  { emoji: '💀', name: 'Dark Lord Dex', team: ['cracker', 'stuffer', 'keylogger'], badge: '🔐 Lock Badge',
+  { emoji: '🎮', name: 'Cheater Chase', team: ['skinscammer', 'cheatinjector', 'tradetrickster'], badge: '🏆 Fair Play Badge',
+    intro: 'Want a free legendary skin? Just log in on my site!', outro: 'No cheats, no scams, no way! Fine, the Fair Play Badge is yours.' },
+  { emoji: '🌩️', name: 'Storm Hacker Skye', team: ['bruteforcer', 'resetphisher', 'shouldersurfer'], badge: '☁️ Cloud Badge',
+    intro: 'I\'ve got your password. Now I just need you to tap Approve...', outro: 'You denied every sign-in! Take the Cloud Badge.' },
+  { emoji: '💀', name: 'Dark Lord Dex', team: ['cracker', 'combolister', 'botnet'], badge: '🔐 Lock Badge',
     intro: 'I have a list of a billion leaked passwords. Is yours on it?', outro: 'Unique passwords AND 2FA? Impossible! Fine, take the Lock Badge.' },
 ];

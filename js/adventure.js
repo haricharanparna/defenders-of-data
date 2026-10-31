@@ -6,8 +6,8 @@ const $ = id => document.getElementById(id);
 const ADVENTURE_KEY = 'defenders-of-data-adventure';
 
 const TILE = 48;
-const ZONE_W = 16;
-const SPEED = 190;               // pixels per second
+const MAP_VERSION = 2;           // bump when the map changes, so old saves start at home
+const SPEED = 135;               // pixels per second
 const ACCEL = 14;                // how quickly you speed up and slow down (higher = snappier)
 const RADIUS = 15;               // your size, for bumping into walls
 const BODY_SIZE = 19;            // how big you're drawn
@@ -26,6 +26,69 @@ const creature = id => (id === BOSS.id ? BOSS : CREATURES.find(c => c.id === id)
 const rarityOf = c => RARITY[c.rarity || 'common'];
 
 // ---------- The world ----------
+// Each area is built from its own fixed seed, so it comes out the same every time.
+// A road runs across the middle with two roads crossing it, and everything important sits
+// right next to a road so you can always reach it. Spam grass, data streams and walls fill the rest.
+const ROAD_Y = Math.floor(ZONE_H / 2);   // the main road is this row and the one above it
+
+function seeded(seed) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let n = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    n = (n + Math.imul(n ^ (n >>> 7), 61 | n)) ^ n;
+    return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildZone(i) {
+  const rand = seeded(1234 + i * 977);
+  const int = (min, max) => min + Math.floor(rand() * (max - min + 1));
+  const grid = Array.from({ length: ZONE_H }, (_, y) => Array.from({ length: ZONE_W }, (_, x) =>
+    (x === 0 || y === 0 || x === ZONE_W - 1 || y === ZONE_H - 1 ? '#' : '.')));
+  const kept = new Set();   // squares that must stay clear
+  const keep = (x, y) => kept.add(`${x},${y}`);
+
+  // Roads
+  const roadXs = [int(6, 9), int(18, 22)];
+  for (let x = 0; x < ZONE_W; x++) { keep(x, ROAD_Y - 1); keep(x, ROAD_Y); }
+  for (const rx of roadXs) for (let y = 1; y < ZONE_H - 1; y++) { keep(rx, y); keep(rx + 1, y); }
+  // The way in from the last area, and the gate to the next one
+  if (i > 0) grid[ROAD_Y - 1][0] = grid[ROAD_Y][0] = '.';
+  if (i < ZONES.length - 1) grid[ROAD_Y - 1][ZONE_W - 1] = grid[ROAD_Y][ZONE_W - 1] = 'G';
+
+  // People and places, each with clear space around it
+  const place = (ch, x, y) => {
+    grid[y][x] = ch;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) keep(x + dx, y + dy);
+  };
+  if (i === 0) place('H', 2, ROAD_Y - 2);
+  place('R', 4, ROAD_Y + 1);
+  place('R', roadXs[1] + 3, ROAD_Y + 1);
+  place('S', 6 + (i === 0 ? 0 : -2), ROAD_Y - 2);
+  place('S', ZONE_W - 10, ROAD_Y + 1);
+  place('N', roadXs[0] + 3, ROAD_Y - 2);
+  place('T', ZONE_W - 4, ROAD_Y - 2);
+  if (i === ZONES.length - 1) place('B', ZONE_W - 3, ROAD_Y + 1);
+
+  // Fill the rest
+  const paint = (ch, count, w, h) => {
+    for (let n = 0; n < count; n++) {
+      const pw = int(...w), ph = int(...h);
+      const px = int(1, ZONE_W - 1 - pw), py = int(1, ZONE_H - 1 - ph);
+      for (let y = py; y < py + ph; y++) {
+        for (let x = px; x < px + pw; x++) if (!kept.has(`${x},${y}`) && grid[y][x] === '.') grid[y][x] = ch;
+      }
+    }
+  };
+  paint('~', 3, [2, 5], [2, 3]);
+  paint('#', 9, [1, 3], [1, 3]);
+  paint(',', 12, [3, 7], [2, 5]);
+  // Spam grass also grows along the roads in places, so you can't always avoid it
+  paint(',', 6, [2, 4], [2, 3]);
+  return grid.map(row => row.join(''));
+}
+
+ZONES.forEach((z, i) => { z.rows = buildZone(i); });
 const MAP = ZONES[0].rows.map((_, r) => ZONES.map(z => z.rows[r]).join(''));
 const MAP_W = MAP[0].length;
 const MAP_H = MAP.length;
@@ -47,21 +110,29 @@ for (let y = 0; y < MAP_H; y++) {
 }
 
 // ---------- Saved progress ----------
-let save = {
-  px: null, py: null, hp: BASE_HP, badges: [], caught: [], seen: [], beatBoss: false,
-  restore: { x: 2, y: 1 },
-};
+const START = { x: 2, y: ROAD_Y };
+const fresh = () => ({
+  px: center(START.x, START.y).x, py: center(START.x, START.y).y, hp: BASE_HP, badges: [], caught: [], seen: [],
+  beatBoss: false, restore: { x: 4, y: ROAD_Y + 1 }, mapVersion: MAP_VERSION,
+});
+let save = fresh();
 let firstVisit = true;
+let mapChanged = false;
 try {
   const saved = JSON.parse(localStorage.getItem(ADVENTURE_KEY));
-  if (saved) { save = { ...save, ...saved }; firstVisit = false; }
+  if (saved) {
+    firstVisit = false;
+    if (saved.mapVersion === MAP_VERSION) {
+      save = { ...save, ...saved };
+    } else {
+      // The world was rebuilt: start again at home, but keep every threat you've quarantined
+      mapChanged = true;
+      const known = id => CREATURES.some(c => c.id === id);
+      save.caught = (saved.caught || []).filter(known);
+      save.seen = (saved.seen || []).filter(known);
+    }
+  }
 } catch { /* storage blocked */ }
-// Older saves stored tiles, not pixels
-if (save.px === null) {
-  const start = center(save.x ?? 2, save.y ?? 1);
-  save.px = start.x;
-  save.py = start.y;
-}
 
 function saveAdventure() {
   save.px = Math.round(player.x);
@@ -269,10 +340,12 @@ function startBattle({ wild = null, trainer = null, boss = false }) {
   player.vx = player.vy = 0;
   const team = boss ? [BOSS.id] : trainer !== null ? [...TRAINERS[trainer].team] : [wild];
   const bossFight = boss || trainer !== null;
+  // Guardians join boss battles, and help against the toughest wild threats too
+  const withGuardians = bossFight || ['legendary', 'mythic'].includes(creature(wild)?.rarity);
   battle = {
     team, trainer, boss, wild: !!wild, bossFight, enemy: null, attack: null, shield: false, hintMove: null,
     // Guardians only join boss battles
-    guardians: bossFight ? myGuardians().map(g => ({ ...g, hp: GUARDIAN_HP, maxHp: GUARDIAN_HP, usedSpecial: false })) : [],
+    guardians: withGuardians ? myGuardians().map(g => ({ ...g, hp: GUARDIAN_HP, maxHp: GUARDIAN_HP, usedSpecial: false })) : [],
     active: 0,
   };
   $('battle').hidden = false;
@@ -301,7 +374,7 @@ function nextEnemy() {
   $('enemy-sprite').textContent = c.emoji;
   $('enemy-sprite').className = `sprite enemy-sprite enter rarity-${c.rarity}`;
   updateBattleHp();
-  const rare = c !== BOSS && ['rare', 'epic', 'legendary'].includes(c.rarity) ? ` ✨ ${r.name.toUpperCase()}!` : '';
+  const rare = c !== BOSS && ['rare', 'epic', 'legendary', 'mythic'].includes(c.rarity) ? ` ✨ ${r.name.toUpperCase()}!` : '';
   const intro = battle.boss ? '☠️ The final battle begins!'
     : battle.trainer !== null ? `${TRAINERS[battle.trainer].name} sends out ${c.emoji} ${c.name}!${rare}`
     : `A wild ${c.emoji} ${c.name} appeared!${rare}`;
@@ -491,51 +564,162 @@ function enemyBeaten() {
   const actions = $('battle-actions');
   actions.innerHTML = '';
   actions.className = 'battle-actions';
-  const hard = ['rare', 'epic', 'legendary'].includes(c.rarity) ? ' It\'s rare, so the question is harder!' : '';
-  addAction(`<strong>🧪 Quarantine it</strong><span>Answer a question to add it to your Index.${hard}</span>`, () => quarantine(c), 'quarantine').focus();
+  const hard = ['rare', 'epic', 'legendary', 'mythic'].includes(c.rarity) ? ` It's ${rarityOf(c).name}, so the questions are harder!` : '';
+  addAction(`<strong>🧪 Quarantine it</strong><span>Get ${CATCH_NEEDED} questions right in ${CATCH_TIME} seconds.${hard}</span>`, () => quarantine(c), 'quarantine').focus();
   addAction('<strong>Leave it</strong><span>Keep exploring</span>', endBattle);
 }
 
 // ---------- Quarantine (catching) ----------
-function questionPool(tier) {
-  const all = [
+// Answer 7 questions right in 30 seconds, from a never-ending stream. The rarer the threat,
+// the harder the questions. Run out of time and it escapes.
+const CATCH_NEEDED = 7;
+const CATCH_TIME = 30;
+const CATCH_WRONG_COST = 2;   // a wrong answer also costs this many seconds
+// Which question levels each rarity tier draws from
+const CATCH_LEVELS = { 1: [1], 2: [2], 3: [2, 3], 4: [3] };
+
+function catchPool(tier) {
+  const levels = CATCH_LEVELS[tier];
+  const choice = [
     ...Object.values(UPGRADES).flat(),
     ...SKILLS.flatMap(skill => skill.questions.map(q => ({ ...q, level: skill.level <= 30 ? 2 : 3 }))),
-    ...BOSS_QUESTIONS,
+    ...BOSS_QUESTIONS.map(q => ({ ...q, level: q.level || 2 })),
     ...FINAL_BOSS_QUESTIONS.map(q => ({ ...q, level: 3 })),
-  ];
-  // Rarer threats get the hardest questions available
-  const exact = all.filter(q => (q.level || 1) === tier);
-  return exact.length ? exact : all.filter(q => (q.level || 1) <= tier);
+  ].filter(q => levels.includes(q.level || 1));
+  // Real or Scam messages are quick to read, so they mix in too
+  const realOrScam = QUIZ.filter(q => levels.includes(q.level || 1)).map(q => ({
+    msg: q, prompt: 'Real or scam?', level: q.level,
+    options: [
+      { text: '✅ Real', correct: q.answer === 'real', why: q.why },
+      { text: '🚩 Scam', correct: q.answer === 'scam', why: q.why },
+    ],
+  }));
+  return [...choice, ...realOrScam];
 }
 
+let catching = null;
+
 function quarantine(c) {
-  const q = pickRandom(questionPool(rarityOf(c).tier));
-  log(`🧪 Quarantine: ${q.prompt}`, 'question');
+  const tier = rarityOf(c).tier;
+  catching = { c, pool: catchPool(tier), asked: new Set(), right: 0, left: CATCH_TIME, busy: false, last: performance.now() };
+  log(`🧪 Quarantine! Get ${CATCH_NEEDED} right in ${CATCH_TIME} seconds before ${c.name} escapes!`, 'question');
+  catching.timer = setInterval(catchTick, 100);
+  nextCatchQuestion();
+}
+
+function nextCatchQuestion() {
+  const k = catching;
+  let fresh = k.pool.filter(q => !k.asked.has(q));
+  if (!fresh.length) { k.asked.clear(); fresh = k.pool; }
+  const q = pickRandom(fresh);
+  k.asked.add(q);
+  k.busy = false;
+
   const actions = $('battle-actions');
-  actions.innerHTML = '';
-  actions.className = 'battle-actions answers';
-  for (const opt of shuffle(q.options)) {
-    addAction('<strong></strong>', () => {
-      if (opt.correct) {
-        save.caught.push(c.id);
-        playSound('badge');
-        log(`✅ ${opt.why}`, 'good');
-        log(`🧪 ${c.emoji} ${c.name} was quarantined! Added to your Threat Index.`, 'good');
-        $('enemy-sprite').className = 'sprite enemy-sprite caught';
-        saveAdventure();
-        updateHud();
-        setTimeout(() => { endBattle(); openIndex(c.id); }, 1800);
-      } else {
-        playSound('wrong');
-        log(`❌ ${opt.why} The right answer: ${q.options.find(o => o.correct).text}`, 'bad');
-        log(`${c.emoji} ${c.name} escaped!`);
-        $('enemy-sprite').className = 'sprite enemy-sprite fled';
-        setTimeout(endBattle, 2600);
-      }
-    }).querySelector('strong').textContent = opt.text;
+  actions.innerHTML = `
+    <div class="catch-head">
+      <span class="catch-time"><span id="catch-fill"></span></span>
+      <strong id="catch-left"></strong>
+      <span class="catch-dots">${Array.from({ length: CATCH_NEEDED }, (_, i) => `<span class="${i < k.right ? 'on' : ''}"></span>`).join('')}</span>
+    </div>
+    <p class="catch-q"></p>`;
+  actions.className = 'battle-actions catching';
+  actions.querySelector('.catch-q').textContent = q.prompt;
+  if (q.msg) {
+    const box = document.createElement('div');
+    box.className = 'message catch-msg';
+    box.innerHTML = '<div class="msg-from"><span></span><span class="msg-meta"></span></div>';
+    box.querySelector('span').textContent = q.msg.from;
+    box.querySelector('.msg-meta').textContent = q.msg.meta || '';
+    for (const [key, cls] of [['note', 'msg-note'], ['text', 'msg-text'], ['link', 'msg-link']]) {
+      if (!q.msg[key]) continue;
+      const el = document.createElement('p');
+      el.className = cls;
+      el.textContent = (key === 'link' ? '🔗 ' : '') + q.msg[key];
+      box.appendChild(el);
+    }
+    actions.appendChild(box);
   }
-  actions.querySelector('button').focus();
+  for (const opt of shuffle(q.options)) {
+    const btn = document.createElement('button');
+    btn.className = 'action answer';
+    btn.textContent = opt.text;
+    btn.addEventListener('click', () => answerCatch(btn, opt, q));
+    actions.appendChild(btn);
+  }
+  updateCatchTimer();
+  actions.querySelector('.answer').focus();
+}
+
+function answerCatch(btn, opt, q) {
+  const k = catching;
+  if (!k || k.busy) return;
+  k.busy = true;
+  $('battle-actions').querySelectorAll('.answer').forEach(b => {
+    b.disabled = true;
+    if (q.options.find(o => o.text === b.textContent)?.correct) b.classList.add('right');
+  });
+  if (opt.correct) {
+    k.right++;
+    playSound('right');
+    if (k.right >= CATCH_NEEDED) return caught();
+    setTimeout(() => catching === k && nextCatchQuestion(), 350);
+  } else {
+    btn.classList.add('wrong');
+    k.left = Math.max(0, k.left - CATCH_WRONG_COST);
+    playSound('wrong');
+    // Leave the right answer up a moment so you can learn from it
+    setTimeout(() => catching === k && nextCatchQuestion(), 1100);
+  }
+  $('battle-actions').querySelectorAll('.catch-dots span').forEach((dot, i) => dot.classList.toggle('on', i < k.right));
+}
+
+function catchTick() {
+  const k = catching;
+  if (!k) return;
+  const now = performance.now();
+  k.left -= (now - k.last) / 1000;
+  k.last = now;
+  updateCatchTimer();
+  if (k.left <= 0) escaped();
+}
+
+function updateCatchTimer() {
+  const k = catching;
+  const fill = $('catch-fill');
+  if (!fill) return;
+  fill.style.width = `${Math.max(0, (k.left / CATCH_TIME) * 100)}%`;
+  fill.className = k.left < 8 ? 'low' : '';
+  $('catch-left').textContent = `${Math.max(0, Math.ceil(k.left))}s`;
+}
+
+function stopCatching() {
+  clearInterval(catching.timer);
+  const c = catching.c;
+  catching = null;
+  return c;
+}
+
+function caught() {
+  const c = stopCatching();
+  save.caught.push(c.id);
+  playSound('badge');
+  $('battle-actions').innerHTML = '';
+  log(`🧪 ${CATCH_NEEDED} right! ${c.emoji} ${c.name} was quarantined and added to your Threat Index.`, 'good');
+  $('enemy-sprite').className = 'sprite enemy-sprite caught';
+  saveAdventure();
+  updateHud();
+  setTimeout(() => { endBattle(); openIndex(c.id); }, 1600);
+}
+
+function escaped() {
+  const right = catching.right;
+  const c = stopCatching();
+  playSound('wrong');
+  $('battle-actions').innerHTML = '';
+  log(`⏰ Time's up! You got ${right} of ${CATCH_NEEDED}. ${c.emoji} ${c.name} escaped!`, 'bad');
+  $('enemy-sprite').className = 'sprite enemy-sprite fled';
+  setTimeout(endBattle, 2000);
 }
 
 // ---------- How battles end ----------
@@ -683,7 +867,7 @@ function showDex(c, caught, seen) {
   box.hidden = false;
   box.style.setProperty('--rarity', r.color);
   if (!caught) {
-    box.innerHTML = `<p class="dex-title">${seen ? `${c.emoji} ${c.name}` : '❓ Unknown threat'} ${rarityTag}</p><p>${seen ? 'You\'ve met it, but it isn\'t quarantined yet. Beat it in the wild, then answer the quarantine question.' : `Explore the spam grass to find it.${c.zone ? ` It lives in ${ZONES[c.zone - 1].name}.` : ''}`}</p>`;
+    box.innerHTML = `<p class="dex-title">${seen ? `${c.emoji} ${c.name}` : '❓ Unknown threat'} ${rarityTag}</p><p>${seen ? 'You\'ve met it, but it isn\'t quarantined yet. Beat it in the wild, then pass the quarantine challenge.' : `Explore the spam grass to find it.${c.zone ? ` It lives in ${ZONES[c.zone - 1].name}.` : ''}`}</p>`;
     return;
   }
   const d = DEFENSES[c.beats];
@@ -777,12 +961,18 @@ const canvas = $('world');
 const ctx = canvas.getContext('2d');
 const camera = { x: player.x, y: player.y };
 
+// The canvas always matches its box exactly (so nothing gets stretched when the top bar
+// changes height), and draws at the screen's real pixel density so it stays sharp.
+let viewW = 0, viewH = 0, dpr = 1;
 function resize() {
   const wrap = $('world-wrap');
-  canvas.width = wrap.clientWidth;
-  canvas.height = wrap.clientHeight;
+  dpr = window.devicePixelRatio || 1;
+  viewW = wrap.clientWidth;
+  viewH = wrap.clientHeight;
+  canvas.width = Math.round(viewW * dpr);
+  canvas.height = Math.round(viewH * dpr);
 }
-window.addEventListener('resize', resize);
+new ResizeObserver(resize).observe($('world-wrap'));
 canvas.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
   mouse.x = e.clientX - rect.left;
@@ -949,17 +1139,18 @@ function draw(time, dt) {
   camera.x += (player.x - camera.x) * follow;
   camera.y += (player.y - camera.y) * follow;
   const mapW = MAP_W * TILE, mapH = MAP_H * TILE;
-  const offX = mapW < canvas.width ? (canvas.width - mapW) / 2 : -Math.max(0, Math.min(mapW - canvas.width, camera.x - canvas.width / 2));
-  const offY = mapH < canvas.height ? (canvas.height - mapH) / 2 : -Math.max(0, Math.min(mapH - canvas.height, camera.y - canvas.height / 2));
+  const offX = mapW < viewW ? (viewW - mapW) / 2 : -Math.max(0, Math.min(mapW - viewW, camera.x - viewW / 2));
+  const offY = mapH < viewH ? (viewH - mapH) / 2 : -Math.max(0, Math.min(mapH - viewH, camera.y - viewH / 2));
 
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = '#070b1f';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, viewW, viewH);
   ctx.save();
   view.x = Math.round(offX);
   view.y = Math.round(offY);
   ctx.translate(view.x, view.y);
-  const x0 = Math.max(0, Math.floor(-offX / TILE)), x1 = Math.min(MAP_W, Math.ceil((canvas.width - offX) / TILE));
-  const y0 = Math.max(0, Math.floor(-offY / TILE)), y1 = Math.min(MAP_H, Math.ceil((canvas.height - offY) / TILE));
+  const x0 = Math.max(0, Math.floor(-offX / TILE)), x1 = Math.min(MAP_W, Math.ceil((viewW - offX) / TILE));
+  const y0 = Math.max(0, Math.floor(-offY / TILE)), y1 = Math.min(MAP_H, Math.ceil((viewH - offY) / TILE));
   drawTiles(time, x0, x1, y0, y1);
   drawPlayer();
   drawPrompt(time);
@@ -969,6 +1160,45 @@ function draw(time, dt) {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
   ZONES.forEach((z, i) => ctx.fillText(z.name.toUpperCase(), (i * ZONE_W + ZONE_W / 2) * TILE, TILE * (MAP_H - 0.5)));
   ctx.restore();
+  drawMinimap();
+}
+
+// A small map of the area you're in, in the top-right corner
+const MINI = 4;   // pixels per square
+const MINI_COLORS = { '#': '#05070f', '~': '#1a5a9a', R: '#2ee6ff', S: '#e8f1ff', N: '#7cff6b', T: '#ff3d8b', G: '#ffd23f', B: '#ff2050', H: '#ffd23f' };
+const minimaps = ZONES.map((z, i) => {
+  const mini = document.createElement('canvas');
+  mini.width = ZONE_W * MINI;
+  mini.height = ZONE_H * MINI;
+  const m = mini.getContext('2d');
+  for (let y = 0; y < ZONE_H; y++) {
+    for (let x = 0; x < ZONE_W; x++) {
+      const ch = z.rows[y][x];
+      m.fillStyle = MINI_COLORS[ch] || (ch === ',' ? z.grass : z.ground);
+      m.fillRect(x * MINI, y * MINI, MINI, MINI);
+    }
+  }
+  return mini;
+});
+
+function drawMinimap() {
+  const z = zoneOf(player.x / TILE);
+  const w = ZONE_W * MINI, h = ZONE_H * MINI;
+  const x = viewW - w - 12, y = 12;
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = 'rgba(7, 11, 31, 0.9)';
+  ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
+  ctx.drawImage(minimaps[z], x, y);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#1a7f99';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x - 4, y - 4, w + 8, h + 8);
+  // You
+  const px = x + (player.x / TILE - z * ZONE_W) * MINI, py = y + (player.y / TILE) * MINI;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(px, py, 3, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 // ---------- Main loop ----------
@@ -1002,4 +1232,5 @@ resize();
 $('hud-coder').innerHTML = avatarSvg();
 updateHud();
 if (firstVisit) $('dlg-help').showModal();
+else if (mapChanged) say(['🌐 The internet got a LOT bigger! There are now 6 areas and 60 threats to find.', 'You are back home to start the new journey, and every threat you quarantined is still in your Index.']);
 requestAnimationFrame(loop);

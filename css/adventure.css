@@ -259,3 +259,24 @@ body.adventure { display: flex; flex-direction: column; height: 100vh; }
   .player-sprite { width: 80px; height: 80px; }
   .guardian-sprite { font-size: 2.6rem; }
 }
+
+/* ---------- Mythic ---------- */
+.enemy-sprite.rarity-mythic { animation: enter 0.5s ease-out, idle 2s ease-in-out 0.5s infinite, mythic 1.2s ease-in-out infinite; filter: drop-shadow(0 0 30px #ff3d6e) drop-shadow(0 0 12px #fff); }
+@keyframes mythic { 50% { filter: drop-shadow(0 0 50px #ff3d6e) drop-shadow(0 0 22px #c58bff); } }
+
+/* ---------- Quarantine challenge: 7 right in 30 seconds ---------- */
+.battle-actions.catching { grid-template-columns: 1fr 1fr; }
+.catch-head { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.7rem; }
+.catch-time { height: 12px; background: #2a3570; border-radius: 6px; overflow: hidden; }
+.catch-time span { display: block; height: 100%; background: #7cff6b; transition: width 0.1s linear; }
+.catch-time span.low { background: var(--pink); }
+#catch-left { font-family: var(--pixel); font-size: 0.8rem; color: var(--gold); min-width: 3ch; }
+.catch-dots { display: flex; gap: 0.3rem; }
+.catch-dots span { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #7cff6b; }
+.catch-dots span.on { background: #7cff6b; box-shadow: 0 0 8px #7cff6b; }
+.catch-q { grid-column: 1 / -1; margin: 0; font-weight: 800; color: var(--cyan); }
+.catch-msg { grid-column: 1 / -1; margin: 0; padding: 0.5rem 0.8rem; font-size: 0.88rem; }
+.action.answer { font-weight: 700; font-size: 0.9rem; }
+.action.answer.right { border-color: #7cff6b; background: rgba(124, 255, 107, 0.18); opacity: 1; }
+.action.answer.wrong { border-color: var(--pink); background: rgba(255, 61, 139, 0.18); opacity: 1; }
+@media (max-width: 760px) { .battle-actions.catching { grid-template-columns: 1fr; } }
