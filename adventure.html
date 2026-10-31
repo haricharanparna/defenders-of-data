@@ -55,7 +55,7 @@
       <div class="battle-field">
         <div class="fighter enemy">
           <div class="card">
-            <p class="card-name"><span id="enemy-name"></span> <span class="type-tag" id="enemy-type"></span></p>
+            <p class="card-name"><span id="enemy-name"></span> <span class="type-tag rarity-tag" id="enemy-rarity"></span> <span class="type-tag" id="enemy-type"></span></p>
             <span class="battle-hp"><span id="enemy-hp-fill"></span></span>
           </div>
           <div class="sprite enemy-sprite" id="enemy-sprite"></div>
@@ -66,6 +66,15 @@
             <p class="card-name">You <span class="type-tag me">Defender</span></p>
             <span class="battle-hp"><span id="player-hp-fill"></span></span>
             <p class="hp-text" id="player-hp-text"></p>
+          </div>
+          <!-- Your guardian (boss battles only) -->
+          <div class="guardian" id="guardian" hidden>
+            <div class="sprite guardian-sprite" id="guardian-sprite"></div>
+            <div class="card">
+              <p class="card-name"><span id="guardian-name"></span> <span class="type-tag me" id="guardian-type"></span></p>
+              <span class="battle-hp"><span id="guardian-hp-fill"></span></span>
+              <p class="hp-text"><span id="guardian-team"></span> · <span id="guardian-hp-text"></span></p>
+            </div>
           </div>
         </div>
       </div>
@@ -94,7 +103,8 @@
       <li><strong>Wild threats</strong> hide in the darker spam grass. Walk through it to find them.</li>
       <li><strong>In battle</strong>, read each attack and pick the defense that beats it. The right one is super effective!</li>
       <li><strong>Quarantine</strong> beaten threats by answering a question. They go into your 📖 Threat Index.</li>
-      <li><strong>Beat the hacker trainers</strong> to earn badges and open the gates. Omega Ransomware waits at the very end.</li>
+      <li><strong>Rarer threats</strong> (Rare, Epic, Legendary) are harder to find and harder to beat, but they make your Index shine.</li>
+      <li><strong>Beat the hacker trainers</strong> to earn badges, open the gates and get new 🦉 guardians that fight beside you in boss battles. Omega Ransomware waits at the very end.</li>
     </ol>
     <div class="end-buttons"><button class="btn btn-primary" id="help-go">Let's go!</button></div>
   </dialog>
