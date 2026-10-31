@@ -29,6 +29,7 @@
         <span class="charge" aria-hidden="true"><span id="charge-fill"></span></span>
       </button>
       <button class="btn btn-small" id="btn-levels" title="Level map: skip ahead with a quiz (V)">🗺️ Levels</button>
+      <button class="btn btn-small" id="btn-how" title="How to play" aria-label="How to play">?</button>
       <button class="btn btn-small" id="btn-mute" title="Sound (M)">🔊</button>
       <button class="btn btn-small" id="btn-speed" title="Speed (F)">1x</button>
       <button class="btn btn-small" id="btn-pause" title="Pause (P)">⏸</button>
@@ -180,6 +181,23 @@
     <div class="end-buttons">
       <button class="btn btn-primary" id="skill-go">🧠 Take the skill check (2 questions)</button>
     </div>
+  </dialog>
+
+  <!-- How to Play: shown when you start Tower Defense (howto.js) -->
+  <dialog id="dlg-how" class="panel how-panel" aria-labelledby="how-title">
+    <p class="brief-tag" id="how-count"></p>
+    <div class="how-page" id="how-page">
+      <div class="how-icon" id="how-icon" aria-hidden="true"></div>
+      <h2 id="how-title"></h2>
+      <p class="how-text" id="how-text"></p>
+      <p class="how-tip" id="how-tip"></p>
+    </div>
+    <div class="how-dots" id="how-dots" aria-hidden="true"></div>
+    <div class="end-buttons">
+      <button class="btn" id="how-back">Back</button>
+      <button class="btn" id="how-next">Next</button>
+    </div>
+    <button class="how-skip" id="how-skip">Skip directions</button>
   </dialog>
 
   <dialog id="dlg-brief" class="panel lesson brief-panel" aria-labelledby="brief-title">
@@ -371,6 +389,7 @@
   <script src="js/boss.js"></script>
   <script src="js/rewards.js"></script>
   <script src="js/study.js"></script>
+  <script src="js/howto.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

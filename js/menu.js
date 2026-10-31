@@ -1,10 +1,8 @@
 // Title screen: buttons and pop-up panels
 
-const howDialog = document.getElementById('dlg-how');
 const whyDialog = document.getElementById('dlg-why');
 const toast = document.getElementById('toast');
 
-document.getElementById('btn-how').addEventListener('click', () => howDialog.showModal());
 document.getElementById('btn-why').addEventListener('click', () => whyDialog.showModal());
 
 // Every "close" button closes the panel it lives in
