@@ -8,6 +8,7 @@ const ADVENTURE_KEY = 'defenders-of-data-adventure';
 const TILE = 48;
 const MAP_VERSION = 2;           // bump when the map changes, so old saves start at home
 const SPEED = 135;               // pixels per second
+const SPRINT = 1.75;             // how much faster you go while running (hold Shift or turn on Run)
 const ACCEL = 14;                // how quickly you speed up and slow down (higher = snappier)
 const RADIUS = 15;               // your size, for bumping into walls
 const BODY_SIZE = 19;            // how big you're drawn
@@ -191,8 +192,9 @@ function movePlayer(dt) {
   const len = Math.hypot(ix, iy) || 1;
   // Ease toward the target speed, so starting and stopping feel smooth
   const blend = 1 - Math.exp(-ACCEL * dt);
-  player.vx += ((ix / len) * SPEED - player.vx) * blend;
-  player.vy += ((iy / len) * SPEED - player.vy) * blend;
+  const top = SPEED * (sprinting() ? SPRINT : 1);
+  player.vx += ((ix / len) * top - player.vx) * blend;
+  player.vy += ((iy / len) * top - player.vy) * blend;
   if (Math.abs(player.vx) < 1 && !ix) player.vx = 0;
   if (Math.abs(player.vy) < 1 && !iy) player.vy = 0;
 
@@ -941,8 +943,28 @@ document.addEventListener('keydown', e => {
     openIndex();
   }
 });
-document.addEventListener('keyup', e => { if (KEYS[e.key]) held.delete(KEYS[e.key]); });
-window.addEventListener('blur', () => held.clear());
+document.addEventListener('keyup', e => {
+  if (KEYS[e.key]) held.delete(KEYS[e.key]);
+  if (e.key === 'Shift') shiftHeld = false;
+});
+
+// Running: hold Shift, or click Run to keep it on (remembered on this computer)
+const SPRINT_KEY = 'defenders-of-data-sprint';
+let shiftHeld = false;
+let runOn = false;
+try { runOn = localStorage.getItem(SPRINT_KEY) === '1'; } catch { /* storage blocked */ }
+const sprinting = () => runOn !== shiftHeld;   // Shift flips it either way
+function setRun(on) {
+  runOn = on;
+  $('btn-sprint').setAttribute('aria-pressed', on);
+  $('btn-sprint').classList.toggle('on', on);
+  try { localStorage.setItem(SPRINT_KEY, on ? '1' : '0'); } catch { /* storage blocked */ }
+}
+// (Blur it after clicking so Space still talks instead of pressing the button again)
+$('btn-sprint').addEventListener('click', e => { setRun(!runOn); e.currentTarget.blur(); });
+setRun(runOn);
+document.addEventListener('keydown', e => { if (e.key === 'Shift') shiftHeld = true; });
+window.addEventListener('blur', () => { held.clear(); shiftHeld = false; });
 
 // On-screen pad: hold a direction to keep walking
 for (const btn of document.querySelectorAll('.pad button')) {

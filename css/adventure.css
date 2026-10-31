@@ -280,3 +280,6 @@ body.adventure { display: flex; flex-direction: column; height: 100vh; }
 .action.answer.right { border-color: #7cff6b; background: rgba(124, 255, 107, 0.18); opacity: 1; }
 .action.answer.wrong { border-color: var(--pink); background: rgba(255, 61, 139, 0.18); opacity: 1; }
 @media (max-width: 760px) { .battle-actions.catching { grid-template-columns: 1fr; } }
+
+/* Run button (adventure.js) */
+.run-btn.on { color: var(--bg); background: #7cff6b; border-color: #7cff6b; box-shadow: 0 0 12px rgba(124, 255, 107, 0.6); }
