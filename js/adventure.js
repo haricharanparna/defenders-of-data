@@ -1117,6 +1117,50 @@ function drawTiles(time, x0, x1, y0, y1) {
   }
 }
 
+// ---------- Your sidekick ----------
+// The sidekick from your Coder Locker follows you around, like a pet in Fortnite: it trails a
+// little behind you, hops along when it moves, and bobs happily when you stand still.
+const sidekick = cosmetic(coder.look.pet);
+const pet = { x: player.x - 34, y: player.y + 8, facing: 1, hop: 0 };
+
+function movePet(dt) {
+  if (!sidekick.emoji || dt <= 0) return;
+  // Its spot: behind you and a little to one side
+  const back = player.angle + Math.PI;
+  const tx = player.x + Math.cos(back) * 40 + Math.cos(back + Math.PI / 2) * 14;
+  const ty = player.y + Math.sin(back) * 40 + Math.sin(back + Math.PI / 2) * 14;
+  const dx = tx - pet.x, dy = ty - pet.y;
+  const dist = Math.hypot(dx, dy);
+  // Way behind (like after a battle teleport)? Pop right back next to you
+  if (dist > 320) { pet.x = tx; pet.y = ty; return; }
+  // It hurries to catch up when it falls behind
+  const ox = pet.x, oy = pet.y;
+  const follow = 1 - Math.exp(-(dist > 70 ? 9 : 5) * dt);
+  pet.x += dx * follow;
+  pet.y += dy * follow;
+  if (Math.abs(pet.x - ox) > 0.4) pet.facing = pet.x > ox ? 1 : -1;
+  const speed = Math.hypot(pet.x - ox, pet.y - oy) / dt;
+  pet.hop = speed > 18 ? pet.hop + dt * 13 : 0;
+}
+
+function drawPet(time) {
+  if (!sidekick.emoji) return;
+  const lift = pet.hop ? Math.abs(Math.sin(pet.hop)) * 8 : 1.5 + Math.sin(time / 380) * 1.5;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(pet.x, pet.y + 12, 10 - lift * 0.4, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.save();
+  ctx.translate(pet.x, pet.y - lift);
+  // Most emoji animals face left, so flip it when it's heading right
+  ctx.scale(pet.facing > 0 ? -1 : 1, 1);
+  ctx.font = '28px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(sidekick.emoji, 0, 0);
+  ctx.restore();
+}
+
 // You, seen from above: a round body with your coder's face, and hands that swing as you walk
 function drawPlayer() {
   const { x, y, angle } = player;
@@ -1222,7 +1266,8 @@ function draw(time, dt) {
   const x0 = Math.max(0, Math.floor(-offX / TILE)), x1 = Math.min(MAP_W, Math.ceil((viewW - offX) / TILE));
   const y0 = Math.max(0, Math.floor(-offY / TILE)), y1 = Math.min(MAP_H, Math.ceil((viewH - offY) / TILE));
   drawTiles(time, x0, x1, y0, y1);
-  drawPlayer();
+  // Whoever is lower on the screen is drawn in front
+  if (pet.y > player.y) { drawPlayer(); drawPet(time); } else { drawPet(time); drawPlayer(); }
   drawPrompt(time);
 
   // Zone names on the map, so you can see where you're heading
@@ -1279,6 +1324,7 @@ function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
   movePlayer(dt);
+  movePet(dt);
   const zone = zoneOf(player.x / TILE);
   if (zone !== lastZone) { lastZone = zone; updateHud(); showToast(`📍 ${ZONES[zone].name}`); }
   if ((sinceSave += dt) > 5) { sinceSave = 0; saveAdventure(); }
