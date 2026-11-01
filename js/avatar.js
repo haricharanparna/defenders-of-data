@@ -219,7 +219,8 @@ function equipCosmetic(item) {
 // Returns an SVG string. Each drawing gets its own id prefix so gradients don't clash on one page.
 let avatarCount = 0;
 
-function avatarSvg(look = coder.look) {
+// bare: leave out the background (the Locker's item tiles put their rarity color behind the coder)
+function avatarSvg(look = coder.look, { bare = false } = {}) {
   const n = `av${avatarCount++}`;
   const get = slot => cosmetic(look[slot]) || cosmetic(DEFAULT_LOOK[slot]);
   const hoodie = get('hoodie'), hair = get('hair').id, hairColor = get('hairColor').color;
@@ -345,7 +346,7 @@ function avatarSvg(look = coder.look) {
   const sidekick = pet.emoji ? `<text x="102" y="113" font-size="19" text-anchor="middle">${pet.emoji}</text>` : '';
 
   return `<svg class="avatar-svg" viewBox="0 0 120 120" role="img" aria-label="Your coder"><defs>${defs}</defs><g clip-path="url(#${n}-clip)">
-    ${back}${hoodBack}${hairBack}${body}${head}${hairFront}${eyewear}${headwear}${laptopSvg}${sidekick}</g></svg>`;
+    ${bare ? '' : back}${hoodBack}${hairBack}${body}${head}${hairFront}${eyewear}${headwear}${laptopSvg}${sidekick}</g></svg>`;
 }
 
 // ---------- Outfits ----------

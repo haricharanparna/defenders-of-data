@@ -7,7 +7,7 @@
   <meta name="description" content="A tower defense game about protecting your data and staying safe online.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -99,26 +99,36 @@
     </div>
   </dialog>
 
-  <!-- Coder Locker: spend stars on cosmetics (locker.js) -->
-  <dialog id="dlg-coder" class="panel locker" aria-labelledby="coder-title">
-    <h2 id="coder-title">Coder Locker</h2>
-    <div class="locker-body">
-      <div class="locker-side">
-        <div class="locker-preview" id="locker-preview"></div>
-        <p class="locker-stars"><span class="star-icon">★</span> <strong id="locker-balance">0</strong> to spend</p>
-        <p class="locker-earned" id="locker-earned"></p>
-        <div class="locker-buy" id="locker-buy" hidden>
-          <p id="locker-buy-name"></p>
-          <button class="btn btn-primary" id="locker-buy-btn"></button>
-          <button class="btn btn-small" id="locker-buy-cancel">Take it off</button>
+  <!-- Coder Locker: spend stars on cosmetics (locker.js). Full screen, like a game locker. -->
+  <dialog id="dlg-coder" class="locker" aria-labelledby="coder-title">
+    <div class="lk-bg" aria-hidden="true"></div>
+    <header class="lk-top">
+      <button class="lk-back" id="locker-back" hidden>&#8249; Back</button>
+      <h2 id="coder-title">Locker</h2>
+      <span class="lk-count" id="locker-count"></span>
+      <span class="lk-stars" title="Stars to spend. Earn them by clearing levels in Tower Defense."><span class="lk-star">★</span><strong id="locker-balance">0</strong></span>
+      <button class="lk-close close-btn" aria-label="Close the locker">&#10005;</button>
+    </header>
+    <div class="lk-main">
+      <section class="lk-left">
+        <div class="lk-loadout" id="locker-loadout"></div>
+        <div class="lk-grid" id="locker-grid" hidden></div>
+      </section>
+      <section class="lk-right">
+        <div class="lk-stage">
+          <div class="lk-rays" aria-hidden="true"></div>
+          <div class="lk-preview" id="locker-preview"></div>
+          <div class="lk-podium" aria-hidden="true"></div>
         </div>
-      </div>
-      <div class="locker-shop">
-        <div class="locker-tabs" id="locker-tabs" role="tablist" aria-label="Cosmetic types"></div>
-        <div class="locker-grid" id="locker-grid"></div>
-      </div>
+        <div class="lk-details" id="locker-details" aria-live="polite">
+          <span class="lk-rarity" id="locker-rarity"></span>
+          <h3 class="lk-item-name" id="locker-item-name"></h3>
+          <p class="lk-item-type" id="locker-item-type"></p>
+          <p class="lk-item-note" id="locker-item-note"></p>
+          <button class="lk-action" id="locker-action"></button>
+        </div>
+      </section>
     </div>
-    <button class="btn close-btn">Done</button>
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
