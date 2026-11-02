@@ -440,6 +440,20 @@ kbd {
 .lk-event-icon { font-size: 3.2rem; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4)); animation: lk-bob 2.4s ease-in-out infinite; }
 .lk-event-text strong { display: block; font-family: var(--lk-font); font-weight: 400; font-size: clamp(1.4rem, 2.6vw, 2rem); text-transform: uppercase; line-height: 1; }
 .lk-event-text span { font-weight: 800; opacity: 0.9; }
+.lk-event-until {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.55rem;
+  font-family: var(--body);
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: none;
+  vertical-align: middle;
+  color: #2a1400;
+  background: var(--lk-yellow);
+  border-radius: 999px;
+}
 .lk-event-new {
   position: absolute;
   top: 0.5rem;
