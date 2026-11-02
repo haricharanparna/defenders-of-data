@@ -3,7 +3,7 @@
 // and your towers do double damage for the rest of that level.
 // Questions come from the tower upgrades and from the skills you've learned so far (content.js).
 
-const BONUS_STAY = 5;                 // seconds the bubble stays (real seconds, whatever the game speed)
+const BONUS_STAY = 5 * TIME_SCALE;    // seconds the bubble stays (real seconds, whatever the game speed; longer with Extra time)
 const BONUS_APPEAR = [2, 9];          // it shows up between these many seconds into the level
 const BONUS_DAMAGE = 2;               // damage multiplier when you answer right
 const BONUS_SIZE = 13;                // bubble radius in pixels: small enough to be easy to miss

@@ -9,7 +9,7 @@ const GRID = 48;            // size of one grid square in pixels
 const THREAT_CHANCE = 0.25; // how many of the movers are threats
 const MAX_MOVERS = 40;
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches || access.calm;   // Calm mode (access.js)
 
 let width, height, centerX, centerY;
 let movers = [];

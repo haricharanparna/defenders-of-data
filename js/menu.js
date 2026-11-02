@@ -5,6 +5,21 @@ const toast = document.getElementById('toast');
 
 document.getElementById('btn-why').addEventListener('click', () => whyDialog.showModal());
 
+// Accessibility: one switch per setting in access.js
+const accessList = document.getElementById('access-list');
+for (const option of ACCESS_OPTIONS) {
+  const row = document.createElement('label');
+  row.className = 'access-option';
+  row.innerHTML = `<span class="access-emoji" aria-hidden="true">${option.emoji}</span>
+    <span class="access-text"><strong>${option.name}</strong><span>${option.text}</span></span>
+    <input type="checkbox" role="switch" class="access-switch">`;
+  const input = row.querySelector('input');
+  input.checked = access[option.id];
+  input.addEventListener('change', () => setAccess(option.id, input.checked));
+  accessList.appendChild(row);
+}
+document.getElementById('btn-access').addEventListener('click', () => document.getElementById('dlg-access').showModal());
+
 // Every "close" button closes the panel it lives in
 document.querySelectorAll('.close-btn').forEach(btn => {
   btn.addEventListener('click', () => btn.closest('dialog').close());

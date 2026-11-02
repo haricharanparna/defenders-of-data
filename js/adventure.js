@@ -575,7 +575,7 @@ function enemyBeaten() {
 // Answer 7 questions right in 30 seconds, from a never-ending stream. The rarer the threat,
 // the harder the questions. Run out of time and it escapes.
 const CATCH_NEEDED = 7;
-const CATCH_TIME = 30;
+const CATCH_TIME = 30 * TIME_SCALE;   // TIME_SCALE: 2 with Extra time on (access.js)
 const CATCH_WRONG_COST = 2;   // a wrong answer also costs this many seconds
 // Which question levels each rarity tier draws from
 const CATCH_LEVELS = { 1: [1], 2: [2], 3: [2, 3], 4: [3] };

@@ -37,7 +37,10 @@
       <button class="btn btn-primary" id="btn-play">&#9654; PLAY</button>
       <button class="btn coder-btn" id="btn-coder"><span class="coder-mini" id="coder-mini" aria-hidden="true"></span>My Coder</button>
       <button class="btn" id="btn-why">Why It Matters</button>
-      <button class="btn" id="btn-save">💾 Save Code</button>
+      <div class="menu-row">
+        <button class="btn" id="btn-save">💾 Save Code</button>
+        <button class="btn" id="btn-access">♿ Accessibility</button>
+      </div>
     </nav>
 
     <p class="hint">Use your mouse, or <kbd>Tab</kbd> + <kbd>Enter</kbd> to choose</p>
@@ -48,11 +51,17 @@
     <h2 id="why-title">Why It Matters</h2>
     <p>Teens spend hours online every day, and scammers know it. One bad click can leak your passwords, your photos or your location.</p>
     <ul class="facts">
-      <li><strong>$12.5 billion</strong> was lost to fraud reported to the U.S. FTC in 2024.</li>
-      <li><strong>Phishing</strong> (fake messages and links) is the most reported type of cybercrime to the FBI.</li>
-      <li><strong>2-step verification</strong> blocks most automated attempts to break into your accounts.</li>
+      <li><strong>$12.5 billion</strong> was lost to fraud reported to the U.S. FTC in 2024. <a class="source" href="https://www.ftc.gov/news-events/news/press-releases/2025/03/new-ftc-data-show-big-jump-reported-losses-fraud-125-billion-2024" target="_blank" rel="noopener">Source: FTC</a></li>
+      <li><strong>Phishing</strong> (fake messages and links) is the most reported type of cybercrime to the FBI. <a class="source" href="https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf" target="_blank" rel="noopener">Source: FBI IC3 2024 report</a></li>
+      <li><strong>2-step verification</strong> blocks most automated attempts to break into your accounts. <a class="source" href="https://security.googleblog.com/2019/05/new-research-how-effective-is-basic.html" target="_blank" rel="noopener">Source: Google research</a></li>
     </ul>
-    <p>Every tower in this game is a real habit you can use today. Defend the game, then defend yourself!</p>
+    <p>Every tower, defender and guardian in this game is a real habit you can use today. Defend the game, then defend yourself!</p>
+
+    <!-- Real-Life Missions (missions.js): do them for real and earn stars -->
+    <h3 class="missions-title">🎯 Real-Life Missions <span class="missions-count" id="missions-count"></span></h3>
+    <p class="missions-sub">Do these in real life, then check them off for stars in the Coder Locker.</p>
+    <div class="missions" id="missions-list"></div>
+    <p class="help-line">🚨 Got scammed or feel unsafe online? Tell a trusted adult right away. You can report scams at <a href="https://reportfraud.ftc.gov" target="_blank" rel="noopener">ReportFraud.ftc.gov</a>.</p>
     <button class="btn btn-primary close-btn">Let's go!</button>
   </dialog>
 
@@ -69,6 +78,15 @@
     <p class="save-message" id="save-message" role="status" hidden></p>
     <p class="save-tip">🔒 Keep your code private, like a password: anyone with it can load your progress.</p>
     <button class="btn close-btn">Done</button>
+  </dialog>
+
+  <!-- Accessibility settings for every game (access.js) -->
+  <dialog id="dlg-access" class="panel" aria-labelledby="access-title">
+    <h2 id="access-title">♿ Accessibility</h2>
+    <p>Make the game work for you. These settings apply to all three games.</p>
+    <div class="access-list" id="access-list"></div>
+    <p class="access-note">Everything also works with just a keyboard: <kbd>Tab</kbd> to move, <kbd>Enter</kbd> to choose, <kbd>Esc</kbd> to close.</p>
+    <button class="btn btn-primary close-btn">Done</button>
   </dialog>
 
   <!-- Choose a mode -->
@@ -155,10 +173,12 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <script src="js/access.js"></script>
   <script src="js/background.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/locker.js"></script>
   <script src="js/savecode.js"></script>
+  <script src="js/missions.js"></script>
 </body>
 </html>

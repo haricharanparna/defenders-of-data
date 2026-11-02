@@ -13,10 +13,10 @@ const COST_GROWTH = 1.15;          // each extra defender costs 15% more
 const OFFLINE_RATE = 0.25;         // defenders earn this share while you're away...
 const OFFLINE_MAX = 8 * 60 * 60;   // ...for up to 8 hours
 const SCAM_EVERY = [35, 75];       // seconds between scam pop-ups
-const SCAM_STAY = 20;              // seconds before an unanswered pop-up gives up
+const SCAM_STAY = 20 * TIME_SCALE; // seconds before an unanswered pop-up gives up (longer with Extra time)
 const SCAM_LOSS = 0.1;             // falling for a scam loses this share of your bytes
 const SECRET_EVERY = [50, 120];    // seconds between secret messages
-const SECRET_STAY = 6;
+const SECRET_STAY = 6 * TIME_SCALE;
 const OVERDRIVE = { times: 7, seconds: 30 };
 
 // ---------- What you can buy ----------

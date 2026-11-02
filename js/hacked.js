@@ -5,7 +5,7 @@
 // Uses QUIZ from content.js and playSound() from sound.js.
 
 const HACK_EVERY = [3 * 60, 7 * 60];   // seconds of play between attacks
-const HACK_TIME = 30;                    // seconds you have to kick the hacker out
+const HACK_TIME = 30 * TIME_SCALE;       // seconds you have to kick the hacker out (longer with Extra time)
 const HACK_NEEDED = 3;                   // right answers needed
 const HACK_WRONG_COST = 4;               // a wrong answer gives the hacker this many extra seconds
 const HACK_FILES = ['📁 Homework', '📷 Photos', '🔑 Passwords', '💬 Chats', '🎮 Game saves', '💳 Payment info'];

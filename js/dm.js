@@ -5,12 +5,12 @@
 //  - No reply: nothing happens, but you miss the bonus
 // Uses DMS from content.js.
 
-const DM_TIME = 12;         // seconds to reply
+const DM_TIME = 12 * TIME_SCALE;   // seconds to reply (longer with Extra time, access.js)
 const DM_PER_WAVE = 2;
 const DM_REWARD = 8;
 const OVERCLOCK_TIME = 8;
 const DM_SNEAK_IN = 3;      // threats that sneak in after a risky reply
-const DM_RESULT_TIME = 7;   // how long the explanation stays up
+const DM_RESULT_TIME = 7 * TIME_SCALE;   // how long the explanation stays up
 
 const dmBox = el('dm');
 let dm = null;              // the DM on screen: { msg, timeLeft, answered, resultLeft }
