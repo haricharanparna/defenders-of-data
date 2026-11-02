@@ -560,9 +560,8 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-const helpDialog = $('dlg-help');
-$('btn-help').addEventListener('click', () => helpDialog.showModal());
-$('help-go').addEventListener('click', () => helpDialog.close());
+// How to Play is a video of the game playing itself (demo.js)
+$('btn-help').addEventListener('click', () => openDemo('clicker'));
 
 window.addEventListener('beforeunload', saveClicker);
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveClicker(); });
@@ -570,7 +569,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) saveC
 $('hud-coder').innerHTML = avatarSvg();
 if (game.clicks > 0) $('click-hint').classList.add('gone');
 render(true);
-if (firstVisit) helpDialog.showModal();
+if (firstVisit && !DEMO_MODE) openDemo('clicker');
 else if (awayEarned >= 1) showToast(`Welcome back! Your defenders earned ${fmt(awayEarned)} bytes while you were away.`);
 // Every few minutes a hacker breaks in (hacked.js). Too slow, and they take 3/4 of your bytes.
 const hackAttack = setupHackAttack({

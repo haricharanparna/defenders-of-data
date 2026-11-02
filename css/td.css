@@ -803,53 +803,6 @@ body.td {
 .cleared-stats .score-bank strong { font-family: var(--body); font-size: 1rem; color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .cleared-coder { animation: none; } }
 
-/* ---------- How to Play (howto.js) ---------- */
-.how-panel { width: min(520px, 94vw); text-align: center; }
-.how-page { min-height: 15rem; display: flex; flex-direction: column; align-items: center; }
-.how-page.slide { animation: how-slide 0.25s ease-out; }
-@keyframes how-slide { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
-.how-icon {
-  width: 96px;
-  height: 96px;
-  display: grid;
-  place-items: center;
-  font-size: 3.2rem;
-  border-radius: 50%;
-  background: rgba(46, 230, 255, 0.1);
-  border: 3px solid var(--cyan-dim);
-  margin: 0.4rem 0 0.8rem;
-}
-.how-panel h2 { margin-bottom: 0.5rem; }
-.how-text { margin: 0; font-size: 1.15rem; line-height: 1.6; }
-.how-text strong { color: var(--cyan); }
-.how-tip {
-  margin: 1rem 0 0;
-  padding: 0.6rem 0.9rem;
-  font-size: 0.95rem;
-  color: var(--text-dim);
-  border-left: 3px solid var(--gold);
-  background: rgba(255, 210, 63, 0.07);
-  border-radius: 6px;
-  text-align: left;
-}
-.how-dots { display: flex; justify-content: center; gap: 0.45rem; margin-top: 1.2rem; }
-.how-dots span { width: 10px; height: 10px; border-radius: 50%; background: #2a3570; transition: background 0.2s, transform 0.2s; }
-.how-dots .done { background: var(--cyan-dim); }
-.how-dots .on { background: var(--gold); transform: scale(1.3); }
-.how-panel .end-buttons .btn { min-width: 8rem; }
-.how-skip {
-  display: block;
-  margin: 0.9rem auto 0;
-  font: inherit;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  background: none;
-  border: none;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.how-skip:hover, .how-skip:focus-visible { color: var(--text); }
-@media (prefers-reduced-motion: reduce) { .how-page.slide { animation: none; } }
 
 /* ---------- Feedback that makes the game feel alive (juice.js) ---------- */
 .stat { position: relative; display: inline-block; }

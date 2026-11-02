@@ -261,8 +261,6 @@ body.clicker { display: flex; flex-direction: column; height: 100vh; }
 @keyframes tip-in { from { opacity: 0; transform: translateY(8px); } }
 
 /* ---------- Help ---------- */
-.clicker-steps { display: grid; gap: 0.6rem; margin: 0.5rem 0 0; padding-left: 1.3rem; text-align: left; }
-.clicker-steps strong { color: var(--cyan); }
 
 @media (prefers-reduced-motion: reduce) {
   .big-shield, .click-hint, .secret-bubble, .secret-bubble span, .overdrive, .upgrade, .helper { animation: none; }

@@ -675,3 +675,159 @@ kbd {
   .hacked[open], .hack-title, .hack-title::before, .hack-title::after, .hacked.panic, .hacked.panic .hack-meter strong, .hack-log p { animation: none; }
 }
 
+
+/* ---------- How to Play videos (demo.js) ---------- */
+.panel.demo {
+  width: min(1000px, 96vw, calc((100dvh - 15rem) * 16 / 9));
+  min-width: min(560px, 96vw);
+  max-height: 98dvh;
+  padding: 1rem 1.2rem 1.1rem;
+}
+.demo-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; }
+.demo-head h2 { margin: 0; font-size: clamp(0.75rem, 1.6vw, 1rem); text-align: left; flex: 1; }
+.demo-live {
+  padding: 0.25rem 0.5rem;
+  font-family: var(--pixel);
+  font-size: 0.55rem;
+  color: #fff;
+  background: #e0393e;
+  border-radius: 4px;
+  animation: demo-blink 1.6s ease-in-out infinite;
+}
+@keyframes demo-blink { 50% { opacity: 0.55; } }
+.demo-voice { flex: none; }
+
+/* The screen: the game is laid out at 1280x720 and scaled down to fit */
+.demo-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 3px solid var(--cyan-dim);
+  background: var(--bg);
+  box-shadow: 0 0 30px rgba(46, 230, 255, 0.2);
+}
+#demo-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  border: 0;
+  transform-origin: 0 0;
+  pointer-events: none;   /* it's a video: watch, don't touch */
+}
+.demo-cursor { position: absolute; top: 0; left: 0; z-index: 2; width: 26px; height: 26px; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6)); }
+.demo-cursor svg { display: block; width: 100%; height: 100%; }
+.demo-cursor::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  opacity: 0;
+}
+.demo-cursor.clicking::before { animation: demo-click 0.45s ease-out; }
+@keyframes demo-click { from { opacity: 1; transform: scale(0.3); } to { opacity: 0; transform: scale(1.5); } }
+
+/* The keyboard and mouse in the corner */
+.demo-input {
+  position: absolute;
+  right: 1.2%;
+  bottom: 2%;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 6px;
+  width: 27%;
+  background: rgba(7, 11, 31, 0.7);
+  border: 1px solid rgba(46, 230, 255, 0.35);
+  border-radius: 8px;
+  pointer-events: none;
+}
+.demo-keys { flex: 1; display: grid; gap: 2px; }
+.demo-row { display: flex; gap: 2px; justify-content: center; }
+.demo-key {
+  flex: 1;
+  min-width: 0;
+  max-width: 9%;
+  padding: 2px 0;
+  font-family: var(--body);
+  font-weight: 800;
+  font-size: clamp(5px, 0.75vw, 9px);
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-dim);
+  background: #1a2350;
+  border-radius: 3px;
+  box-shadow: 0 2px 0 #0b1030;
+  transition: background 0.08s, color 0.08s, transform 0.08s;
+}
+.demo-key.wide { max-width: 16%; flex: 1.6; }
+.demo-key.space { max-width: 40%; flex: 5; }
+.demo-key.down { color: var(--bg); background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transform: translateY(2px); }
+.demo-mouse {
+  position: relative;
+  flex: none;
+  width: 11%;
+  aspect-ratio: 3 / 4.4;
+  display: flex;
+  border: 2px solid #3a4785;
+  border-radius: 45% 45% 40% 40%;
+  overflow: hidden;
+  background: #1a2350;
+}
+.demo-mouse span { flex: 1; height: 42%; border-bottom: 2px solid #3a4785; transition: background 0.08s; }
+.demo-mouse-l { border-right: 2px solid #3a4785; }
+.demo-mouse.down .demo-mouse-l { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+
+/* Loading, and the end of the video */
+.demo-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  text-align: center;
+  background: rgba(7, 11, 31, 0.82);
+  backdrop-filter: blur(2px);
+}
+.demo-end { width: 100%; margin: 0; font-family: var(--pixel); font-size: clamp(0.8rem, 2vw, 1.2rem); color: var(--gold); }
+.demo-spinner {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 0.6rem;
+  vertical-align: -0.2rem;
+  border: 3px solid var(--cyan-dim);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: demo-spin 0.8s linear infinite;
+}
+@keyframes demo-spin { to { transform: rotate(360deg); } }
+
+.demo-progress { height: 5px; margin-top: 0.5rem; border-radius: 3px; background: #1a2350; overflow: hidden; }
+.demo-progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pink), var(--gold)); }
+/* Captions, like subtitles */
+.demo-caption {
+  min-height: 3.2em;
+  margin: 0.6rem 0 0;
+  padding: 0.45rem 0.8rem;
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+}
+.panel.demo .end-buttons { margin-top: 0.8rem; }
+@media (prefers-reduced-motion: reduce) { .demo-live, .demo-spinner { animation: none; } }

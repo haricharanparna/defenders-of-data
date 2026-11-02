@@ -1456,14 +1456,14 @@ function loop(now) {
 }
 
 // ---------- Start ----------
-$('btn-help').addEventListener('click', () => $('dlg-help').showModal());
-$('help-go').addEventListener('click', () => {
-  $('dlg-help').close();
+// How to Play is a video of the game playing itself (demo.js). The first time, a welcome follows it.
+$('btn-help').addEventListener('click', () => openDemo('adventure', welcome));
+function welcome() {
   if (firstVisit) {
     firstVisit = false;
     say(['🏠 This is your Home Network. Head right through the spam grass to explore the internet.', '🦉 Hoot the owl is your first guardian! Guardians fight beside you in boss battles. Beat hacker trainers to get more.', 'Talk to 👩 Mom and read the 🪧 signs for tips. Good luck, Defender!']);
   }
-});
+}
 $('win-go').addEventListener('click', () => $('dlg-win').close());
 window.addEventListener('beforeunload', saveAdventure);
 
@@ -1471,6 +1471,6 @@ resize();
 $('hud-coder').innerHTML = avatarSvg();
 renderSettings();
 updateHud();
-if (firstVisit) $('dlg-help').showModal();
+if (firstVisit && !DEMO_MODE) openDemo('adventure', welcome);
 else if (mapChanged) say(['🌐 The internet got a LOT bigger! There are now 6 areas and 60 threats to find.', 'You are back home to start the new journey, and every threat you quarantined is still in your Index.']);
 requestAnimationFrame(loop);

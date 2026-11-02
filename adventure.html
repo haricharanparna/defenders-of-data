@@ -116,21 +116,6 @@
     </div>
   </dialog>
 
-  <!-- How to play -->
-  <dialog id="dlg-help" class="panel how-panel" aria-labelledby="help-title">
-    <div class="how-icon" aria-hidden="true">🗺️</div>
-    <h2 id="help-title">Internet Adventure</h2>
-    <ol class="clicker-steps">
-      <li><strong>Walk</strong> with the arrow keys, WASD or the buttons. Hold <strong>Shift</strong> (or turn on 🏃 Sprint) to run fast until your stamina bar runs out. Press <strong>Space</strong> (or A) to talk and read signs. Change any key in ⚙️ Settings.</li>
-      <li><strong>Wild threats</strong> hide in the darker spam grass. Walk through it to find them.</li>
-      <li><strong>In battle</strong>, read each attack and pick the defense that beats it. The right one is super effective!</li>
-      <li><strong>Quarantine</strong> beaten threats: get 7 questions right in 30 seconds and they go into your 📖 Threat Index. Too slow, and they escape!</li>
-      <li><strong>60 threats</strong> live in 6 areas, 10 in each. Rarer ones (Rare, Epic, Legendary and the super-tough <strong>Mythic</strong>) are harder to find, beat and quarantine.</li>
-      <li><strong>Beat the hacker trainers</strong> to earn badges, open the gates and get new 🦉 guardians that fight beside you in boss battles. Omega Ransomware waits at the very end.</li>
-    </ol>
-    <div class="end-buttons"><button class="btn btn-primary" id="help-go">Let's go!</button></div>
-  </dialog>
-
   <!-- You beat the final boss -->
   <dialog id="dlg-win" class="panel cleared-panel" aria-labelledby="win-title">
     <div class="confetti" id="confetti" aria-hidden="true"></div>
@@ -142,10 +127,12 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <script src="js/demo-mode.js"></script>
   <script src="js/content.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/adventure-data.js"></script>
+  <script src="js/demo.js"></script>
   <script src="js/adventure.js"></script>
 </body>
 </html>

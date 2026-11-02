@@ -81,18 +81,6 @@
   <footer class="ticker" aria-live="off"><span class="ticker-tag">Safety tip</span><span id="ticker-text"></span></footer>
 
   <!-- First time here: how to play (clicker.js) -->
-  <dialog id="dlg-help" class="panel how-panel" aria-labelledby="help-title">
-    <div class="how-icon" aria-hidden="true">🛡️</div>
-    <h2 id="help-title">Data Clicker</h2>
-    <ol class="clicker-steps">
-      <li><strong>Click the shield</strong> to earn bytes.</li>
-      <li><strong>Hire defenders</strong> in the shop. They earn bytes for you, even while you're away! Answer a question to unlock each one.</li>
-      <li><strong>Scam pop-ups</strong> will show up. Decide if they're real or a scam. Get it right for bonus bytes. Fall for a scam and you lose some!</li>
-      <li><strong>Watch for a tiny secret message</strong> bubble. Click it and answer right for a super-fast Overdrive.</li>
-    </ol>
-    <div class="end-buttons"><button class="btn btn-primary" id="help-go">Let's go!</button></div>
-  </dialog>
-
   <!-- Questions: unlocking defenders, upgrades and secret messages -->
   <dialog id="dlg-ask" class="panel lesson" aria-labelledby="ask-title">
     <p class="brief-tag" id="ask-tag"></p>
@@ -109,10 +97,12 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <script src="js/demo-mode.js"></script>
   <script src="js/content.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/hacked.js"></script>
+  <script src="js/demo.js"></script>
   <script src="js/clicker.js"></script>
 </body>
 </html>
