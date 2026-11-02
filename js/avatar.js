@@ -35,6 +35,7 @@ const COSMETICS = [
   { id: 'outfit-space', slot: 'outfit', name: 'Space Suit', price: 60, rarity: 'epic' },
   { id: 'outfit-armor', slot: 'outfit', name: 'Knight Armor', price: 70, rarity: 'epic' },
   { id: 'outfit-hero', slot: 'outfit', name: 'Superhero Suit', price: 120, rarity: 'legendary' },
+  { id: 'outfit-hacker', slot: 'outfit', name: 'Hacker', price: 150, rarity: 'legendary', note: 'The most expensive outfit in the game! A glowing hacker hoodie for an ethical hacker who uses their skills to protect people.' },
   { id: 'outfit-skeleton', slot: 'outfit', name: 'Skeleton Suit', price: 20, event: 'halloween' },
   { id: 'outfit-mummy', slot: 'outfit', name: 'Mummy Wraps', price: 25, event: 'halloween' },
   { id: 'outfit-pumpkin', slot: 'outfit', name: 'Pumpkin Costume', price: 25, event: 'halloween' },
@@ -192,11 +193,57 @@ function saveCoder() {
 
 const ownsCosmetic = item => item.price === 0 || coder.owned.includes(item.id);
 
-// Stars come from your best result on each level, so they only ever go up
+// Stars come from your best result on each level in Tower Defense (up to 300),
+// plus bonus stars from milestones in Data Clicker and Adventure, so they only ever go up
 function earnedStars() {
   let stars = {};
   try { stars = JSON.parse(localStorage.getItem(STAR_SAVE_KEY)) || {}; } catch { /* storage blocked */ }
-  return Object.values(stars).reduce((a, b) => a + b, 0);
+  return Object.values(stars).reduce((a, b) => a + b, 0) + Object.values(bonusStars).reduce((a, b) => a + b, 0);
+}
+
+// ---------- Bonus stars from Data Clicker and Adventure ----------
+// Each milestone pays once ({ 'clicker-bytes-1000': 1, ... }), so they can't be farmed.
+// About 25 stars in Clicker and 53 in Adventure: Tower Defense levels stay the main way to earn.
+const BONUS_STARS_KEY = 'defenders-of-data-bonus-stars';
+let bonusStars = {};
+try { bonusStars = JSON.parse(localStorage.getItem(BONUS_STARS_KEY)) || {}; } catch { /* storage blocked */ }
+
+function awardStars(id, stars, why) {
+  if (bonusStars[id] || (typeof DEMO_MODE !== 'undefined' && DEMO_MODE)) return false;
+  bonusStars[id] = stars;
+  try { localStorage.setItem(BONUS_STARS_KEY, JSON.stringify(bonusStars)); } catch { /* storage blocked */ }
+  showStarReward(stars, why);
+  return true;
+}
+
+// A gold "+2 ★" pop-up at the top of the screen. It's a popover so it shows above open windows too.
+const starQueue = [];
+function showStarReward(stars, why) {
+  starQueue.push({ stars, why });
+  if (starQueue.length === 1) nextStarReward();
+}
+function nextStarReward() {
+  const reward = starQueue[0];
+  if (!reward) return;
+  let box = document.getElementById('star-reward');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'star-reward';
+    box.className = 'star-reward';
+    box.popover = 'manual';
+    box.setAttribute('role', 'status');
+    document.body.appendChild(box);
+  }
+  box.innerHTML = `<span class="sr-star" aria-hidden="true">★</span><span class="sr-text"><strong>+${reward.stars} star${reward.stars > 1 ? 's' : ''}!</strong><small></small><small>Spend them in the Coder Locker</small></span>`;
+  box.querySelector('small').textContent = reward.why;
+  if (box.matches(':popover-open')) box.hidePopover();
+  box.showPopover();
+  if (typeof playSound === 'function') playSound('badge');
+  setTimeout(() => {
+    box.hidePopover();
+    starQueue.shift();
+    setTimeout(nextStarReward, 300);
+  }, 3200);
 }
 const starsToSpend = () => Math.max(0, earnedStars() - coder.spent);
 
@@ -219,6 +266,13 @@ function equipCosmetic(item) {
 // Returns an SVG string. Each drawing gets its own id prefix so gradients don't clash on one page.
 let avatarCount = 0;
 
+// Blend two #rrggbb colors: t = 0 gives a, t = 1 gives b. Used for shadows and highlights.
+function mix(a, b, t) {
+  const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const [x, y] = [rgb(a), rgb(b)];
+  return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
 // bare: leave out the background (the Locker's item tiles put their rarity color behind the coder)
 function avatarSvg(look = coder.look, { bare = false } = {}) {
   const n = `av${avatarCount++}`;
@@ -227,6 +281,9 @@ function avatarSvg(look = coder.look, { bare = false } = {}) {
   const skin = get('skin').color, hat = get('hat').id, glasses = get('glasses').id;
   const laptop = get('laptop'), bg = get('bg'), pet = get('pet');
   const outfit = get('outfit').id, face = get('face').id, neck = get('neck').id;
+  // Shadows and highlights, so the coder looks lit from the top left
+  const skinShade = mix(skin, '#3a1410', 0.22), skinLight = mix(skin, '#ffffff', 0.18);
+  const hairDark = mix(hairColor, '#000000', 0.35), hairLight = mix(hairColor, '#ffffff', 0.4);
 
   const defs = `
     <linearGradient id="${n}-rainbow" x1="0" x2="1"><stop offset="0" stop-color="#ff4d6d"/><stop offset=".25" stop-color="#ffb84d"/><stop offset=".5" stop-color="#5ee07a"/><stop offset=".75" stop-color="#4db8ff"/><stop offset="1" stop-color="#a66bff"/></linearGradient>
@@ -236,6 +293,8 @@ function avatarSvg(look = coder.look, { bare = false } = {}) {
     <linearGradient id="${n}-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1250"/><stop offset="1" stop-color="#0d0618"/></linearGradient>
     <linearGradient id="${n}-patch" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1a0a"/><stop offset="1" stop-color="#8a3a0c"/></linearGradient>
     <linearGradient id="${n}-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6dce8"/><stop offset=".5" stop-color="#9aa3b5"/><stop offset="1" stop-color="#6b7385"/></linearGradient>
+    <radialGradient id="${n}-face" cx=".4" cy=".36" r=".72"><stop offset="0" stop-color="${skinLight}"/><stop offset=".62" stop-color="${skin}"/><stop offset="1" stop-color="${skinShade}"/></radialGradient>
+    <linearGradient id="${n}-shade" x1="0" x2="1"><stop offset="0" stop-opacity=".3"/><stop offset=".3" stop-opacity="0"/><stop offset=".7" stop-opacity="0"/><stop offset="1" stop-opacity=".34"/></linearGradient>
     <clipPath id="${n}-clip"><rect width="120" height="120" rx="18"/></clipPath>`;
   const paint = color => color === 'rainbow' ? `url(#${n}-rainbow)` : color === 'gold' ? `url(#${n}-gold)` : color;
 
@@ -273,10 +332,13 @@ function avatarSvg(look = coder.look, { bare = false } = {}) {
 
   // Hair that sits behind the head
   let hairBack = '';
-  if (hair === 'hair-long') hairBack = `<path d="M34 50 C34 24 86 24 86 50 L89 90 L31 90 Z" fill="${hairColor}"/>`;
-  if (hair === 'hair-curly') hairBack = `<circle cx="60" cy="44" r="30" fill="${hairColor}"/><circle cx="34" cy="58" r="9" fill="${hairColor}"/><circle cx="86" cy="58" r="9" fill="${hairColor}"/>`;
-  if (hair === 'hair-pigtails') hairBack = `<circle cx="31" cy="56" r="9" fill="${hairColor}"/><circle cx="89" cy="56" r="9" fill="${hairColor}"/>`;
-  if (hair === 'hair-bun') hairBack = `<circle cx="60" cy="24" r="9" fill="${hairColor}"/>`;
+  if (hair === 'hair-long') hairBack = `<path d="M33 50 C31 20 89 20 87 50 C87 66 92 80 89 96 Q80 99 74 92 L46 92 Q40 99 31 96 C28 80 33 66 33 50 Z" fill="${hairDark}"/>
+    <path d="M36 52 C35 70 38 82 35 94 M84 52 C85 70 82 82 85 94" fill="none" stroke="${hairColor}" stroke-width="5" stroke-linecap="round"/>`;
+  if (hair === 'hair-curly') hairBack = `<circle cx="60" cy="44" r="30" fill="${hairDark}"/><circle cx="34" cy="58" r="9" fill="${hairDark}"/><circle cx="86" cy="58" r="9" fill="${hairDark}"/><circle cx="33" cy="70" r="7" fill="${hairDark}"/><circle cx="87" cy="70" r="7" fill="${hairDark}"/>`;
+  if (hair === 'hair-pigtails') hairBack = `<path d="M33 50 C22 54 20 72 26 84 C30 76 34 64 36 56 Z M87 50 C98 54 100 72 94 84 C90 76 86 64 84 56 Z" fill="${hairColor}"/>
+    <path d="M29 60 C25 68 25 76 27 80 M91 60 C95 68 95 76 93 80" fill="none" stroke="${hairLight}" stroke-width="1.5" opacity=".6" stroke-linecap="round"/>
+    <rect x="31" y="50" width="6" height="5" rx="2" fill="#ff3d8b"/><rect x="83" y="50" width="6" height="5" rx="2" fill="#ff3d8b"/>`;
+  if (hair === 'hair-bun') hairBack = `<circle cx="60" cy="21" r="10" fill="${hairColor}"/><path d="M53 18 Q60 13 67 18" fill="none" stroke="${hairLight}" stroke-width="1.6" opacity=".6"/>`;
 
   if (hat === 'hat-hood') hairBack = ''; // the hood covers it
 
@@ -285,28 +347,49 @@ function avatarSvg(look = coder.look, { bare = false } = {}) {
 
   // The outfit: what's behind and around the body, then the neck, then the collar and details on top
   const [outfitBack, outfitFront] = outfitSvg(outfit, paint(hoodie.color), skin, n);
-  const body = `${outfitBack}<rect x="53" y="70" width="14" height="16" rx="4" fill="${skin}"/>${outfitFront}${neckSvg(neck)}`;
+  // The neck is a little darker than the face, with a shadow under the chin.
+  // The outfit gets shaded at the sides so it looks round.
+  const body = `${outfitBack}<path d="${BODY}" fill="url(#${n}-shade)"/>
+    <path d="M52.5 68 H67.5 V84 Q60 88 52.5 84 Z" fill="${mix(skin, '#3a1410', 0.1)}"/><ellipse cx="60" cy="76" rx="8.5" ry="4.5" fill="${skinShade}" opacity=".8"/>
+    ${outfitFront}${neckSvg(neck)}`;
 
+  // A face shape with a chin, real-looking eyes (white, colored iris, lid), eyebrows, nose and a smile
+  const eye = x => `
+    <ellipse cx="${x}" cy="55.5" rx="4.6" ry="3.7" fill="#fff"/>
+    <circle cx="${x + 0.3}" cy="55.7" r="2.9" fill="#5b3a24"/><circle cx="${x + 0.3}" cy="55.7" r="2.9" fill="none" stroke="#2a180e" stroke-width=".7"/>
+    <circle cx="${x + 0.3}" cy="55.8" r="1.5" fill="#120a06"/><circle cx="${x + 1.3}" cy="54.6" r="1" fill="#fff"/>
+    <path d="M${x - 4.9} 55.4 Q${x} 50.6 ${x + 4.9} 55.4" fill="none" stroke="#1d1b22" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M${x - 4} 59.2 Q${x} 60.6 ${x + 4} 59.2" fill="none" stroke="${skinShade}" stroke-width=".8" stroke-linecap="round"/>`;
   const head = `
-    <circle cx="36" cy="56" r="5" fill="${skin}"/><circle cx="84" cy="56" r="5" fill="${skin}"/>
-    <ellipse cx="60" cy="52" rx="24" ry="25" fill="${skin}"/>
-    <circle cx="51" cy="55" r="2.8" fill="#1d1b22"/><circle cx="69" cy="55" r="2.8" fill="#1d1b22"/>
-    <circle cx="52" cy="54" r=".9" fill="#fff"/><circle cx="70" cy="54" r=".9" fill="#fff"/>
-    <circle cx="45" cy="63" r="3.5" fill="#ff7a8a" opacity=".35"/><circle cx="75" cy="63" r="3.5" fill="#ff7a8a" opacity=".35"/>
-    <path d="M53 65 Q60 71 67 65" fill="none" stroke="#1d1b22" stroke-width="2.2" stroke-linecap="round"/>
+    <ellipse cx="36.5" cy="57" rx="4.6" ry="6" fill="${skin}"/><ellipse cx="83.5" cy="57" rx="4.6" ry="6" fill="${skin}"/>
+    <ellipse cx="36.8" cy="57" rx="2" ry="3.6" fill="${skinShade}" opacity=".7"/><ellipse cx="83.2" cy="57" rx="2" ry="3.6" fill="${skinShade}" opacity=".7"/>
+    <path d="M60 27 C74 27 84 37 84 51 C84 63 78 72 69 76.5 C65 78.6 55 78.6 51 76.5 C42 72 36 63 36 51 C36 37 46 27 60 27 Z" fill="url(#${n}-face)"/>
+    ${eye(51)}${eye(69)}
+    <path d="M45.5 48.6 Q50.5 45.4 56 47.4 M74.5 48.6 Q69.5 45.4 64 47.4" fill="none" stroke="${hairDark}" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M60.5 56 Q59 61 58 62.4" fill="none" stroke="${skinShade}" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+    <path d="M57.4 63.6 Q60 65 62.6 63.6" fill="none" stroke="${skinShade}" stroke-width="1.4" stroke-linecap="round"/>
+    <ellipse cx="44.5" cy="63.5" rx="4" ry="2.6" fill="#ff6b7d" opacity=".22"/><ellipse cx="75.5" cy="63.5" rx="4" ry="2.6" fill="#ff6b7d" opacity=".22"/>
+    <path d="M53.6 67 Q60 73.6 66.4 67 Q60 68.8 53.6 67 Z" fill="#8a2f3a"/>
+    <path d="M55 67.4 Q60 69.2 65 67.4 L64.4 68.6 Q60 70 55.6 68.6 Z" fill="#fff"/>
+    <path d="M53 66.6 Q54 66 54.6 66.9 M67 66.6 Q66 66 65.4 66.9" fill="none" stroke="#8a2f3a" stroke-width="1" stroke-linecap="round"/>
     ${faceSvg(face)}`;
 
-  // Hair on top of the head
-  const fringe = `<path d="M36 50 C35 28 50 25 60 25 C72 25 86 29 84 50 C79 40 70 36 60 37 C50 37 41 42 36 50 Z" fill="${hairColor}"/>`;
+  // Hair on top of the head: a side-swept fringe with a shine and strands
+  const fringe = `<path d="M34.5 54 C31 30 46 22 61 22 C77 22 89 32 85.5 54 C84 46 81 41 76 38 C70 44 58 45.5 48 41 C43 44 38 48 34.5 54 Z" fill="${hairColor}"/>
+    <path d="M76 38 C70 44 58 45.5 48 41" fill="none" stroke="${hairDark}" stroke-width="1.4" opacity=".6"/>
+    <path d="M62 26 C58 32 54 37 48 41 M72 28 C70 34 68 38 64 43" fill="none" stroke="${hairDark}" stroke-width="1" opacity=".45" stroke-linecap="round"/>
+    <path d="M42 34 Q52 25 68 26" fill="none" stroke="${hairLight}" stroke-width="2.4" opacity=".6" stroke-linecap="round"/>`;
+  const curls = [[42, 36, 8], [52, 29, 8.5], [64, 28, 8.5], [75, 33, 8], [82, 43, 6.5], [37, 45, 6.5]];
   const hairFront = {
     'hair-short': fringe,
     'hair-long': fringe,
     'hair-bun': fringe,
     'hair-pigtails': fringe,
-    'hair-curly': `<circle cx="44" cy="34" r="8" fill="${hairColor}"/><circle cx="56" cy="29" r="8" fill="${hairColor}"/><circle cx="68" cy="30" r="8" fill="${hairColor}"/><circle cx="78" cy="37" r="7" fill="${hairColor}"/>`,
-    'hair-buzz': `<path d="M37 46 C37 30 50 27 60 27 C70 27 83 30 83 46 C76 38 44 38 37 46 Z" fill="${hairColor}" opacity=".85"/>`,
-    'hair-spiky': `<path d="M36 50 L37 34 L44 38 L46 24 L53 33 L59 20 L65 32 L72 23 L75 36 L83 31 L84 50 C76 40 44 40 36 50 Z" fill="${hairColor}"/>`,
-    'hair-mohawk': `<path d="M53 20 L67 20 L66 44 L54 44 Z" fill="${hairColor}"/><path d="M38 46 C38 34 44 30 54 29 L54 40 C46 40 40 43 38 46 Z M82 46 C82 34 76 30 66 29 L66 40 C74 40 80 43 82 46 Z" fill="${hairColor}" opacity=".35"/>`,
+    'hair-curly': curls.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${hairColor}"/><path d="M${x - r / 2} ${y - r / 3} Q${x} ${y - r * 0.8} ${x + r / 2} ${y - r / 3}" fill="none" stroke="${hairLight}" stroke-width="1.3" opacity=".55"/>`).join(''),
+    'hair-buzz': `<path d="M36.5 48 C36 30 49 26 60 26 C71 26 84 30 83.5 48 C80 40 72 37 60 37 C48 37 40 40 36.5 48 Z" fill="${hairColor}" opacity=".9"/><path d="M45 31 Q55 27 66 28" fill="none" stroke="${hairLight}" stroke-width="1.6" opacity=".5"/>`,
+    'hair-spiky': `<path d="M35 52 L36 34 L44 38 L45 22 L53 32 L59 17 L65 31 L73 21 L75 35 L85 30 L85 52 C78 40 44 40 35 52 Z" fill="${hairColor}"/>
+      <path d="M45 22 L49 34 M59 17 L60 32 M73 21 L70 34" fill="none" stroke="${hairLight}" stroke-width="1.4" opacity=".55" stroke-linecap="round"/>`,
+    'hair-mohawk': `<path d="M53 18 Q60 12 67 18 L66 44 L54 44 Z" fill="${hairColor}"/><path d="M57 18 L57.5 40" stroke="${hairLight}" stroke-width="1.5" opacity=".55"/><path d="M38 46 C38 34 44 30 54 29 L54 40 C46 40 40 43 38 46 Z M82 46 C82 34 76 30 66 29 L66 40 C74 40 80 43 82 46 Z" fill="${hairColor}" opacity=".35"/>`,
   }[hair] || '';
 
   const eyewear = {
@@ -406,6 +489,15 @@ function outfitSvg(id, c, skin, n) {
       <path d="M42 87 L48 78 L56 87 Z M78 87 L72 78 L64 87 Z" fill="#d62839"/>
       <path d="M50 94 L60 89 L70 94 L60 104 Z" fill="#ffd23f" stroke="#c8920a" stroke-width="1"/>
       <path d="M57 93 L63 93 L58 99 L63 99" fill="none" stroke="#d62839" stroke-width="1.6"/>`];
+    case 'outfit-hacker': return [`${body('#121418')}
+      <g font-family="monospace" font-size="5" fill="#3dff7a" opacity=".55"><text x="22" y="108">1011</text><text x="24" y="115">0110</text><text x="84" y="108">0101</text><text x="83" y="115">1100</text></g>`, `
+      <path d="M38 90 Q40 80 60 80 Q80 80 82 90 Q72 86 60 92 Q48 86 38 90 Z" fill="#1d2027" stroke="#3dff7a" stroke-width="1" stroke-opacity=".7"/>
+      <path d="M60 92 V122" stroke="#3dff7a" stroke-width="1.6" opacity=".9"/>
+      <path d="M53 90 L52 104 M67 90 L68 104" stroke="#3dff7a" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="52" cy="105" r="1.6" fill="#3dff7a"/><circle cx="68" cy="105" r="1.6" fill="#3dff7a"/>
+      <rect x="70" y="89" width="17" height="10" rx="2.5" fill="#0a0c10" stroke="#3dff7a" stroke-width="1"/>
+      <text x="78.5" y="96.4" font-family="monospace" font-weight="bold" font-size="6.5" text-anchor="middle" fill="#3dff7a">&gt;_</text>
+      <path d="M18 122 C18 94 36 84 60 84 C84 84 102 94 102 122" fill="none" stroke="#3dff7a" stroke-width="1" opacity=".35"/>`];
     case 'outfit-vampire': return [`${cape('#111', '#8b0f1f')}${body('#1a1a1f')}
       <path d="M41 95 L32 64 L54 84 Z" fill="#8b0f1f" stroke="#111" stroke-width="1.5"/>
       <path d="M79 95 L88 64 L66 84 Z" fill="#8b0f1f" stroke="#111" stroke-width="1.5"/>`, `

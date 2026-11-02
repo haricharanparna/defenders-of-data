@@ -711,7 +711,18 @@ function caught() {
   $('enemy-sprite').className = 'sprite enemy-sprite caught';
   saveAdventure();
   updateHud();
-  setTimeout(() => { endBattle(); openIndex(c.id); }, 1600);
+  setTimeout(() => { endBattle(); openIndex(c.id); checkStars(); }, 1600);
+}
+
+// ---------- Stars for the Coder Locker (awardStars is in avatar.js) ----------
+// Each one pays once, 53 stars in all: quarantine milestones, badges and the final boss
+const CATCH_STARS = [[5, 2], [10, 2], [20, 3], [30, 3], [45, 5], [CREATURES.length, 10]];
+function checkStars() {
+  for (const [count, stars] of CATCH_STARS) {
+    if (save.caught.length >= count) awardStars(`adventure-caught-${count}`, stars, count === CREATURES.length ? 'You quarantined every threat!' : `You quarantined ${count} threats`);
+  }
+  for (const z of save.badges) awardStars(`adventure-badge-${z}`, 3, `You got the ${TRAINERS[z].badge}`);
+  if (save.beatBoss) awardStars('adventure-boss', 10, 'You beat Omega Ransomware!');
 }
 
 function escaped() {
@@ -733,6 +744,7 @@ function wonTrainer() {
   saveAdventure();
   endBattle();
   playSound('badge');
+  checkStars();
   const newGuardian = GUARDIANS[save.badges.length];
   say([
     `${trainer.emoji} ${trainer.name}: ${trainer.outro}`,
@@ -751,6 +763,7 @@ function wonBoss() {
   $('win-text').textContent = `You and your guardians beat Omega Ransomware and saved the internet! You've quarantined ${save.caught.length} of ${CREATURES.length} threats. Keep exploring to find the rare ones.`;
   makeConfetti();
   $('dlg-win').showModal();
+  checkStars();
 }
 
 function lostBattle() {
@@ -1471,6 +1484,7 @@ resize();
 $('hud-coder').innerHTML = avatarSvg();
 renderSettings();
 updateHud();
+checkStars();   // stars for anything you did before stars came to Adventure
 if (firstVisit && !DEMO_MODE) openDemo('adventure', welcome);
 else if (mapChanged) say(['🌐 The internet got a LOT bigger! There are now 6 areas and 60 threats to find.', 'You are back home to start the new journey, and every threat you quarantined is still in your Index.']);
 requestAnimationFrame(loop);

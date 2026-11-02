@@ -123,8 +123,8 @@ function renderDetails() {
       ? 'Click an item to try it on. Items you own go on right away.'
       : 'Click any slot to change that part of your coder.';
     lockerEl('locker-item-note').textContent = earned === 0
-      ? 'Clear levels in Tower Defense to earn up to 3 ★ each, then spend them here!'
-      : `You've earned ${earned} ★ in Tower Defense. Replay levels for 3 stars to earn more.`;
+      ? 'Earn ★ by clearing Tower Defense levels (up to 3 each) and hitting milestones in Data Clicker and Adventure, then spend them here!'
+      : `You've earned ${earned} ★. Get more by replaying Tower Defense levels for 3 stars, or by hitting milestones in Data Clicker and Adventure.`;
     action.hidden = true;
     return;
   }

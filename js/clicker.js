@@ -369,7 +369,18 @@ function buildShop() {
 let shopShape = '';
 const shopKey = () => HELPERS.map((h, i) => helperVisible(h, i) ? 1 : 0).join('') + UPGRADE_LIST.filter(upgradeVisible).map(u => u.id).join(',');
 
+// ---------- Stars for the Coder Locker (awardStars is in avatar.js) ----------
+// Each one pays once, 25 stars in all, so Tower Defense levels stay the main way to earn
+const BYTE_STARS = [[1e3, 1], [1e5, 1], [1e7, 2], [1e9, 3], [1e11, 5]];
+const STREAK_STARS = [[10, 2], [25, 3]];
+function checkStars() {
+  for (const [bytes, stars] of BYTE_STARS) if (game.total >= bytes) awardStars(`clicker-bytes-${bytes}`, stars, `You earned ${fmt(bytes)} bytes in Data Clicker`);
+  for (const [streak, stars] of STREAK_STARS) if (game.streak >= streak) awardStars(`clicker-streak-${streak}`, stars, `${streak} right answers in a row`);
+  for (const h of HELPERS) if (game.unlocked.includes(h.id)) awardStars(`clicker-unlock-${h.id}`, 1, `You unlocked ${h.emoji} ${h.name}`);
+}
+
 function render(rebuild = false) {
+  checkStars();
   if (rebuild || shopKey() !== shopShape) buildShop();
   $('bytes').textContent = fmt(game.bytes);
   $('rate').textContent = fmt(perSecond(), 1);

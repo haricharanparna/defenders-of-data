@@ -831,3 +831,30 @@ kbd {
 }
 .panel.demo .end-buttons { margin-top: 0.8rem; }
 @media (prefers-reduced-motion: reduce) { .demo-live, .demo-spinner { animation: none; } }
+
+/* ---------- Bonus star pop-up (avatar.js awardStars) ---------- */
+.star-reward {
+  position: fixed;
+  inset: 1rem auto auto 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 1.1rem 0.6rem 0.8rem;
+  color: #fff;
+  background: linear-gradient(135deg, #3a2a05, #1a1440);
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  box-shadow: 0 0 24px rgba(255, 210, 63, 0.45), 0 8px 20px rgba(0, 0, 0, 0.5);
+  font-family: var(--body);
+}
+.star-reward:popover-open { animation: star-pop 0.45s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes star-pop { from { transform: translateX(-50%) translateY(-20px) scale(0.6); opacity: 0; } }
+.sr-star { font-size: 2.2rem; line-height: 1; color: var(--gold); text-shadow: 0 0 12px var(--gold); animation: star-spin 1s ease-out; }
+@keyframes star-spin { from { transform: rotate(-200deg) scale(0.3); } }
+.sr-text { display: grid; line-height: 1.25; }
+.sr-text strong { font-family: var(--pixel); font-size: 0.8rem; color: var(--gold); margin-bottom: 0.2rem; }
+.sr-text small { font-size: 0.85rem; font-weight: 700; }
+.sr-text small + small { font-size: 0.72rem; color: var(--text-dim); }
+@media (prefers-reduced-motion: reduce) { .star-reward:popover-open, .sr-star { animation: none; } }
