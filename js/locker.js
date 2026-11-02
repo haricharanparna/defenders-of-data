@@ -83,7 +83,7 @@ function renderLoadout() {
   const event = document.createElement('button');
   event.className = 'lk-tile lk-event-tile';
   event.innerHTML = `<span class="lk-event-new">NEW!</span><span class="lk-event-icon" aria-hidden="true">🎃</span>
-    <span class="lk-event-text"><strong>Halloween Shop <em class="lk-event-until">⏰ Until 11/20</em></strong><span>${spooky.filter(ownsCosmetic).length}/${spooky.length} collected</span></span>`;
+    <span class="lk-event-text"><strong>Halloween Shop <em class="lk-event-until">⏰ Until 11/8</em></strong><span>${spooky.filter(ownsCosmetic).length}/${spooky.length} collected</span></span>`;
   event.addEventListener('click', () => browse(HALLOWEEN.id));
   loadout.appendChild(event);
 
