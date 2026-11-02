@@ -65,10 +65,10 @@ function renderLocker() {
   lockerEl('locker-loadout').hidden = browsing;
   lockerEl('locker-grid').hidden = !browsing;
 
-  // The big coder wears whatever you picked, even if you don't own it yet
+  // The big coder, head to shoes, wears whatever you picked, even if you don't own it yet
   const look = picked ? { ...coder.look, [picked.slot]: picked.id } : coder.look;
   const preview = lockerEl('locker-preview');
-  preview.innerHTML = avatarSvg(look);
+  preview.innerHTML = avatarSvg(look, { full: true });
   preview.className = `lk-preview ${picked ? picked.rarity || 'common' : ''}${picked && !ownsCosmetic(picked) ? ' trying' : ''}`;
 
   if (browsing) renderGrid(tab); else renderLoadout();

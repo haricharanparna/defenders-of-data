@@ -274,7 +274,9 @@ function mix(a, b, t) {
 }
 
 // bare: leave out the background (the Locker's item tiles put their rarity color behind the coder)
-function avatarSvg(look = coder.look, { bare = false } = {}) {
+// full: the whole coder standing, head to shoes, with the background as a circle behind them
+// (the Locker's big preview, like the character on the side in Quizizz)
+function avatarSvg(look = coder.look, { bare = false, full = false } = {}) {
   const n = `av${avatarCount++}`;
   const get = slot => cosmetic(look[slot]) || cosmetic(DEFAULT_LOOK[slot]);
   const hoodie = get('hoodie'), hair = get('hair').id, hairColor = get('hairColor').color;
@@ -426,10 +428,60 @@ function avatarSvg(look = coder.look, { bare = false } = {}) {
       : `<path d="M60 107 L66 109.5 V113 C66 116 63 118 60 119 C57 118 54 116 54 113 V109.5 Z" fill="${laptop.neon ? '#2ee6ff' : '#fff'}" opacity="${laptop.neon ? 1 : 0.55}"/>`}
     ${laptop.stickers ? `<circle cx="42" cy="108" r="3.5" fill="#ff3d8b"/><rect x="72" y="105" width="8" height="6" rx="2" fill="#ffd23f"/><circle cx="76" cy="117" r="3.5" fill="#20a95a"/><path d="M41 114 l3 5 l3 -5 z" fill="#8a4ce0"/>` : ''}`;
 
-  const sidekick = pet.emoji ? `<text x="102" y="113" font-size="19" text-anchor="middle">${pet.emoji}</text>` : '';
-
-  return `<svg class="avatar-svg" viewBox="0 0 120 120" role="img" aria-label="Your coder"><defs>${defs}</defs><g clip-path="url(#${n}-clip)">
+  if (!full) {
+    const sidekick = pet.emoji ? `<text x="102" y="113" font-size="19" text-anchor="middle">${pet.emoji}</text>` : '';
+    return `<svg class="avatar-svg" viewBox="0 0 120 120" role="img" aria-label="Your coder"><defs>${defs}</defs><g clip-path="url(#${n}-clip)">
     ${bare ? '' : back}${hoodBack}${hairBack}${body}${head}${hairFront}${eyewear}${headwear}${laptopSvg}${sidekick}</g></svg>`;
+  }
+
+  // ---------- The whole coder, for the Locker ----------
+  // Below the chest: legs and shoes, the rest of the top (down to the knees for long coats), and arms.
+  // With a laptop, the arms bend to hold it at the waist.
+  const o = outfitBelow(outfit, paint(hoodie.color), skin, n);
+  const torso = o.long ? 'M22 116 H98 L95 178 H25 Z' : 'M22 116 H98 L90 160 H30 Z';
+  const legs = 'M33 156 H58.5 L57 193 H35 Z M61.5 156 H87 L85 193 H63 Z';
+  const holding = !laptop.none;
+  const arms = holding
+    ? 'M19 104 Q11 134 30 151 L39 141 Q27 130 31 110 Z M101 104 Q109 134 90 151 L81 141 Q93 130 89 110 Z'
+    : 'M19 104 Q13 130 15 152 H28 Q27 130 31 110 Z M101 104 Q107 130 105 152 H92 Q93 130 89 110 Z';
+  const hands = holding ? [[37, 148], [83, 148]] : [[21.5, 156], [98.5, 156]];
+  const below = `
+    ${o.cape ? `<path d="M16 100 H104 L112 198 H8 Z" fill="${o.cape}"/>` : ''}
+    <path d="${legs}" fill="${o.pants}"/><path d="${legs}" fill="url(#${n}-shade)"/>
+    <path d="M34 189 H58 V198 Q58 203 54 203 H31 Q25 203 27 197 Q29 190 34 189 Z M62 189 H86 Q91 190 93 197 Q95 203 89 203 H66 Q62 203 62 198 Z" fill="${o.shoes}"/>
+    <path d="M27 200 H58 M62 200 H93" stroke="#000" stroke-opacity=".3" stroke-width="2"/>
+    <path d="${torso}" fill="${o.main}"/><path d="${torso}" fill="url(#${n}-shade)"/>
+    ${o.long ? '<path d="M60 122 V178" stroke="#000" stroke-opacity=".2" stroke-width="1.5"/>' : '<path d="M30.5 157 H89.5" stroke="#000" stroke-opacity=".3" stroke-width="3"/>'}
+    <path d="${arms}" fill="${o.arm}"/><path d="${arms}" fill="#000" opacity=".12"/>`;
+  const handsSvg = hands.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="${skin}"/><circle cx="${x}" cy="${y}" r="6" fill="none" stroke="${skinShade}" stroke-width="1"/>`).join('');
+  const backdrop = bare ? '' : `<g clip-path="url(#${n}-round)">${back}</g><circle cx="60" cy="62" r="54" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2"/>`;
+  const buddy = pet.emoji ? `<text x="108" y="204" font-size="22" text-anchor="middle">${pet.emoji}</text>` : '';
+  return `<svg class="avatar-svg full" viewBox="0 0 120 208" role="img" aria-label="Your coder"><defs>${defs}<clipPath id="${n}-round"><circle cx="60" cy="62" r="54"/></clipPath></defs>
+    ${backdrop}${below}${hoodBack}${hairBack}${body}${head}${hairFront}${eyewear}${headwear}<g transform="translate(0 30)">${laptopSvg}</g>${handsSvg}${buddy}</svg>`;
+}
+
+// What each outfit looks like below the chest, for the full-body coder.
+// main: the top's color (c is your outfit color), long: a coat down to the knees, cape: the cape's lining
+function outfitBelow(id, c, skin, n) {
+  const metal = `url(#${n}-metal)`;
+  const below = {
+    'outfit-tshirt': { arm: skin },
+    'outfit-varsity': { arm: '#f4f1e8' },
+    'outfit-leather': { main: '#1f1f26', shoes: '#1c1c22' },
+    'outfit-labcoat': { main: '#f1f4f8', long: true },
+    'outfit-suit': { main: '#22253a', pants: '#22253a', shoes: '#1c1c22' },
+    'outfit-trench': { main: '#7a5434', long: true, shoes: '#3d2814' },
+    'outfit-space': { main: '#e9edf5', pants: '#e9edf5', shoes: '#9aa6bd' },
+    'outfit-armor': { main: metal, pants: metal, shoes: '#555d6e' },
+    'outfit-hero': { pants: c, shoes: '#d62839', cape: '#a51d2c' },
+    'outfit-hacker': { main: '#121418', pants: '#1c1f26', shoes: '#0a0c10' },
+    'outfit-vampire': { main: '#1a1a1f', pants: '#1a1a1f', shoes: '#111', cape: '#8b0f1f' },
+    'outfit-skeleton': { main: '#15151b', pants: '#15151b', shoes: '#15151b' },
+    'outfit-mummy': { main: '#e8dcc0', pants: '#e8dcc0', shoes: '#bfae86' },
+    'outfit-witch': { main: '#3a1f55', long: true, shoes: '#1c1c22' },
+    'outfit-pumpkin': { main: '#f07c12', pants: '#3d7a2a' },
+  }[id] || {};
+  return { main: c, pants: '#2c3a5e', shoes: '#f1f4f8', ...below, arm: below.arm || below.main || c };
 }
 
 // ---------- Outfits ----------
