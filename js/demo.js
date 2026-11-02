@@ -21,6 +21,11 @@ const KEY_LABELS = { Escape: 'Esc', Shift: 'Shift', ' ': 'Space', ArrowLeft: 'â†
 const KEY_CODES = { ' ': 'Space', Escape: 'Escape', Shift: 'ShiftLeft' };
 const keyCode = key => KEY_CODES[key] || (key.startsWith('Arrow') ? key : /\d/.test(key) ? `Digit${key}` : `Key${key.toUpperCase()}`);
 
+// Your own recorded narration, in the voice folder: line id â†’ file name (see VOICE-SCRIPT.md).
+// Lines not listed here are read by the computer's voice.
+const VOICE_CLIPS = {};
+let clip = null;   // the recording playing right now
+
 let voiceOn = true;
 try { voiceOn = localStorage.getItem(VOICE_KEY) !== '0'; } catch { /* storage blocked */ }
 
@@ -61,13 +66,15 @@ let screenScale = 1;
 let current = null;    // the demo that's playing: { name, stopped, start, length }
 let demoAfter = null;
 
-// The keyboard in the corner
-for (const row of KEY_ROWS) {
+// The keyboard in the corner: an RGB gaming keyboard. Each key gets its own color (--h, a hue)
+// in a rainbow wave across the board, and the CSS makes the wave flow.
+for (const [r, row] of KEY_ROWS.entries()) {
   const line = document.createElement('div');
   line.className = 'demo-row';
-  for (const key of row) {
+  for (const [i, key] of row.entries()) {
     const k = document.createElement('span');
     k.className = `demo-key${key.length > 1 ? ' wide' : ''}${key === ' ' ? ' space' : ''}`;
+    k.style.setProperty('--h', Math.round(r * 24 + (i / row.length) * 300));
     k.dataset.key = key;
     k.textContent = KEY_LABELS[key] || key.toUpperCase();
     line.appendChild(k);
@@ -127,6 +134,7 @@ function stopDemo() {
   if (current) current.stopped = true;
   current = null;
   window.speechSynthesis?.cancel();
+  clip?.pause();
   frame.onload = null;
   demoDialog.querySelectorAll('.demo-key.down').forEach(k => k.classList.remove('down'));
 }
@@ -172,7 +180,10 @@ demoEl('demo-cover').addEventListener('click', e => {
 });
 demoEl('demo-voice').addEventListener('click', () => {
   voiceOn = !voiceOn;
-  if (!voiceOn) window.speechSynthesis?.cancel();
+  if (!voiceOn) {
+    window.speechSynthesis?.cancel();
+    clip?.pause();
+  }
   try { localStorage.setItem(VOICE_KEY, voiceOn ? '1' : '0'); } catch { /* storage blocked */ }
   renderVoice();
 });
@@ -274,14 +285,23 @@ function demoApi(run) {
   }
 
   // Say a line out loud and show it as a caption. Resolves when it's finished.
-  function say(text) {
+  // id names the line in VOICE-SCRIPT.md: a recording in VOICE_CLIPS plays if there is one,
+  // otherwise the computer's voice reads it.
+  function say(id, text) {
     alive();
     demoEl('demo-caption').textContent = text;
     const words = text.split(/\s+/).length;
     return new Promise(resolve => {
       let timer;
       const done = () => { clearTimeout(timer); resolve(); };
-      if (voiceOn && window.speechSynthesis) {
+      if (voiceOn && VOICE_CLIPS[id]) {
+        clip = new Audio(`voice/${VOICE_CLIPS[id]}`);
+        clip.onended = done;
+        clip.onerror = done;
+        clip.onpause = done;   // voice turned off, or the video closed
+        // Browsers block sound until you've clicked the page: then just show the caption long enough to read
+        clip.play().catch(() => { timer = setTimeout(done, words * 320 + 900); });
+      } else if (voiceOn && window.speechSynthesis) {
         const line = new SpeechSynthesisUtterance(text);
         line.voice = pickVoice();
         line.rate = 1.03;
@@ -330,45 +350,45 @@ const DEMOS = {
       };
 
       await together(
-        say('Hackers send threats down this path. They want to steal your data at the end!'),
+        say('td-01', 'Hackers send threats down this path. They want to steal your data at the end!'),
         (async () => { for (const [c, r] of [[0, 3], [4, 3], [4, 10], [10, 10], [10, 3], [16, 3], [16, 10], [21, 10]]) await moveTo(tile(c, r), 420); })(),
       );
       await together(
-        say('Towers stop them. Each tower is a real way to stay safe online. Click one to unlock it.'),
+        say('td-02', 'Towers stop them. Each tower is a real way to stay safe online. Click one to unlock it.'),
         click('#tower-bar .tool', 900),
       );
       await waitFor(() => $('#dlg-challenge').open);
       const right = game('lastChallenge.linkcheck.options.find(o => o.correct).text');
       await together(
-        say('Answer a quick question to unlock it. Read every choice carefully!'),
+        say('td-03', 'Answer a quick question to unlock it. Read every choice carefully!'),
         (async () => { for (const b of $('#ch-options').children) await moveTo(b, 450); })(),
       );
       await click(button('#ch-options .choice', right));
       await wait(1200);
       await click('#ch-unlock');
-      await say('Unlocked! Now press 1, or click the tower, then click an empty square next to the path.');
+      await say('td-04', 'Unlocked! Now press 1, or click the tower, then click an empty square next to the path.');
       await press('1');
       await click(tile(5, 6));
       await click(tile(9, 9), 700);
       await press('Escape');
-      await together(say('Press Space to start the wave. Your towers fire all by themselves!'), press(' '));
+      await together(say('td-05', 'Press Space to start the wave. Your towers fire all by themselves!'), press(' '));
       await waitFor(threat, 15000);
-      await say('Click a threat to scan it.');
+      await say('td-06', 'Click a threat to scan it.');
       await waitFor(threat, 15000);
       await click(threat, 650);
       await waitFor(() => $('#dlg-scan').open, 3000);
       const kind = game('state.enemies.find(e => !e.gone).type');
       await together(
-        say('Read the message and pick what kind of threat it is. This one is phishing!'),
+        say('td-07', 'Read the message and pick what kind of threat it is. This one is phishing!'),
         moveTo('#scan-message', 700),
       );
       await click(`#scan-choices [data-type="${kind}"]`);
-      await say('Right! Now your towers do double damage to it.');
+      await say('td-08', 'Right! Now your towers do double damage to it.');
       await click('#scan-continue');
-      await together(say('Press F to speed things up.'), press('f'));
-      await say('Keep an eye out for a tiny secret message bubble. Click it fast for double damage!');
+      await together(say('td-09', 'Press F to speed things up.'), press('f'));
+      await say('td-10', 'Keep an eye out for a tiny secret message bubble. Click it fast for double damage!');
       await waitFor(() => $('#dlg-quiz').open, 60000);
-      await say('After every wave, play Real or Scam. Right answers earn bytes for more towers.');
+      await say('td-11', 'After every wave, play Real or Scam. Right answers earn bytes for more towers.');
       for (let i = 0; i < 3; i++) {
         await moveTo('#quiz-message', 500);
         await wait(i === 0 ? 900 : 400);
@@ -378,10 +398,10 @@ const DEMOS = {
         await click('#quiz-next');
       }
       await together(
-        say('Every tenth wave, a Ransomware Boss attacks. Answer its questions to save your towers.'),
+        say('td-12', 'Every tenth wave, a Ransomware Boss attacks. Answer its questions to save your towers.'),
         moveTo('#btn-wave', 900),
       );
-      await say('Clear levels to earn stars, and spend them on your coder. Now it\'s your turn!');
+      await say('td-13', 'Clear levels to earn stars, and spend them on your coder. Now it\'s your turn!');
     },
   },
 
@@ -404,44 +424,44 @@ const DEMOS = {
       }
 
       await together(
-        say('Click the big shield to earn bytes. Every click protects your data!'),
+        say('clicker-01', 'Click the big shield to earn bytes. Every click protects your data!'),
         (async () => { await moveTo('#big-shield', 700); for (let i = 0; i < 18; i++) await click('#big-shield', 60); })(),
       );
       await together(
-        say('Spend bytes to hire defenders. Each one is a real way to stay safe online.'),
+        say('clicker-02', 'Spend bytes to hire defenders. Each one is a real way to stay safe online.'),
         moveTo('#helpers .helper', 900),
       );
       await click('#helpers .helper');
-      await say('Answer a question to unlock it.');
+      await say('clicker-03', 'Answer a question to unlock it.');
       await answerAsk();
       await together(
-        say('Defenders earn bytes for you every second, even while you\'re away!'),
+        say('clicker-04', 'Defenders earn bytes for you every second, even while you\'re away!'),
         moveTo('#rate', 800),
       );
       game('showScam(); scam.left = 999');
       await wait(400);
       await together(
-        say('Watch out for pop-ups! Read the message and decide: is it real, or a scam?'),
+        say('clicker-05', 'Watch out for pop-ups! Read the message and decide: is it real, or a scam?'),
         moveTo('#scam-message', 800),
       );
       const truth = game('scam.item.answer');
       await click(`#scam-buttons [data-answer="${truth}"]`);
-      await say('Get it right for bonus bytes. Then click anywhere to keep going.');
+      await say('clicker-06', 'Get it right for bonus bytes. Then click anywhere to keep going.');
       await click('#big-shield', 700);
       game('showSecret(); secretLeft = 999');
       await wait(300);
       await together(
-        say('See that tiny bubble? That\'s a secret message. Click it before it disappears!'),
+        say('clicker-07', 'See that tiny bubble? That\'s a secret message. Click it before it disappears!'),
         moveTo('#secret-bubble', 1400),
       );
       await click('#secret-bubble');
       await answerAsk();
       await together(
-        say('Overdrive! For thirty seconds, everything earns seven times more.'),
+        say('clicker-08', 'Overdrive! For thirty seconds, everything earns seven times more.'),
         (async () => { await moveTo('#big-shield', 500); for (let i = 0; i < 14; i++) await click('#big-shield', 60); })(),
       );
       await together(
-        say('Every few minutes a hacker breaks in. Answer fast to keep your bytes. Have fun, Defender!'),
+        say('clicker-09', 'Every few minutes a hacker breaks in. Answer fast to keep your bytes. Have fun, Defender!'),
         moveTo('#bytes', 900),
       );
     },
@@ -456,7 +476,7 @@ const DEMOS = {
       const nearSign = () => game('(() => { const t = nearbyThing(); return !!t && "SN".includes(t.t); })()');
 
       await together(
-        say('Walk with W A S D, or the arrow keys. Your coder always faces your mouse.'),
+        say('adventure-01', 'Walk with W A S D, or the arrow keys. Your coder always faces your mouse.'),
         (async () => {
           await moveTo(canvasPoint(0.75, 0.45), 600);
           await hold(['d'], 1100);
@@ -467,7 +487,7 @@ const DEMOS = {
           await moveTo(canvasPoint(0.85, 0.5), 500);
         })(),
       );
-      await together(say('Hold Shift to sprint. Watch your stamina bar!'), hold(['Shift', 'd'], 1600));
+      await together(say('adventure-02', 'Hold Shift to sprint. Watch your stamina bar!'), hold(['Shift', 'd'], 1600));
       await moveTo('#btn-sprint', 500);
       // Walk along until there's a sign or a person to talk to (or skip ahead to one)
       for (let i = 0; i < 25 && !nearSign(); i++) await hold(['d'], 150);
@@ -478,15 +498,15 @@ const DEMOS = {
             const c = center(x + dx, y + dy); player.x = c.x; player.y = c.y; return; } } })()`);
       }
       await moveTo(canvasPoint(0.55, 0.5), 400);
-      await together(say('Press Space to talk to people and read signs. They have great safety tips!'), press(' '));
+      await together(say('adventure-03', 'Press Space to talk to people and read signs. They have great safety tips!'), press(' '));
       for (let i = 0; i < 4 && game('!!talkLines'); i++) {
         await wait(1100);
         await press(' ');
       }
-      await together(say('Wild threats hide in the dark spam grass. Walk through it to find them.'), hold(['s'], 600));
+      await together(say('adventure-04', 'Wild threats hide in the dark spam grass. Walk through it to find them.'), hold(['s'], 600));
       game('startWild()');
       await waitFor(() => $('#battle-actions [data-move]'), 5000);
-      await say('Battle! Read the attack, then pick the defense that beats it. The right one is super effective!');
+      await say('adventure-05', 'Battle! Read the attack, then pick the defense that beats it. The right one is super effective!');
       let narrated = false;
       for (let turn = 0; turn < 20 && !$('.action.quarantine'); turn++) {
         await waitFor(() => $('.action.quarantine') || ($('#battle-actions [data-move]') && !$('#battle-actions [data-move]').disabled), 9000);
@@ -494,9 +514,9 @@ const DEMOS = {
         await moveTo('#battle-log', 400);
         await wait(500);
         await click(`#battle-actions [data-move="${game('battle.attack.beats')}"]`, 500);
-        if (!narrated) { narrated = true; await say('Super effective!'); }
+        if (!narrated) { narrated = true; await say('adventure-06', 'Super effective!'); }
       }
-      await say('You beat it! Now quarantine it: get 7 questions right in 30 seconds before it escapes.');
+      await say('adventure-07', 'You beat it! Now quarantine it: get 7 questions right in 30 seconds before it escapes.');
       await click('.action.quarantine');
       const answering = (async () => {
         for (let i = 0; i < 7; i++) {
@@ -506,15 +526,15 @@ const DEMOS = {
           await click(button('#battle-actions .answer', right), 320);
         }
       })();
-      await together(say('Rarer threats are tougher, and their questions are harder.'), answering);
+      await together(say('adventure-08', 'Rarer threats are tougher, and their questions are harder.'), answering);
       await waitFor(() => $('#dlg-index').open, 6000);
-      await say('Quarantined! It goes into your Threat Index. Press I to open it any time.');
+      await say('adventure-09', 'Quarantined! It goes into your Threat Index. Press I to open it any time.');
       await click('#index-close');
       await press('i');
       await wait(1200);
       await click('#index-close');
       await together(
-        say('Beat hacker trainers to earn badges and open new areas. You can change your keys in Settings. Good luck, Defender!'),
+        say('adventure-10', 'Beat hacker trainers to earn badges and open new areas. You can change your keys in Settings. Good luck, Defender!'),
         moveTo('#btn-settings', 1200),
       );
     },
