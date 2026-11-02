@@ -182,14 +182,52 @@ function loadCoder() {
       spent = Math.max(0, spent - 10);
     }
   }
-  return { look, owned, spent, starterDuck: true };
+  return { look, owned, spent, starterDuck: true, name: cleanName(saved.name) };
 }
+
+// ---------- Your coder's name ----------
+// A nickname, never your real name: no email or password, and it never leaves this computer.
+// New coders get a random fun name, like in Quizizz.
+const NAME_MAX = 20;
+const NAME_FIRST = ['Cyber', 'Pixel', 'Turbo', 'Secret', 'Mega', 'Neon', 'Stealth', 'Quantum', 'Firewall', 'Byte', 'Crypto', 'Glitch'];
+const NAME_LAST = ['Panda', 'Fox', 'Ninja', 'Owl', 'Dragon', 'Tiger', 'Wizard', 'Falcon', 'Otter', 'Shark', 'Koala', 'Phoenix'];
+// Letters, numbers, spaces, - and _ only
+const cleanName = name => (typeof name === 'string' ? name : '').replace(/[^\p{L}\p{N} _-]/gu, '').replace(/\s+/g, ' ').slice(0, NAME_MAX).trim();
+const nameFrom = list => list[Math.floor(Math.random() * list.length)];
+const randomName = () => `${nameFrom(NAME_FIRST)} ${nameFrom(NAME_LAST)} ${Math.floor(Math.random() * 90) + 10}`;
 
 let coder = loadCoder();
 
 function saveCoder() {
   try { localStorage.setItem(CODER_KEY, JSON.stringify(coder)); } catch { /* storage blocked */ }
 }
+
+if (!coder.name) {
+  coder.name = randomName();
+  saveCoder();
+}
+
+function setCoderName(name) {
+  coder.name = cleanName(name) || coder.name;
+  saveCoder();
+  showHudName();
+  return coder.name;
+}
+
+// In the games, your name sits next to your coder in the top bar
+function showHudName() {
+  const hud = document.getElementById('hud-coder');
+  if (!hud) return;
+  let tag = document.getElementById('hud-name');
+  if (!tag) {
+    tag = document.createElement('span');
+    tag.id = 'hud-name';
+    tag.className = 'hud-name';
+    hud.after(tag);
+  }
+  tag.textContent = coder.name;
+}
+showHudName();
 
 const ownsCosmetic = item => item.price === 0 || coder.owned.includes(item.id);
 

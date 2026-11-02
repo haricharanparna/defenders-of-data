@@ -468,7 +468,7 @@ kbd {
 
 /* Your coder on a glowing stage */
 .lk-right { min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-.lk-stage { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 1.4rem; }
+.lk-stage { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; align-items: flex-end; justify-content: center; padding: 3.6rem 0 1.4rem; }
 .lk-rays {
   position: absolute;
   width: 150%;
@@ -570,7 +570,7 @@ kbd {
   .lk-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 0.5rem; }
   .lk-name { font-size: 0.72rem; }
   .lk-label { font-size: 0.62rem; }
-  .lk-stage { min-height: 330px; }
+  .lk-stage { min-height: 390px; }
   .lk-preview { height: 300px; }
   .lk-count { display: none; }
 }
@@ -872,3 +872,104 @@ kbd {
 .sr-text small { font-size: 0.85rem; font-weight: 700; }
 .sr-text small + small { font-size: 0.72rem; color: var(--text-dim); }
 @media (prefers-reduced-motion: reduce) { .star-reward:popover-open, .sr-star { animation: none; } }
+
+/* ---------- Your coder's name (avatar.js) ---------- */
+/* In the Locker: a nameplate above your coder, like Quizizz */
+.lk-nameplate {
+  position: absolute;
+  z-index: 2;
+  top: 0.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  background: rgba(7, 11, 50, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 30, 0.4);
+}
+.lk-nameplate input {
+  width: 16ch;
+  field-sizing: content;   /* grows to fit your name */
+  min-width: 6ch;
+  max-width: 62vw;
+  padding: 0.25rem 0.6rem;
+  font-family: var(--lk-font);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: #fff;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  outline: none;
+}
+.lk-nameplate input:hover { background: rgba(255, 255, 255, 0.08); }
+.lk-nameplate input:focus { background: rgba(255, 255, 255, 0.16); }
+.lk-nameplate button {
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  font-size: 1.1rem;
+  background: var(--lk-yellow);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.lk-nameplate button:hover, .lk-nameplate button:focus-visible { transform: rotate(-20deg) scale(1.1); outline: 2px solid #fff; }
+.lk-name-tip {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 80vw;
+  margin: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #2a1400;
+  background: var(--lk-yellow);
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.lk-nameplate:hover .lk-name-tip, .lk-nameplate:focus-within .lk-name-tip { opacity: 1; }
+
+/* In the games: your name next to your coder in the top bar */
+.hud-name {
+  max-width: 11rem;
+  overflow: hidden;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--gold);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+@media (max-width: 700px) { .hud-name { display: none; } }
+
+/* ---------- Save Code (savecode.js) ---------- */
+.save-panel p { margin: 0 0 0.9rem; }
+.save-label { display: block; margin: 0.4rem 0 0.35rem; font-weight: 800; color: var(--cyan); }
+.save-box {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+  word-break: break-all;
+  resize: vertical;
+  background: var(--bg);
+  border: 2px solid var(--cyan-dim);
+  border-radius: 6px;
+}
+.save-box:focus { border-color: var(--cyan); outline: none; }
+.save-btn { display: block; width: 100%; margin: 0.6rem 0 1rem; font-size: 0.8rem; }
+.save-message { padding: 0.6rem 0.8rem; font-weight: 800; border-radius: 6px; }
+.save-message.good { color: #7cff6b; background: rgba(124, 255, 107, 0.1); }
+.save-message.bad { color: var(--pink); background: rgba(255, 61, 139, 0.1); }
+.save-tip { font-size: 0.9rem; color: var(--text-dim); }

@@ -202,6 +202,16 @@ lockerDialog.addEventListener('cancel', e => {
   backToLoadout();
 });
 
+// Your name, above your coder: saved when you press Enter or click away
+const nameInput = lockerEl('locker-name');
+nameInput.value = coder.name;
+nameInput.addEventListener('change', () => { nameInput.value = setCoderName(nameInput.value); });
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') nameInput.blur(); });
+lockerEl('locker-name-dice').addEventListener('click', () => {
+  nameInput.value = setCoderName(randomName());
+  celebrate(false);
+});
+
 lockerEl('btn-coder').addEventListener('click', openLocker);
 showCoderMini();
 // The coder in the game's top bar links here with #coder

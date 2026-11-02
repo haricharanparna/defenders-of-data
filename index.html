@@ -37,6 +37,7 @@
       <button class="btn btn-primary" id="btn-play">&#9654; PLAY</button>
       <button class="btn coder-btn" id="btn-coder"><span class="coder-mini" id="coder-mini" aria-hidden="true"></span>My Coder</button>
       <button class="btn" id="btn-why">Why It Matters</button>
+      <button class="btn" id="btn-save">💾 Save Code</button>
     </nav>
 
     <p class="hint">Use your mouse, or <kbd>Tab</kbd> + <kbd>Enter</kbd> to choose</p>
@@ -53,6 +54,21 @@
     </ul>
     <p>Every tower in this game is a real habit you can use today. Defend the game, then defend yourself!</p>
     <button class="btn btn-primary close-btn">Let's go!</button>
+  </dialog>
+
+  <!-- Save Code: move your progress to another computer, no account needed (savecode.js) -->
+  <dialog id="dlg-save" class="panel save-panel" aria-labelledby="save-title">
+    <h2 id="save-title">💾 Save Code</h2>
+    <p>No account needed! Copy this code, then load it on another computer to bring your stars, coder and progress with you.</p>
+    <label class="save-label" for="save-code">Your save code</label>
+    <textarea id="save-code" class="save-box" rows="3" readonly></textarea>
+    <button class="btn btn-primary save-btn" id="save-copy">📋 Copy my save code</button>
+    <label class="save-label" for="save-load-box">Got a code from another computer? Paste it here:</label>
+    <textarea id="save-load-box" class="save-box" rows="3" placeholder="DOD1-..." spellcheck="false"></textarea>
+    <button class="btn save-btn" id="save-load">📥 Load save code</button>
+    <p class="save-message" id="save-message" role="status" hidden></p>
+    <p class="save-tip">🔒 Keep your code private, like a password: anyone with it can load your progress.</p>
+    <button class="btn close-btn">Done</button>
   </dialog>
 
   <!-- Choose a mode -->
@@ -117,6 +133,12 @@
       <section class="lk-right">
         <div class="lk-stage">
           <div class="lk-rays" aria-hidden="true"></div>
+          <!-- Your name, above your coder (a nickname: never your real name) -->
+          <div class="lk-nameplate">
+            <input id="locker-name" maxlength="20" autocomplete="off" spellcheck="false" aria-label="Your coder's name" aria-describedby="locker-name-tip">
+            <button type="button" id="locker-name-dice" title="Random name" aria-label="Pick a random name">🎲</button>
+            <p class="lk-name-tip" id="locker-name-tip">✏️ Click to rename. Use a nickname, never your real name!</p>
+          </div>
           <div class="lk-preview" id="locker-preview"></div>
           <div class="lk-podium" aria-hidden="true"></div>
         </div>
@@ -137,5 +159,6 @@
   <script src="js/menu.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/locker.js"></script>
+  <script src="js/savecode.js"></script>
 </body>
 </html>
