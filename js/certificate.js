@@ -92,7 +92,7 @@ function renderCertificate() {
   const name = nameInput.value.trim() || coder.name;
   const when = earnedAt || Date.now();
   certEl('cert-name').textContent = name;
-  certEl('cert-date').textContent = new Date(when).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  certEl('cert-date').textContent = new Date(when).toLocaleDateString(LANG === 'es' ? 'es' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   certEl('cert-number').textContent = `Certificate No. ${certNumber(name, earnedAt || 0)}`;
   certEl('cert-coder').innerHTML = avatarSvg();
   certEl('cert-paper').classList.toggle('locked', !earnedAt);

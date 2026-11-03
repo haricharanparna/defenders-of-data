@@ -578,8 +578,8 @@ function demoApi(run) {
       await wait(100);
     }
   }
-  // The answer button whose text matches
-  const button = (sel, text) => [...doc.querySelectorAll(sel)].find(b => b.textContent.trim() === text.trim());
+  // The answer button whose text matches (in Spanish, the button shows the translation)
+  const button = (sel, text) => [...doc.querySelectorAll(sel)].find(b => [text.trim(), tr(text).trim()].includes(b.textContent.trim()));
 
   return { say, wait, moveTo, click, hold, press, game, $, waitFor, button };
 }

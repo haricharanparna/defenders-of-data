@@ -20,6 +20,14 @@ for (const option of ACCESS_OPTIONS) {
 }
 document.getElementById('btn-access').addEventListener('click', () => document.getElementById('dlg-access').showModal());
 
+// Language: the button is labeled in the language it switches to (i18n.js)
+const langButton = document.getElementById('btn-lang');
+if (LANG === 'es') {
+  langButton.textContent = '🌐 English';
+  langButton.lang = 'en';
+}
+langButton.addEventListener('click', () => setLanguage(LANG === 'es' ? 'en' : 'es'));
+
 // Every "close" button closes the panel it lives in
 document.querySelectorAll('.close-btn').forEach(btn => {
   btn.addEventListener('click', () => btn.closest('dialog').close());

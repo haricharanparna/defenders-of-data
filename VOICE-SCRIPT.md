@@ -7,7 +7,7 @@ Put all the files in the `voice` folder in this project, and list them in `VOICE
 - Sound excited, like a YouTuber showing off a game. Talk a little faster than normal.
 - Leave about half a second of quiet at the start and end, and record somewhere quiet.
 - You can change the words to sound like you! Just update the caption text in `js/demo.js` to match.
-- If a file is missing, that line uses the computer voice, so nothing breaks.
+- If a file is missing, that line just shows as a caption, so nothing breaks.
 
 ## Tower Defense (13 lines)
 

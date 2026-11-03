@@ -998,8 +998,8 @@ kbd {
 .save-tip { font-size: 0.9rem; color: var(--text-dim); }
 
 /* ---------- Accessibility (access.js) ---------- */
-.menu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-.menu-row .btn { padding: 0.85rem 0.3rem; font-size: 0.62rem; white-space: nowrap; }
+.menu-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+.menu-row .btn { padding: 0.85rem 0.3rem; font-size: 0.62rem; line-height: 1.5; }   /* longer Spanish labels wrap instead of spilling out */
 .access-list { display: grid; gap: 0.7rem; margin: 1rem 0; }
 .access-option {
   display: flex;

@@ -417,7 +417,7 @@ function enemyTurn() {
     }
   }
   e.turn++;
-  log(`${e.c.emoji} ${e.c.name} ${battle.attack.text}`, 'attack');
+  log(`${e.c.emoji} ${tr(e.c.name)} ${tr(battle.attack.text)}`, 'attack');
   showMoves();
 }
 

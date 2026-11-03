@@ -424,7 +424,7 @@ function answerQuestion(button, opt, q) {
   const right = q.options.find(o => o.correct);
   [...$('q-options').children].forEach(b => {
     b.disabled = true;
-    if (b.textContent === right.text) b.classList.add('right');
+    if (b.textContent === tr(right.text)) b.classList.add('right');
   });
   if (!opt.correct) {
     button.classList.add('wrong');

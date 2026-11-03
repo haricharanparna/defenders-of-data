@@ -54,6 +54,7 @@ The **Accessibility** settings (extra time, bigger text, calm mode) let every st
   - **Extra time:** every countdown lasts twice as long.
   - **Bigger text:** everything is larger and easier to read.
   - **Calm mode:** turns off flashing, shaking and bouncing. The game also follows your computer's "reduce motion" setting.
+- **🌐 English and Spanish (Español):** one button on the title screen switches every game, question, scam example and caption to Spanish. The page language changes too, so screen readers read it in a Spanish voice.
 - **Keyboard and mouse:** everything works with Tab, Enter and Esc, with visible focus outlines. Adventure has re-mappable keys.
 - **Screen reader labels** on buttons and live regions for captions and results.
 - **Works on phones, tablets and computers.**
@@ -72,7 +73,8 @@ Plain **HTML, CSS and JavaScript**, with no game engine, no frameworks and no bu
 - **Canvas rendering** for the Tower Defense board and the Adventure world. Adventure areas are generated from fixed seeds, so they come out the same every time.
 - **Coders drawn in code:** every avatar is an SVG built from your choices, with shading computed from your skin and hair colors. A full-body version stands in the Locker.
 - **Self-playing demos:** the How to Play videos run the *real game* in a hidden frame and drive it with simulated mouse and keyboard events. They read the game's own state to answer correctly, so they never go out of date.
-- **Narration:** recorded voice clips, falling back to the Web Speech API.
+- **Narration:** recorded voice clips with captions. A line without a clip shows as a caption only.
+- **Translation:** the game is written in English, and `js/i18n.js` swaps every line on screen (page text, labels, canvas text) for its Spanish version from `js/lang-es.js`, including lines with numbers and names filled in.
 - **Save codes:** all saves are compressed with the browser's `CompressionStream` and turned into one copyable code.
 - **Shared systems** across the three games: stars, coder, sound, accessibility settings and the "you've been hacked!" event.
 
@@ -87,6 +89,7 @@ js/content.js         The learning content: quiz, flashcards, DMs, skills, boss 
 js/avatar.js          Your coder: cosmetics, drawing, stars
 js/demo.js            How to Play videos
 js/access.js          Accessibility settings
+js/i18n.js            English / Spanish switch (Spanish text in js/lang-es.js)
 css/                  Styles (style.css is shared)
 ```
 
