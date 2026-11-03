@@ -39,7 +39,7 @@ function firewallBlast() {
   if (state.charge < BLAST_CHARGE || !state.waveActive || state.over || anyDialogOpen()) return;
   state.charge = 0;
   state.blasts++;
-  blastFlash = 0.5;
+  blastFlash = calmMotion() ? 0 : 0.5;   // no white flash in Calm mode
   playSound('blast');
   for (const e of state.enemies) {
     if (THREATS[e.type].boss) hurt(e, e.maxHp * BLAST_BOSS_DAMAGE);

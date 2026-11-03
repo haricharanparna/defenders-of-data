@@ -10,7 +10,7 @@ const THREAT_CHANCE = 0.25; // how many of the movers are threats
 const MAX_MOVERS = 40;
 
 // Checked every frame, so turning Calm mode on or off (access.js) takes effect right away
-const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches || access.calm;
+const reduceMotion = calmMotion;
 
 let width, height, centerX, centerY;
 let movers = [];

@@ -21,15 +21,17 @@ const OVERDRIVE = { times: 7, seconds: 30 };
 
 // ---------- What you can buy ----------
 // tier: how hard the unlock question is (1 to 3)
+// topics: where the hiring question comes from (UPGRADES groups or SKILLS names in content.js),
+// so the question is about the defender you're hiring
 const HELPERS = [
-  { id: 'password', emoji: '🔑', name: 'Password Manager', habit: 'Makes a strong, different password for every account.', cost: 15, rate: 0.1, tier: 1 },
-  { id: 'twofa', emoji: '🔐', name: '2FA Codes', habit: 'A second key, so a stolen password isn\'t enough.', cost: 100, rate: 1, tier: 1 },
-  { id: 'update', emoji: '🔄', name: 'Auto Updates', habit: 'Patches the holes hackers use, all by itself.', cost: 1100, rate: 8, tier: 1 },
-  { id: 'antivirus', emoji: '🦠', name: 'Antivirus Scanner', habit: 'Catches malware before it can run.', cost: 12000, rate: 47, tier: 2 },
-  { id: 'firewall', emoji: '🧱', name: 'Firewall', habit: 'Blocks connections you didn\'t ask for.', cost: 130000, rate: 260, tier: 2 },
-  { id: 'backup', emoji: '💽', name: 'Cloud Backup', habit: 'A spare copy of your files, so ransomware can\'t win.', cost: 1.4e6, rate: 1400, tier: 2 },
-  { id: 'team', emoji: '👩‍💻', name: 'Security Team', habit: 'Real people watching for attacks day and night.', cost: 2e7, rate: 7800, tier: 3 },
-  { id: 'ai', emoji: '🤖', name: 'AI Threat Hunter', habit: 'Spots strange activity faster than any human.', cost: 3.3e8, rate: 44000, tier: 3 },
+  { id: 'password', emoji: '🔑', name: 'Password Manager', habit: 'Makes a strong, different password for every account.', cost: 15, rate: 0.1, tier: 1, topics: ['twofa', 'Password Managers'] },
+  { id: 'twofa', emoji: '🔐', name: '2FA Codes', habit: 'A second key, so a stolen password isn\'t enough.', cost: 100, rate: 1, tier: 1, topics: ['twofa', 'Login Alerts and MFA Fatigue'] },
+  { id: 'update', emoji: '🔄', name: 'Auto Updates', habit: 'Patches the holes hackers use, all by itself.', cost: 1100, rate: 8, tier: 1, topics: ['update', 'Patching Fast'] },
+  { id: 'antivirus', emoji: '🦠', name: 'Antivirus Scanner', habit: 'Catches malware before it can run.', cost: 12000, rate: 47, tier: 2, topics: ['update', 'App Permissions'] },
+  { id: 'firewall', emoji: '🧱', name: 'Firewall', habit: 'Blocks connections you didn\'t ask for.', cost: 130000, rate: 260, tier: 2, topics: ['Public Wi-Fi Safety', 'Encryption'] },
+  { id: 'backup', emoji: '💽', name: 'Cloud Backup', habit: 'A spare copy of your files, so ransomware can\'t win.', cost: 1.4e6, rate: 1400, tier: 2, topics: ['Backing Up Your Files', 'Double Extortion'] },
+  { id: 'team', emoji: '👩‍💻', name: 'Security Team', habit: 'Real people watching for attacks day and night.', cost: 2e7, rate: 7800, tier: 3, topics: ['Social Engineering', 'If You Get Hacked'] },
+  { id: 'ai', emoji: '🤖', name: 'AI Threat Hunter', habit: 'Spots strange activity faster than any human.', cost: 3.3e8, rate: 44000, tier: 3, topics: ['AI Fakes', 'verify'] },
 ];
 
 // Each defender gets 4 upgrades that double it, once you own enough of them
@@ -184,8 +186,13 @@ function questionPool(tier) {
   return all.filter(q => (q.level || 1) <= tier);
 }
 
-function pickQuestion(tier) {
-  const pool = questionPool(tier);
+// Every question about these topics (UPGRADES groups or SKILLS names), at any difficulty
+function topicPool(topics) {
+  return topics.flatMap(t => UPGRADES[t] || SKILLS.find(skill => skill.name === t)?.questions || []);
+}
+
+function pickQuestion(tier, topics) {
+  const pool = topics ? topicPool(topics) : questionPool(tier);
   const fresh = pool.filter(q => !askedRecently.includes(q.prompt));
   const q = pickRandom(fresh.length ? fresh : pool);
   askedRecently.push(q.prompt);
@@ -198,8 +205,8 @@ const shuffle = list => list.map(v => [Math.random(), v]).sort((a, b) => a[0] - 
 
 // done(true) when answered right. A wrong answer offers another question.
 function ask(opts, done) {
-  const { tag, title, tier, doneText } = opts;
-  const q = pickQuestion(tier);
+  const { tag, title, tier, topics, doneText } = opts;
+  const q = pickQuestion(tier, topics);
   askOpts = opts;
   askDone = done;
   askRight = null;
@@ -292,7 +299,7 @@ function buyHelper(h) {
   const cost = helperCost(h);
   if (game.bytes < cost) return;
   if (!game.unlocked.includes(h.id)) {
-    ask({ tag: `🔒 Unlock ${h.emoji} ${h.name}`, title: 'Answer to hire this defender', tier: h.tier, doneText: `Hire ${h.name}` }, () => {
+    ask({ tag: `🔒 Unlock ${h.emoji} ${h.name}`, title: 'Answer to hire this defender', tier: h.tier, topics: h.topics, doneText: `Hire ${h.name}` }, () => {
       game.unlocked.push(h.id);
       showToast(`${h.emoji} ${h.name} unlocked!`);
       playSound('upgrade');

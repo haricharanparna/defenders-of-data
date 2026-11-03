@@ -883,3 +883,19 @@ body.td {
 }
 @keyframes boost-glow { 50% { box-shadow: 0 0 14px rgba(255, 210, 63, 0.9); } }
 @media (prefers-reduced-motion: reduce) { .stat.boost { animation: none; } }
+
+/* ---------- Phones and narrow windows ----------
+   The top bar and tower bar wrap onto several rows, which left no room for the board.
+   Here the page scrolls instead: buttons wrap, the board is as big as fits on screen, and the towers sit 2 per row.
+   (Also for short windows, like a phone turned sideways.) */
+@media (max-width: 700px), (max-height: 560px) {
+  .controls { flex-wrap: wrap; justify-content: flex-end; }
+  body.td { height: auto; min-height: 100vh; }
+  body.td .board { flex: none; padding: 0.4rem; }
+  body.td #board { width: auto; height: auto; max-width: 100%; max-height: calc(100vh - 1.2rem); }
+  body.td .tower-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; padding: 0.5rem; }
+  body.td .tool { min-width: 0; padding: 0.45rem 0.55rem; }
+  body.td .tool-emoji { font-size: 1.5rem; }
+  body.td .tool-name { font-size: 0.85rem; }
+  body.td .tool-beats { font-size: 0.72rem; }
+}

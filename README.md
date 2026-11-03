@@ -32,7 +32,20 @@ Every unlock, upgrade and boss is won by **answering a safety question**, so lea
 - **Level briefings and 20 skill lessons** in Levels mode, each with a quick skill check.
 - **Remember-your-password check:** the practice password you make for the 2FA tower comes back later with a 2-step code.
 - **🎯 Real-Life Missions:** on the Why It Matters screen, players check off real actions (turn on 2FA, update your phone, set an account to private, teach a friend) for stars. The game rewards doing it for real.
-- **Where to get help:** tell a trusted adult, and report scams at [ReportFraud.ftc.gov](https://reportfraud.ftc.gov).
+- **Where to get help:** tell a trusted adult, report scams at [ReportFraud.ftc.gov](https://reportfraud.ftc.gov), and get help with photo threats from NCMEC's [Take It Down](https://takeitdown.ncmec.org).
+
+## For teachers and parents
+
+Defenders of the Data works as a ready-made lesson: it's free, runs in any browser (including school Chromebooks), and needs no accounts, so there's nothing to sign up for and no student data collected.
+
+**A 40-minute class plan:**
+
+1. **Hook (5 min):** open **Why It Matters** together and talk about the $12.5 billion number. Has anyone gotten a weird text or DM?
+2. **Play (20 min):** students pick a game. Tower Defense Levels mode teaches a new skill every 5 levels; Data Clicker is quickest to pick up.
+3. **Share (10 min):** students open **Study** and share one flashcard they learned, or a Real or Scam message that fooled them.
+4. **Homework (5 min):** each student does one **Real-Life Mission** at home (like turning on 2-step verification) and teaches it to someone in their family.
+
+The **Accessibility** settings (extra time, bigger text, calm mode) let every student play at their own pace, and a **Save Code** moves progress between school and home.
 
 ## Beginner-friendly and accessible
 

@@ -1,12 +1,12 @@
 # Voice script for the How to Play videos
 
 Record each line below as its **own file**, named exactly like its number, for example `td-01.m4a`.
-Put all the files in the `voice` folder in this project, then tell Claude to hook them up.
+Put all the files in the `voice` folder in this project, and list them in `VOICE_CLIPS` in `js/demo.js`.
 
 - Any normal audio type works: `.m4a` (iPhone Voice Memos), `.mp3`, `.wav` or `.webm`.
 - Sound excited, like a YouTuber showing off a game. Talk a little faster than normal.
 - Leave about half a second of quiet at the start and end, and record somewhere quiet.
-- You can change the words to sound like you! Just tell Claude, and the captions will be updated to match.
+- You can change the words to sound like you! Just update the caption text in `js/demo.js` to match.
 - If a file is missing, that line uses the computer voice, so nothing breaks.
 
 ## Tower Defense (13 lines)

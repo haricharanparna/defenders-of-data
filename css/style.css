@@ -130,6 +130,12 @@ h1 {
 }
 
 .hint { margin: 0; font-size: 0.9rem; color: var(--text-dim); }
+/* Touch screens (no mouse) get the "tap" hint instead of the mouse and keyboard one */
+.hint-touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .hint-mouse { display: none; }
+  .hint-touch { display: block; }
+}
 kbd {
   font-family: var(--body);
   font-weight: 700;
@@ -251,7 +257,7 @@ kbd {
 .locker {
   --lk-font: 'Lilita One', 'Nunito', sans-serif;
   --lk-yellow: #ffe94d;
-  width: 100vw;
+  width: 100%;   /* not 100vw, which counts the scrollbar and pokes off the right edge */
   height: 100dvh;
   max-width: none;
   max-height: none;
@@ -562,7 +568,7 @@ kbd {
 
 /* Phones and small windows: coder on top, items underneath, whole thing scrolls */
 @media (max-width: 760px) {
-  .locker[open] { overflow-y: auto; }
+  .locker[open] { overflow-x: hidden; overflow-y: auto; }
   .lk-main { flex: none; display: flex; flex-direction: column-reverse; }
   .lk-right, .lk-stage { flex: none; }
   .lk-left { overflow: visible; }
@@ -704,7 +710,7 @@ kbd {
   font-family: var(--pixel);
   font-size: 0.55rem;
   color: #fff;
-  background: #e0393e;
+  background: #c8262c;
   border-radius: 4px;
   animation: demo-blink 1.6s ease-in-out infinite;
 }
@@ -1040,6 +1046,16 @@ kbd {
 .access-switch:focus-visible { outline: none; }
 .access-note { font-size: 0.92rem; color: var(--text-dim); }
 
+/* Read out by screen readers but not shown (like a page's main heading on the game screens) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Bigger text: everything sized in rem grows */
 html.big-text { font-size: 118%; }
 /* Calm mode: no flashing, shaking or bouncing (like the computer's own "reduce motion" setting) */
@@ -1078,6 +1094,9 @@ html.calm *, html.calm *::before, html.calm *::after {
 .mission-star { flex: none; font-size: 0.8rem; font-weight: 800; color: var(--gold); }
 .help-line { margin-top: 1rem; padding: 0.6rem 0.8rem; font-size: 0.92rem; background: rgba(255, 61, 139, 0.1); border-left: 4px solid var(--pink); border-radius: 4px; }
 .help-line a { color: var(--cyan); }
+.help-line p { margin: 0; }
+.help-line ul { margin: 0.4rem 0 0; padding-left: 1.3rem; }
+.help-line li { margin-top: 0.2rem; }
 
 /* ---------- Certified Data Defender (certificate.js) ---------- */
 .cert-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; }

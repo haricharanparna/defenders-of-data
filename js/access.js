@@ -17,6 +17,10 @@ try { access = { ...access, ...JSON.parse(localStorage.getItem(ACCESS_KEY)) }; }
 // Countdowns are multiplied by this. Read when a page loads, so a change applies to the next game you open.
 const TIME_SCALE = access.extraTime ? 2 : 1;
 
+// True when motion should be kept still: Calm mode, or the computer's own "reduce motion" setting.
+// Checked when it's needed (not once on load), so switching Calm mode works right away.
+const calmMotion = () => access.calm || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function applyAccess() {
   document.documentElement.classList.toggle('big-text', access.bigText);
   document.documentElement.classList.toggle('calm', access.calm);
