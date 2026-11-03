@@ -354,6 +354,7 @@ function startBattle({ wild = null, trainer = null, boss = false }) {
   $('battle').classList.toggle('boss-fight', boss);
   $('player-sprite').innerHTML = avatarSvg();
   $('battle-log').innerHTML = '';
+  $('battle-actions').innerHTML = '';   // no moves until the threat attacks
   renderGuardian();
   playSound(bossFight ? 'boss' : 'dm');
   if (battle.guardians.length) log(`Your guardians ${battle.guardians.map(g => g.emoji).join(' ')} are ready to fight!`, 'good');
@@ -387,13 +388,35 @@ function nextEnemy() {
 const guardian = () => battle.guardians[battle.active];
 const guardianUp = () => battle.guardians.length > 0 && guardian().hp > 0;
 
+// After a wrong move, a hint that makes you think about what the attack is doing,
+// without naming the defense that beats it
+const ATTACK_HINTS = {
+  linkcheck: 'Hint: read the attack again. Is someone trying to get you to click a link or open a page?',
+  twofa: 'Hint: read the attack again. Is someone trying to guess, steal or reuse a password?',
+  update: 'Hint: read the attack again. Is something trying to sneak a program onto your device?',
+  verify: 'Hint: read the attack again. Is someone pretending to be a person they\'re not?',
+};
+// Like real scammers, threats mix up their tricks: this is the chance each turn that they try a trick
+// from a different kind of threat. So you have to read every attack, not spam one move.
+const TACTIC_SWITCH = 0.45;
+
 function enemyTurn() {
   if (!battle) return;
   const e = battle.enemy;
-  const index = battle.boss ? Math.floor(Math.random() * e.c.attacks.length) : e.turn % e.c.attacks.length;
+  if (battle.boss) {
+    // The boss's weakness depends on which attack it uses
+    const index = Math.floor(Math.random() * e.c.attacks.length);
+    battle.attack = { text: e.c.attacks[index], beats: BOSS.mixed[index] || e.c.beats };
+  } else {
+    const tricks = CREATURES.filter(c => c.beats !== e.c.beats && c.zone <= e.c.zone);
+    if (tricks.length && Math.random() < TACTIC_SWITCH) {
+      const from = pickRandom(tricks);
+      battle.attack = { text: `switches tactics and ${pickRandom(from.attacks)}`, beats: from.beats };
+    } else {
+      battle.attack = { text: e.c.attacks[e.turn % e.c.attacks.length], beats: e.c.beats };
+    }
+  }
   e.turn++;
-  // The boss's weakness depends on which attack it uses
-  battle.attack = { text: e.c.attacks[index], beats: (battle.boss && BOSS.mixed[index]) || e.c.beats };
   log(`${e.c.emoji} ${e.c.name} ${battle.attack.text}`, 'attack');
   showMoves();
 }
@@ -452,12 +475,11 @@ function useMove(id) {
   } else {
     e.hp = Math.max(0, e.hp - WRONG_DAMAGE);
     playSound('wrong');
-    const right = DEFENSES[battle.attack.beats];
     log(`You used ${d.emoji} ${d.name}. It's not very effective... (-${WRONG_DAMAGE})`, 'bad');
     updateBattleHp();
     setTimeout(() => {
       if (e.hp <= 0) return enemyBeaten();
-      enemyHits(e.power, `Hint: that attack was ${right.type}. ${right.emoji} ${right.name} beats it.`);
+      enemyHits(e.power, ATTACK_HINTS[battle.attack.beats]);
     }, 1000);
   }
 }

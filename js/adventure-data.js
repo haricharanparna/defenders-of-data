@@ -226,7 +226,7 @@ const CREATURES = [
   t('stuffer', '🧦', 'Credential Stuffer', 'twofa', 5, 'rare',
     'Takes passwords leaked from one site and tries them on all your other accounts.',
     'Never reuse passwords. A password manager can remember them all for you.',
-    ['found your password in a leak from an old game site and is trying it on your email.', 'tries your leaked password on 500 other websites at once.']),
+    ['finds your password in a leak from an old game site and tries it on your email.', 'tries your leaked password on 500 other websites at once.']),
   t('simswap', '📞', 'SIM Swapper', 'twofa', 5, 'epic',
     'Tricks a phone company into moving your number to their SIM card, so they get your text codes.',
     'Use an authenticator app for 2-step codes when you can, and ask your family to add a PIN to your phone account.',
