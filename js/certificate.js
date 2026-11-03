@@ -1,14 +1,14 @@
 // The Certified Data Defender certificate, on the title screen (🏆 Certificate).
 // Earn it by mastering all three games:
 //   🏰 Tower Defense: clear all 100 levels
-//   🖱️ Data Clicker: earn 1 billion bytes in total
+//   🖱️ Data Clicker: earn 500K bytes in total
 //   ⚔️ Adventure: quarantine all 60 threats and unlock all 4 guardians
 // Progress is read from each game's own save. Until you've earned it, the certificate shows as a locked preview.
 // Once earned, you can print it or save it as a PDF. Uses CREATURES and GUARDIANS from adventure-data.js.
 
 const CERT_KEY = 'defenders-of-data-certificate';   // { earnedAt } once you've earned it
 const CERT_LEVELS = 100;
-const CERT_BYTES = 1e9;
+const CERT_BYTES = 5e5;
 const certDialog = document.getElementById('dlg-cert');
 const certEl = id => document.getElementById(id);
 
@@ -28,8 +28,8 @@ function certGoals() {
   return [
     { emoji: '🏰', game: 'Tower Defense', goal: `Clear all ${CERT_LEVELS} levels`,
       done: levels / CERT_LEVELS, count: `${levels}/${CERT_LEVELS} levels` },
-    { emoji: '🖱️', game: 'Data Clicker', goal: 'Earn 1 billion bytes',
-      done: bytes / CERT_BYTES, count: `${shortNumber(bytes)}/1B bytes` },
+    { emoji: '🖱️', game: 'Data Clicker', goal: 'Earn 500K bytes',
+      done: bytes / CERT_BYTES, count: `${shortNumber(bytes)}/500K bytes` },
     { emoji: '⚔️', game: 'Adventure', goal: `Quarantine all ${CREATURES.length} threats and unlock all ${GUARDIANS.length} guardians`,
       done: (caught + guardians) / (CREATURES.length + GUARDIANS.length), count: `${caught}/${CREATURES.length} threats · ${guardians}/${GUARDIANS.length} guardians` },
   ];

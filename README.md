@@ -46,7 +46,7 @@ Every unlock, upgrade and boss is won by **answering a safety question**, so lea
 
 Earn ★ stars in all three games and spend them in the **Coder Locker** on 107 cosmetics for your coder: outfits (the legendary Hacker hoodie is the rarest), hair, glasses, laptops, backgrounds and sidekicks, plus a limited-time Halloween shop.
 
-**🏆 Certified Data Defender:** master all three games (clear all 100 Tower Defense levels, earn 1 billion bytes in Data Clicker, and quarantine all 60 threats and unlock all 4 guardians in Adventure) to earn a printable certificate with your name and coder on it. A tracker on the title screen shows how close you are.
+**🏆 Certified Data Defender:** master all three games (clear all 100 Tower Defense levels, earn 500K bytes in Data Clicker, and quarantine all 60 threats and unlock all 4 guardians in Adventure) to earn a printable certificate with your name and coder on it. A tracker on the title screen shows how close you are.
 
 ## How it's built
 
