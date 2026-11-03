@@ -23,7 +23,10 @@ const keyCode = key => KEY_CODES[key] || (key.startsWith('Arrow') ? key : /\d/.t
 
 // Your own recorded narration, in the voice folder: line id → file name (see VOICE-SCRIPT.md).
 // Lines not listed here are read by the computer's voice.
-const VOICE_CLIPS = {};
+const recorded = (game, lines) => Array.from({ length: lines }, (_, i) => `${game}-${String(i + 1).padStart(2, '0')}`);
+const VOICE_CLIPS = Object.fromEntries(
+  [...recorded('td', 13), ...recorded('clicker', 9), ...recorded('adventure', 10)].map(id => [id, `${id}.m4a`]),
+);
 let clip = null;   // the recording playing right now
 
 let voiceOn = true;
@@ -89,9 +92,14 @@ new ResizeObserver(() => {
   frame.style.transform = `scale(${screenScale})`;
 }).observe(screen);
 
+// Browsers block sound until you click the page. If a video starts by itself, the button asks for a click.
+let soundBlocked = false;
+
 function renderVoice() {
-  demoEl('demo-voice').textContent = voiceOn ? '🔊 Voice on' : '🔇 Voice off';
-  demoEl('demo-voice').setAttribute('aria-pressed', voiceOn);
+  const btn = demoEl('demo-voice');
+  btn.textContent = !voiceOn ? '🔇 Voice off' : soundBlocked ? '🔊 Click for sound' : '🔊 Voice on';
+  btn.classList.toggle('needs-click', voiceOn && soundBlocked);
+  btn.setAttribute('aria-pressed', voiceOn);
 }
 renderVoice();
 
@@ -179,6 +187,12 @@ demoEl('demo-cover').addEventListener('click', e => {
   if (act === 'replay') playDemo(current.name);
 });
 demoEl('demo-voice').addEventListener('click', () => {
+  // This click lets the browser play sound, so the next line will be heard
+  if (soundBlocked) {
+    soundBlocked = false;
+    renderVoice();
+    return;
+  }
   voiceOn = !voiceOn;
   if (!voiceOn) {
     window.speechSynthesis?.cancel();
@@ -300,7 +314,13 @@ function demoApi(run) {
         clip.onerror = done;
         clip.onpause = done;   // voice turned off, or the video closed
         // Browsers block sound until you've clicked the page: then just show the caption long enough to read
-        clip.play().catch(() => { timer = setTimeout(done, words * 320 + 900); });
+        clip.play().then(() => {
+          if (soundBlocked) { soundBlocked = false; renderVoice(); }
+        }, () => {
+          soundBlocked = true;
+          renderVoice();
+          timer = setTimeout(done, words * 320 + 900);
+        });
       } else if (voiceOn && window.speechSynthesis) {
         const line = new SpeechSynthesisUtterance(text);
         line.voice = pickVoice();

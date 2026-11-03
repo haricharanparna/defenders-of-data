@@ -1081,3 +1081,5 @@ html.calm *, html.calm *::before, html.calm *::after {
 .mission-star { flex: none; font-size: 0.8rem; font-weight: 800; color: var(--gold); }
 .help-line { margin-top: 1rem; padding: 0.6rem 0.8rem; font-size: 0.92rem; background: rgba(255, 61, 139, 0.1); border-left: 4px solid var(--pink); border-radius: 4px; }
 .help-line a { color: var(--cyan); }
+/* The video started by itself, so the browser blocked sound until you click */
+.demo-voice.needs-click { color: var(--bg); background: var(--gold); border-color: var(--gold); animation: demo-blink 1.2s ease-in-out infinite; }
