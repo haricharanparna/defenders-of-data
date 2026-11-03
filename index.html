@@ -7,7 +7,7 @@
   <meta name="description" content="A tower defense game about protecting your data and staying safe online.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lilita+One&family=Nunito:wght@400;700;800&family=Cinzel:wght@600;800&family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -36,6 +36,7 @@
     <nav class="menu" aria-label="Main menu">
       <button class="btn btn-primary" id="btn-play">&#9654; PLAY</button>
       <button class="btn coder-btn" id="btn-coder"><span class="coder-mini" id="coder-mini" aria-hidden="true"></span>My Coder</button>
+      <button class="btn cert-btn" id="btn-cert">🏆 Certificate <span class="cert-btn-count"></span></button>
       <button class="btn" id="btn-why">Why It Matters</button>
       <div class="menu-row">
         <button class="btn" id="btn-save">💾 Save Code</button>
@@ -87,6 +88,63 @@
     <div class="access-list" id="access-list"></div>
     <p class="access-note">Everything also works with just a keyboard: <kbd>Tab</kbd> to move, <kbd>Enter</kbd> to choose, <kbd>Esc</kbd> to close.</p>
     <button class="btn btn-primary close-btn">Done</button>
+  </dialog>
+
+  <!-- Certified Data Defender: progress on the 3 goals, and the certificate (certificate.js) -->
+  <dialog id="dlg-cert" class="panel cert-panel" aria-labelledby="cert-title">
+    <h2 id="cert-title">🏆 Certified Data Defender</h2>
+    <p class="cert-status" id="cert-status" aria-live="polite"></p>
+    <div class="cert-overall" aria-hidden="true"><span id="cert-overall"></span></div>
+    <div class="cert-goals" id="cert-goals"></div>
+
+    <label class="cert-name-label">Name on your certificate
+      <input id="cert-name-input" maxlength="40" autocomplete="off" spellcheck="false">
+    </label>
+
+    <div class="cert-paper" id="cert-paper">
+      <div class="cert-inner">
+        <svg class="cert-watermark" viewBox="0 0 100 116" aria-hidden="true"><path d="M50 4 L94 20 V56 C94 84 74 104 50 112 C26 104 6 84 6 56 V20 Z"/></svg>
+        <div class="cert-coder" id="cert-coder" aria-hidden="true"></div>
+        <svg class="cert-shield" viewBox="0 0 100 116" aria-hidden="true">
+          <path d="M50 4 L94 20 V56 C94 84 74 104 50 112 C26 104 6 84 6 56 V20 Z" fill="#14205a" stroke="#c9a227" stroke-width="5"/>
+          <rect x="33" y="52" width="34" height="28" rx="4" fill="#e3bb3f"/>
+          <path d="M39 52 V42 C39 34 61 34 61 42 V52" fill="none" stroke="#e3bb3f" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="50" cy="64" r="4" fill="#14205a"/><rect x="48" y="64" width="4" height="9" fill="#14205a"/>
+        </svg>
+        <p class="cert-brand">Defenders of the Data</p>
+        <h3 class="cert-heading">Certificate of Achievement</h3>
+        <p class="cert-line">This certifies that</p>
+        <p class="cert-name" id="cert-name"></p>
+        <p class="cert-line">is officially a</p>
+        <p class="cert-rank">Certified Data Defender</p>
+        <p class="cert-body">for mastering online safety in all three missions: clearing all 100 levels of Tower Defense, building a billion-byte defense in Data Clicker, and quarantining every threat on the internet in Adventure.</p>
+        <div class="cert-footer">
+          <div class="cert-sign">
+            <span class="cert-sign-value" id="cert-date"></span>
+            <span class="cert-sign-label">Date</span>
+          </div>
+          <svg class="cert-seal" viewBox="0 0 120 120" aria-hidden="true">
+            <polygon fill="#c9a227" points="60,2 69,16 85,8 88,25 105,24 100,41 116,48 104,60 116,72 100,79 105,96 88,95 85,112 69,104 60,118 51,104 35,112 32,95 15,96 20,79 4,72 16,60 4,48 20,41 15,24 32,25 35,8 51,16"/>
+            <circle cx="60" cy="60" r="40" fill="#e3bb3f" stroke="#fff3c4" stroke-width="2"/>
+            <circle cx="60" cy="60" r="33" fill="none" stroke="#a8841c" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <path d="M60 36 L79 43 V58 C79 70 71 79 60 83 C49 79 41 70 41 58 V43 Z" fill="#14205a"/>
+            <path d="M60 46 L63 54 L71.5 54.3 L64.8 59.5 L67.2 67.7 L60 63 L52.8 67.7 L55.2 59.5 L48.5 54.3 L57 54 Z" fill="#e3bb3f"/>
+            <text x="60" y="97" text-anchor="middle" font-family="Cinzel, serif" font-weight="800" font-size="8.5" fill="#14205a" letter-spacing="1">CERTIFIED</text>
+          </svg>
+          <div class="cert-sign">
+            <span class="cert-signature">Haricharan Parna</span>
+            <span class="cert-sign-label">Haricharan Parna · Maker &amp; Developer</span>
+          </div>
+        </div>
+        <p class="cert-number" id="cert-number"></p>
+      </div>
+      <div class="cert-lock" aria-hidden="true">🔒 PREVIEW</div>
+    </div>
+
+    <div class="end-buttons">
+      <button class="btn btn-primary" id="cert-print"></button>
+      <button class="btn close-btn">Close</button>
+    </div>
   </dialog>
 
   <!-- Choose a mode -->
@@ -180,5 +238,7 @@
   <script src="js/locker.js"></script>
   <script src="js/savecode.js"></script>
   <script src="js/missions.js"></script>
+  <script src="js/adventure-data.js"></script>
+  <script src="js/certificate.js"></script>
 </body>
 </html>
