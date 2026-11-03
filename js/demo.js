@@ -1,14 +1,24 @@
 // How to Play videos: the real game plays itself in a little screen. A cursor moves and clicks,
 // a keyboard in the corner lights up with every key pressed, and a narrator explains (with captions).
 // The game runs in an iframe with #demo (demo-mode.js), so it starts fresh and never touches your save.
+// The controls work like a video player: pause, skip back and forward, a seek bar, volume and speed.
 // openDemo('td' | 'clicker' | 'adventure', afterClose) plays one. The scripts are at the bottom.
 // Everything is inside this function so its names never clash with the game's own. Only openDemo is shared.
 (() => {
 
 const DEMO_W = 1280;   // the game inside the screen is laid out at this size, then scaled to fit
 const DEMO_H = 720;
-const VOICE_KEY = 'defenders-of-data-demo-voice';
 const STOPPED = Symbol('demo stopped');
+const VOICE_KEY = 'defenders-of-data-demo-voice';     // '0' = muted
+const VOLUME_KEY = 'defenders-of-data-demo-volume';
+const SPEED_KEY = 'defenders-of-data-demo-speed';
+const SPEEDS = [2, 1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25];
+const SKIP = 10000;    // ⏪ and ⏩ jump 10 seconds
+// The game moves forward in steps of about one frame (20ms of video). Faster speeds and skipping take
+// bigger steps, so the game still draws a normal number of frames each second and keeps up.
+const STEP = 20;
+const MAX_STEP = 50;
+const stepSize = () => (skipping() ? MAX_STEP : Math.min(MAX_STEP, STEP * Math.max(1, prefs.speed)));
 
 const KEY_ROWS = [
   ['Escape', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
@@ -22,15 +32,30 @@ const KEY_CODES = { ' ': 'Space', Escape: 'Escape', Shift: 'ShiftLeft' };
 const keyCode = key => KEY_CODES[key] || (key.startsWith('Arrow') ? key : /\d/.test(key) ? `Digit${key}` : `Key${key.toUpperCase()}`);
 
 // Your own recorded narration, in the voice folder: line id → file name (see VOICE-SCRIPT.md).
-// Lines not listed here are read by the computer's voice.
 const recorded = (game, lines) => Array.from({ length: lines }, (_, i) => `${game}-${String(i + 1).padStart(2, '0')}`);
 const VOICE_CLIPS = Object.fromEntries(
   [...recorded('td', 13), ...recorded('clicker', 9), ...recorded('adventure', 10)].map(id => [id, `${id}.m4a`]),
 );
-let clip = null;   // the recording playing right now
+const clipLength = {};   // how long each recording is, in ms, so skipping ahead keeps the same timing
+let narration = null;    // the recording playing right now: { audio }
+let soundBlocked = false;   // browsers block sound until you click the page
 
-let voiceOn = true;
-try { voiceOn = localStorage.getItem(VOICE_KEY) !== '0'; } catch { /* storage blocked */ }
+// Your player settings, remembered on this computer
+const prefs = { volume: 1, muted: false, speed: 1 };
+try {
+  prefs.muted = localStorage.getItem(VOICE_KEY) === '0';
+  const volume = parseFloat(localStorage.getItem(VOLUME_KEY));
+  if (volume >= 0 && volume <= 1) prefs.volume = volume;
+  const speed = parseFloat(localStorage.getItem(SPEED_KEY));
+  if (SPEEDS.includes(speed)) prefs.speed = speed;
+} catch { /* storage blocked */ }
+function savePrefs() {
+  try {
+    localStorage.setItem(VOICE_KEY, prefs.muted ? '0' : '1');
+    localStorage.setItem(VOLUME_KEY, prefs.volume);
+    localStorage.setItem(SPEED_KEY, prefs.speed);
+  } catch { /* storage blocked */ }
+}
 
 // ---------- The player ----------
 const demoDialog = document.createElement('dialog');
@@ -40,7 +65,6 @@ demoDialog.innerHTML = `
   <div class="demo-head">
     <span class="demo-live" aria-hidden="true">▶ DEMO</span>
     <h2 id="demo-title"></h2>
-    <button class="btn btn-small demo-voice" id="demo-voice"></button>
   </div>
   <div class="demo-screen" id="demo-screen">
     <iframe id="demo-frame" title="The game playing by itself" tabindex="-1"></iframe>
@@ -51,9 +75,25 @@ demoDialog.innerHTML = `
       <div class="demo-keys" id="demo-keys"></div>
       <div class="demo-mouse" id="demo-mouse"><span class="demo-mouse-l"></span><span class="demo-mouse-r"></span></div>
     </div>
+    <span class="demo-big-play" id="demo-big-play" aria-hidden="true" hidden>▶</span>
+    <span class="demo-skipping" id="demo-skipping" aria-hidden="true" hidden>⏩ Skipping ahead...</span>
+    <button class="demo-unmute" id="demo-unmute" hidden>🔊 Click for sound</button>
     <div class="demo-cover" id="demo-cover"></div>
   </div>
-  <div class="demo-progress" aria-hidden="true"><span id="demo-progress"></span></div>
+  <div class="demo-controls">
+    <button class="demo-ctl demo-play" id="demo-play"></button>
+    <button class="demo-ctl" id="demo-back" title="Back 10 seconds (J)" aria-label="Back 10 seconds">⏪ 10</button>
+    <button class="demo-ctl" id="demo-fwd" title="Forward 10 seconds (L)" aria-label="Forward 10 seconds">10 ⏩</button>
+    <input type="range" class="demo-seek" id="demo-seek" min="0" max="1000" value="0" aria-label="Seek">
+    <span class="demo-time" id="demo-time">0:00 / 0:00</span>
+    <span class="demo-sound">
+      <button class="demo-ctl" id="demo-mute" title="Mute (M)"></button>
+      <input type="range" class="demo-volume" id="demo-volume" min="0" max="100" aria-label="Volume">
+    </span>
+    <select class="demo-speed" id="demo-speed" aria-label="Playback speed" title="Playback speed">
+      ${SPEEDS.map(s => `<option value="${s}">${s === 1 ? 'Normal' : `${s}×`}</option>`).join('')}
+    </select>
+  </div>
   <p class="demo-caption" id="demo-caption" aria-live="polite"></p>
   <div class="end-buttons">
     <button class="btn btn-primary" id="demo-go">Let's play!</button>
@@ -66,7 +106,7 @@ const frame = demoEl('demo-frame');
 const screen = demoEl('demo-screen');
 const cursor = demoEl('demo-cursor');
 let screenScale = 1;
-let current = null;    // the demo that's playing: { name, stopped, start, length }
+let current = null;    // the demo that's playing: { name, stopped, live, done, length }
 let demoAfter = null;
 
 // The keyboard in the corner: an RGB gaming keyboard. Each key gets its own color (--h, a hue)
@@ -92,40 +132,126 @@ new ResizeObserver(() => {
   frame.style.transform = `scale(${screenScale})`;
 }).observe(screen);
 
-// Browsers block sound until you click the page. If a video starts by itself, the button asks for a click.
-let soundBlocked = false;
+// ---------- The video clock ----------
+// The game in the screen doesn't run on real time: demo-mode.js hands its clock to this player.
+// clock.t is how far into the video we are (ms). Every few milliseconds drive() moves it forward
+// by the real time that passed times the speed, in small steps, and the game and the script follow.
+// Paused, nothing moves. Skipping ahead (clock.seekTo) runs as fast as the computer can.
+const clock = { t: 0, gameT: 0, paused: false, seekTo: null };   // gameT: how far the game itself has moved
+let sleepers = [];     // the script waiting for the clock: { end, resolve, reject, run }
+let lastReal = performance.now();
+let driving = false;
+const skipping = () => clock.seekTo !== null;
 
-function renderVoice() {
-  const btn = demoEl('demo-voice');
-  btn.textContent = !voiceOn ? '🔇 Voice off' : soundBlocked ? '🔊 Click for sound' : '🔊 Voice on';
-  btn.classList.toggle('needs-click', voiceOn && soundBlocked);
-  btn.setAttribute('aria-pressed', voiceOn);
+function sleep(run, ms) {
+  return new Promise((resolve, reject) => {
+    if (run.stopped) return reject(STOPPED);
+    sleepers.push({ end: clock.t + ms, resolve, reject, run });
+  });
 }
-renderVoice();
 
+// Let the script carry on wherever its wait is over
+function wakeSleepers() {
+  const due = sleepers.filter(s => s.end <= clock.t || s.run.stopped);
+  if (!due.length) return false;
+  sleepers = sleepers.filter(s => !due.includes(s));
+  for (const s of due) (s.run.stopped ? s.reject(STOPPED) : s.resolve());
+  return true;
+}
+
+async function drive() {
+  const now = performance.now();
+  const passed = Math.min(100, now - lastReal);
+  lastReal = now;
+  const run = current;
+  if (driving || !run?.live || (clock.paused && !skipping())) return;
+  driving = true;
+  try {
+    let budget = skipping() ? Infinity : passed * prefs.speed;
+    for (let i = 0; i < 5000 && budget > 0 && current === run && run.live; i++) {
+      if (skipping() && performance.now() - now > 14) break;   // keep the page responsive while skipping
+      // Move the video's time to the next moment something happens: the script's next wake-up,
+      // the game's next step, the end of a skip, or as far as real time allows
+      const wake = Math.min(...sleepers.map(s => s.end));
+      const target = Math.min(clock.t + budget, wake, clock.gameT + stepSize(), skipping() ? clock.seekTo : Infinity);
+      const moved = Math.max(0, target - clock.t);
+      clock.t += moved;
+      budget -= moved;
+      // The game only ever moves in whole steps, so it plays out the same way every time
+      while (clock.gameT + stepSize() <= clock.t + 1e-6) {
+        const step = stepSize();
+        clock.gameT += step;
+        frame.contentWindow?.demoClock?.advance(step);
+      }
+      const woke = wakeSleepers();
+      if (woke) for (let k = 0; k < 20; k++) await null;   // let the script react before time moves on
+      if (skipping() && clock.t >= clock.seekTo) {
+        endSkip();
+        break;   // back to normal speed from the next tick
+      }
+      if (moved === 0 && !woke) break;
+    }
+  } finally {
+    driving = false;
+  }
+}
+setInterval(drive, 8);
+
+// ---------- Playing, pausing and skipping ----------
 function openDemo(name, after = null) {
   demoAfter = after;
   demoEl('demo-title').textContent = `How to Play: ${DEMOS[name].title}`;
   if (!demoDialog.open) demoDialog.showModal();
   demoEl('demo-go').focus();
+  loadClipLengths(name);
+  clock.paused = false;
   playDemo(name);
 }
 
-function playDemo(name) {
+// Read how long each recording is. Each line lasts exactly that long in the video, whether it's
+// heard, muted or skipped, so the video always has the same timing.
+const clipsLoaded = {};
+function loadClipLengths(name) {
+  clipsLoaded[name] = clipsLoaded[name] || Promise.all(Object.keys(VOICE_CLIPS).filter(id => id.startsWith(`${name}-`)).map(id =>
+    new Promise(resolve => {
+      const audio = new Audio(`voice/${VOICE_CLIPS[id]}`);
+      audio.preload = 'metadata';
+      audio.onloadedmetadata = () => { clipLength[id] = audio.duration * 1000; resolve(); };
+      audio.onerror = resolve;
+    })));
+  return clipsLoaded[name];
+}
+const stopNarration = () => {
+  narration?.audio.pause();
+  narration = null;
+};
+
+// skipTo: start the video and skip straight to this point (ms), used for skipping back
+function playDemo(name, skipTo = 0) {
   stopDemo();
-  const run = { name, stopped: false, start: 0, length: DEMOS[name].length };
+  const run = { name, stopped: false, live: false, done: false, length: DEMOS[name].length * 1000 };
   current = run;
+  clock.t = 0;
+  clock.gameT = 0;
+  clock.seekTo = skipTo > 0 ? skipTo : null;
   demoEl('demo-caption').textContent = '';
-  demoEl('demo-progress').style.width = '0%';
   showCover('<span class="demo-spinner"></span>Loading the game...');
   cursor.style.transform = `translate(${screen.clientWidth / 2}px, ${screen.clientHeight / 2}px)`;
+  renderControls();
   frame.onload = async () => {
     if (current !== run) return;
+    // Calm mode for the paused game: stop its animations too
+    const style = frame.contentDocument.createElement('style');
+    style.textContent = 'html.demo-paused *, html.demo-paused *::before, html.demo-paused *::after { animation-play-state: paused !important; }';
+    frame.contentDocument.head.appendChild(style);
+    setGameVolume();
+    // Wait (a few seconds at most) to know how long each line is
+    await Promise.race([loadClipLengths(name), new Promise(resolve => window.setTimeout(resolve, 3000))]);
+    if (current !== run) return;
+    run.live = true;
     try {
       await sleep(run, 700);
       hideCover();
-      run.start = performance.now();
-      requestAnimationFrame(() => tickProgress(run));
       await DEMOS[name].script(demoApi(run));
       finishDemo(run);
     } catch (err) {
@@ -140,9 +266,9 @@ function playDemo(name) {
 
 function stopDemo() {
   if (current) current.stopped = true;
+  wakeSleepers();
+  stopNarration();
   current = null;
-  window.speechSynthesis?.cancel();
-  clip?.pause();
   frame.onload = null;
   demoDialog.querySelectorAll('.demo-key.down').forEach(k => k.classList.remove('down'));
 }
@@ -150,25 +276,49 @@ function stopDemo() {
 function finishDemo(run) {
   if (current !== run) return;
   run.done = true;
-  demoEl('demo-progress').style.width = '100%';
+  run.live = false;
+  run.length = clock.t;
+  DEMOS[run.name].length = clock.t / 1000;   // the real length, for the seek bar next time
+  endSkip();
   showCover(`<p class="demo-end">You're ready, Defender!</p>
     <button class="btn btn-primary" data-act="go">Let's play!</button>
     <button class="btn" data-act="replay">↺ Watch again</button>`);
+  renderControls();
 }
 
-function tickProgress(run) {
-  if (current !== run || run.done) return;
-  const t = (performance.now() - run.start) / 1000;
-  demoEl('demo-progress').style.width = `${Math.min(98, (t / run.length) * 100)}%`;
-  requestAnimationFrame(() => tickProgress(run));
+function setPaused(paused) {
+  if (!current) return;
+  if (current.done && !paused) return playDemo(current.name);   // ▶ at the end plays it again
+  clock.paused = paused;
+  if (narration) {
+    if (paused) narration.audio.pause();
+    else narration.audio.play().catch(() => {});
+  }
+  renderControls();
 }
 
-function showCover(html) {
-  const cover = demoEl('demo-cover');
-  cover.innerHTML = html;
-  cover.hidden = false;
+// Jump to a point in the video (ms). Forward skips ahead; back starts over and skips to that point.
+function seek(target) {
+  const run = current;
+  if (!run) return;
+  target = Math.max(0, Math.min(target, run.length));
+  if (run.done || target < clock.t - 250) {
+    if (target <= 0 && !run.done) return playDemo(run.name);
+    return playDemo(run.name, target);
+  }
+  if (target <= clock.t) return;
+  clock.seekTo = target;
+  stopNarration();   // skipped lines show as captions only
+  setGameVolume();
+  renderControls();
 }
-function hideCover() { demoEl('demo-cover').hidden = true; }
+
+function endSkip() {
+  if (!skipping()) return;
+  clock.seekTo = null;
+  setGameVolume();
+  renderControls();
+}
 
 function closeDemo() {
   stopDemo();
@@ -179,6 +329,111 @@ function closeDemo() {
   if (after) after();
 }
 
+function showCover(html) {
+  const cover = demoEl('demo-cover');
+  cover.innerHTML = html;
+  cover.hidden = false;
+}
+function hideCover() { demoEl('demo-cover').hidden = true; }
+
+// ---------- Sound ----------
+const audible = () => !prefs.muted && prefs.volume > 0;
+function setGameVolume() {
+  frame.contentWindow?.demoSetVolume?.(audible() && !skipping() ? prefs.volume : 0);
+}
+function setVolume(volume, muted = volume === 0) {
+  prefs.volume = volume;
+  prefs.muted = muted;
+  if (narration) narration.audio.volume = audible() ? prefs.volume : 0;
+  setGameVolume();
+  savePrefs();
+  renderControls();
+}
+function setSpeed(speed) {
+  prefs.speed = speed;
+  if (narration) narration.audio.playbackRate = speed;
+  savePrefs();
+  renderControls();
+}
+
+// ---------- The controls ----------
+const timeText = ms => {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+let draggingSeek = false;
+
+function renderControls() {
+  const run = current;
+  const paused = clock.paused || !!run?.done;
+  demoDialog.classList.toggle('paused', paused);
+  frame.contentDocument?.documentElement?.classList.toggle('demo-paused', paused);
+  const play = demoEl('demo-play');
+  play.textContent = run?.done ? '↺' : paused ? '▶' : '⏸';
+  play.setAttribute('aria-label', run?.done ? 'Watch again' : paused ? 'Play' : 'Pause');
+  play.title = `${play.getAttribute('aria-label')} (Space or K)`;
+  demoEl('demo-big-play').hidden = !clock.paused || !run || run.done;
+  demoEl('demo-skipping').hidden = !skipping();
+  demoEl('demo-unmute').hidden = !soundBlocked || !audible();
+  const level = audible() ? prefs.volume : 0;
+  const mute = demoEl('demo-mute');
+  mute.textContent = level === 0 ? '🔇' : level < 0.5 ? '🔉' : '🔊';
+  mute.setAttribute('aria-label', audible() ? 'Mute' : 'Unmute');
+  const volume = demoEl('demo-volume');
+  volume.value = Math.round(level * 100);
+  volume.style.setProperty('--fill', `${level * 100}%`);
+  demoEl('demo-speed').value = prefs.speed;
+  renderTime();
+}
+
+function renderTime() {
+  const run = current;
+  const length = run ? Math.max(run.length, clock.t) : 0;
+  const at = run?.done ? length : skipping() ? clock.seekTo : clock.t;
+  const seekBar = demoEl('demo-seek');
+  if (!draggingSeek) {
+    seekBar.value = length ? Math.round((at / length) * 1000) : 0;
+    demoEl('demo-time').textContent = `${timeText(at)} / ${timeText(length)}`;
+  }
+  seekBar.style.setProperty('--fill', `${(seekBar.value / 10)}%`);
+}
+(function tickTime() {
+  if (demoDialog.open) renderTime();
+  requestAnimationFrame(tickTime);
+})();
+
+demoEl('demo-play').addEventListener('click', () => setPaused(!(clock.paused || current?.done)));
+demoEl('demo-back').addEventListener('click', () => seek(clock.t - SKIP));
+demoEl('demo-fwd').addEventListener('click', () => seek(clock.t + SKIP));
+const seekBar = demoEl('demo-seek');
+seekBar.addEventListener('input', () => {
+  draggingSeek = true;
+  const length = Math.max(current?.length || 0, clock.t);
+  demoEl('demo-time').textContent = `${timeText((seekBar.value / 1000) * length)} / ${timeText(length)}`;
+  seekBar.style.setProperty('--fill', `${seekBar.value / 10}%`);
+});
+seekBar.addEventListener('change', () => {
+  draggingSeek = false;
+  seek((seekBar.value / 1000) * Math.max(current?.length || 0, clock.t));
+});
+demoEl('demo-mute').addEventListener('click', () => {
+  soundBlocked = false;
+  if (audible()) setVolume(prefs.volume, true);
+  else setVolume(prefs.volume || 1, false);
+});
+demoEl('demo-volume').addEventListener('input', e => setVolume(e.target.value / 100));
+demoEl('demo-speed').addEventListener('change', e => setSpeed(parseFloat(e.target.value)));
+// This click lets the browser play sound, so the next line will be heard
+demoEl('demo-unmute').addEventListener('click', () => {
+  soundBlocked = false;
+  renderControls();
+});
+// Click the screen to pause or play, like a video
+screen.addEventListener('click', e => {
+  if (e.target.closest('button, .demo-cover:not([hidden])')) return;
+  setPaused(!clock.paused);
+});
+
 demoEl('demo-go').addEventListener('click', closeDemo);
 demoEl('demo-replay').addEventListener('click', () => current ? playDemo(current.name) : null);
 demoEl('demo-cover').addEventListener('click', e => {
@@ -186,36 +441,29 @@ demoEl('demo-cover').addEventListener('click', e => {
   if (act === 'go') closeDemo();
   if (act === 'replay') playDemo(current.name);
 });
-demoEl('demo-voice').addEventListener('click', () => {
-  // This click lets the browser play sound, so the next line will be heard
-  if (soundBlocked) {
-    soundBlocked = false;
-    renderVoice();
-    return;
-  }
-  voiceOn = !voiceOn;
-  if (!voiceOn) {
-    window.speechSynthesis?.cancel();
-    clip?.pause();
-  }
-  try { localStorage.setItem(VOICE_KEY, voiceOn ? '1' : '0'); } catch { /* storage blocked */ }
-  renderVoice();
-});
 demoDialog.addEventListener('cancel', e => {
   e.preventDefault();
   closeDemo();
 });
 
-function sleep(run, ms) {
-  return new Promise((resolve, reject) => setTimeout(() => (run.stopped ? reject(STOPPED) : resolve()), ms));
-}
-
-// A friendly English voice, if the computer has one
-function pickVoice() {
-  const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
-  const liked = ['Natural', 'Google US English', 'Aria', 'Jenny', 'Samantha', 'Zira'];
-  return liked.map(name => voices.find(v => v.name.includes(name))).find(Boolean) || voices[0] || null;
-}
+// Video player keys: Space or K pause, J and L skip 10s, ← and → skip 5s, M mute
+demoDialog.addEventListener('keydown', e => {
+  if (e.target.matches('input, select')) return;
+  const key = e.key.toLowerCase();
+  const actions = {
+    ' ': () => setPaused(!(clock.paused || current?.done)),
+    k: () => setPaused(!(clock.paused || current?.done)),
+    j: () => seek(clock.t - SKIP),
+    l: () => seek(clock.t + SKIP),
+    arrowleft: () => seek(clock.t - SKIP / 2),
+    arrowright: () => seek(clock.t + SKIP / 2),
+    m: () => demoEl('demo-mute').click(),
+  };
+  if (!actions[key]) return;
+  e.preventDefault();
+  actions[key]();
+});
+renderControls();
 
 // ---------- What a script can do ----------
 // Points are in the game's own coordinates (as if the game were full size).
@@ -252,16 +500,16 @@ function demoApi(run) {
   async function moveTo(target, ms = 550) {
     alive();
     const from = { ...at };
-    const start = performance.now();
+    const start = clock.t;
     for (;;) {
       const to = pointOf(target);
-      const t = Math.min(1, (performance.now() - start) / ms);
+      const t = Math.min(1, (clock.t - start) / ms);
       const ease = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       const p = { x: from.x + (to.x - from.x) * ease, y: from.y + (to.y - from.y) * ease };
       placeCursor(p);
       mouseEvent('mousemove', p);
       if (t >= 1) break;
-      await wait(16);   // a timer, not a frame, so it keeps time even if the browser skips frames
+      await wait(16);
     }
   }
 
@@ -299,48 +547,34 @@ function demoApi(run) {
   }
 
   // Say a line out loud and show it as a caption. Resolves when it's finished.
-  // id names the line in VOICE-SCRIPT.md: a recording in VOICE_CLIPS plays if there is one,
-  // otherwise the computer's voice reads it.
+  // id names the line in VOICE-SCRIPT.md. The line lasts exactly as long as its recording on the
+  // video clock, so the timing is the same whether it's heard, muted, skipped or blocked.
   function say(id, text) {
     alive();
     demoEl('demo-caption').textContent = text;
-    const words = text.split(/\s+/).length;
-    return new Promise(resolve => {
-      let timer;
-      const done = () => { clearTimeout(timer); resolve(); };
-      if (voiceOn && VOICE_CLIPS[id]) {
-        clip = new Audio(`voice/${VOICE_CLIPS[id]}`);
-        clip.onended = done;
-        clip.onerror = done;
-        clip.onpause = done;   // voice turned off, or the video closed
-        // Browsers block sound until you've clicked the page: then just show the caption long enough to read
-        clip.play().then(() => {
-          if (soundBlocked) { soundBlocked = false; renderVoice(); }
-        }, () => {
-          soundBlocked = true;
-          renderVoice();
-          timer = setTimeout(done, words * 320 + 900);
-        });
-      } else if (voiceOn && window.speechSynthesis) {
-        const line = new SpeechSynthesisUtterance(text);
-        line.voice = pickVoice();
-        line.rate = 1.03;
-        line.pitch = 1.1;
-        line.onend = done;
-        line.onerror = done;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(line);
-        timer = setTimeout(done, words * 550 + 2500);   // in case the voice never says it finished
-      } else {
-        timer = setTimeout(done, words * 320 + 900);    // time to read the caption
-      }
-    }).then(alive);
+    const length = clipLength[id] || text.split(/\s+/).length * 330 + 900;
+    const line = sleep(run, length);
+    if (!VOICE_CLIPS[id] || skipping() || !audible() || soundBlocked) return line;
+    stopNarration();
+    const audio = new Audio(`voice/${VOICE_CLIPS[id]}`);
+    narration = { audio };
+    audio.volume = prefs.volume;
+    audio.playbackRate = prefs.speed;
+    if (!clock.paused) {
+      audio.play().catch(() => {
+        // Blocked until you click the page: the caption still shows, and a button asks for a click
+        soundBlocked = true;
+        renderControls();
+      });
+    }
+    const end = () => { if (narration?.audio === audio) stopNarration(); };
+    return line.then(end, err => { end(); throw err; });
   }
 
   async function waitFor(test, timeout = 10000) {
-    const end = performance.now() + timeout;
+    const end = clock.t + timeout;
     while (!test()) {
-      if (performance.now() > end) throw new Error('Demo waited too long');
+      if (clock.t > end) throw new Error('Demo waited too long');
       await wait(100);
     }
   }
@@ -358,7 +592,7 @@ const DEMOS = {
   td: {
     title: 'Tower Defense',
     page: 'tower-defense.html',
-    length: 100,
+    length: 97,    // seconds: the exact length at normal speed (every run is the same)
     async script({ say, wait, moveTo, click, press, game, $, waitFor, button }) {
       // A square on the board, or a threat, as a point on the screen
       const toScreen = (x, y) => game(`(() => { const b = canvas.getBoundingClientRect();
@@ -428,7 +662,7 @@ const DEMOS = {
   clicker: {
     title: 'Data Clicker',
     page: 'clicker.html',
-    length: 85,
+    length: 63,
     async script({ say, wait, moveTo, click, game, $, waitFor, button }) {
       // Pop-ups come when the script says so, not at random
       game('scamIn = 9999; secretIn = 9999');
@@ -490,7 +724,7 @@ const DEMOS = {
   adventure: {
     title: 'Internet Adventure',
     page: 'adventure.html',
-    length: 105,
+    length: 80,
     async script({ say, wait, moveTo, click, hold, press, game, $, waitFor, button }) {
       const canvasPoint = (fx, fy) => game(`(() => { const b = canvas.getBoundingClientRect(); return { x: b.left + b.width * ${fx}, y: b.top + b.height * ${fy} }; })()`);
       const nearSign = () => game('(() => { const t = nearbyThing(); return !!t && "SN".includes(t.t); })()');

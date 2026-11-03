@@ -692,7 +692,7 @@ kbd {
 
 /* ---------- How to Play videos (demo.js) ---------- */
 .panel.demo {
-  width: min(1000px, 96vw, calc((100dvh - 15rem) * 16 / 9));
+  width: min(1000px, 96vw, calc((100dvh - 18rem) * 16 / 9));
   min-width: min(560px, 96vw);
   max-height: 98dvh;
   padding: 1rem 1.2rem 1.1rem;
@@ -709,7 +709,6 @@ kbd {
   animation: demo-blink 1.6s ease-in-out infinite;
 }
 @keyframes demo-blink { 50% { opacity: 0.55; } }
-.demo-voice { flex: none; }
 
 /* The screen: the game is laid out at 1280x720 and scaled down to fit */
 .demo-screen {
@@ -848,8 +847,6 @@ kbd {
 }
 @keyframes demo-spin { to { transform: rotate(360deg); } }
 
-.demo-progress { height: 5px; margin-top: 0.5rem; border-radius: 3px; background: #1a2350; overflow: hidden; }
-.demo-progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pink), var(--gold)); }
 /* Captions, like subtitles */
 .demo-caption {
   min-height: 3.2em;
@@ -1081,8 +1078,6 @@ html.calm *, html.calm *::before, html.calm *::after {
 .mission-star { flex: none; font-size: 0.8rem; font-weight: 800; color: var(--gold); }
 .help-line { margin-top: 1rem; padding: 0.6rem 0.8rem; font-size: 0.92rem; background: rgba(255, 61, 139, 0.1); border-left: 4px solid var(--pink); border-radius: 4px; }
 .help-line a { color: var(--cyan); }
-/* The video started by itself, so the browser blocked sound until you click */
-.demo-voice.needs-click { color: var(--bg); background: var(--gold); border-color: var(--gold); animation: demo-blink 1.2s ease-in-out infinite; }
 
 /* ---------- Certified Data Defender (certificate.js) ---------- */
 .cert-btn { display: flex; align-items: center; justify-content: center; gap: 0.6rem; }
@@ -1241,4 +1236,124 @@ html.calm *, html.calm *::before, html.calm *::after {
   .menu { gap: 0.55rem; }
   .menu .btn { padding-top: 0.7rem; padding-bottom: 0.7rem; }
   .menu .coder-btn { padding-top: 0.35rem; padding-bottom: 0.35rem; }
+}
+
+/* ---------- Video player controls (demo.js) ---------- */
+.demo-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(7, 11, 31, 0.85);
+  border: 1px solid rgba(46, 230, 255, 0.25);
+  border-radius: 8px;
+}
+.demo-ctl {
+  flex: none;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  padding: 0 0.45rem;
+  font: 800 0.85rem var(--body);
+  color: var(--text);
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.demo-ctl:hover, .demo-ctl:focus-visible { background: rgba(46, 230, 255, 0.15); outline: none; }
+.demo-ctl:focus-visible { box-shadow: 0 0 0 2px var(--gold); }
+.demo-play { font-size: 1.1rem; }
+.demo-time { flex: none; font: 800 0.85rem var(--body); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.demo-sound { display: flex; align-items: center; gap: 0.2rem; }
+
+/* Sliders: the seek bar and volume, filled up to where they're set (--fill) */
+.demo-seek, .demo-volume {
+  --fill: 0%;
+  appearance: none;
+  height: 6px;
+  margin: 0;
+  background: linear-gradient(90deg, var(--pink), var(--gold)) 0 0 / var(--fill) 100% no-repeat, #2a3360;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.demo-seek { flex: 1; min-width: 4rem; }
+.demo-volume { width: 4.5rem; background: linear-gradient(var(--cyan), var(--cyan)) 0 0 / var(--fill) 100% no-repeat, #2a3360; }
+.demo-seek::-webkit-slider-thumb, .demo-volume::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+.demo-seek::-moz-range-thumb, .demo-volume::-moz-range-thumb { width: 14px; height: 14px; background: #fff; border: 0; border-radius: 50%; }
+.demo-seek:focus-visible, .demo-volume:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.demo-speed {
+  flex: none;
+  padding: 0.3rem 0.4rem;
+  font: 800 0.8rem var(--body);
+  color: var(--text);
+  background: #1a2350;
+  border: 1px solid var(--cyan-dim);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.demo-speed:focus-visible { outline: 2px solid var(--gold); }
+
+/* On the screen: a big ▶ while paused, a note while skipping, and a button when sound is blocked */
+.demo-screen { cursor: pointer; }
+.demo-big-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding-left: 0.3rem;
+  font-size: 2rem;
+  color: #fff;
+  background: rgba(7, 11, 31, 0.75);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.demo-skipping {
+  position: absolute;
+  top: 0.6rem;
+  left: 50%;
+  z-index: 2;
+  padding: 0.3rem 0.8rem;
+  font: 800 0.9rem var(--body);
+  color: var(--bg);
+  background: var(--cyan);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.demo-unmute {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  z-index: 2;
+  padding: 0.45rem 0.9rem;
+  font: 800 0.95rem var(--body);
+  color: var(--bg);
+  background: var(--gold);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  animation: demo-blink 1.2s ease-in-out infinite;
+}
+/* Paused: the keyboard's rainbow stops too */
+.demo.paused .demo-input, .demo.paused .demo-live { animation-play-state: paused; }
+@media (max-width: 640px) {
+  .demo-controls { flex-wrap: wrap; }
+  .demo-seek { order: -1; flex-basis: 100%; }
+  .demo-volume { width: 3.5rem; }
 }
