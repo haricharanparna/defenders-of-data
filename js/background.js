@@ -9,7 +9,8 @@ const GRID = 48;            // size of one grid square in pixels
 const THREAT_CHANCE = 0.25; // how many of the movers are threats
 const MAX_MOVERS = 40;
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches || access.calm;   // Calm mode (access.js)
+// Checked every frame, so turning Calm mode on or off (access.js) takes effect right away
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches || access.calm;
 
 let width, height, centerX, centerY;
 let movers = [];
@@ -104,8 +105,17 @@ function drawMover(m) {
 }
 
 function frame() {
+  requestAnimationFrame(frame);
   ctx.clearRect(0, 0, width, height);
   drawGrid();
+  // Players who prefer less motion just get the still grid
+  if (reduceMotion()) {
+    movers = [];
+    sparks = [];
+    shieldPulse = 0;
+    drawCore();
+    return;
+  }
   const shieldRadius = drawCore();
 
   if (movers.length < MAX_MOVERS && Math.random() < 0.15) spawnMover();
@@ -136,17 +146,9 @@ function frame() {
     ctx.globalAlpha = 1;
     return s.life > 0;
   });
-
-  requestAnimationFrame(frame);
 }
 
 window.addEventListener('resize', resize);
 resize();
 
-if (reduceMotion) {
-  // Players who prefer less motion just get the still grid
-  drawGrid();
-  drawCore();
-} else {
-  frame();
-}
+frame();
