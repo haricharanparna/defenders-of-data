@@ -2,7 +2,7 @@
 
 *Hackers are coming for your data. Build your defenses. Learn to stay safe online.*
 
-### ▶ [Play it now in your browser](https://haricharanparna.github.io/defenders-of-data/)
+### ▶ [Play it now in your browser](https://defenders-of-the-data.netlify.app)
 
 No download or account needed. Works on computers, tablets and phones.
 
