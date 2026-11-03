@@ -2,6 +2,10 @@
 
 *Hackers are coming for your data. Build your defenses. Learn to stay safe online.*
 
+### ▶ [Play it now in your browser](https://haricharanparna.github.io/defenders-of-data/)
+
+No download or account needed. Works on computers, tablets and phones.
+
 Defenders of the Data is a set of three browser games that teach teens how to protect themselves online. Made for the **Girls Who Code HHS Hackathon 2026** (theme: **Discover**: digital safety).
 
 ## Why it matters
