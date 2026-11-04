@@ -188,8 +188,10 @@ function movePlayer(dt) {
     if (held.has('right')) ix += 1;
     if (held.has('up')) iy -= 1;
     if (held.has('down')) iy += 1;
+    if (stick.x || stick.y) { ix = stick.x; iy = stick.y; }
   }
-  const len = Math.hypot(ix, iy) || 1;
+  // Keys and full joystick tilt walk at full speed; a small tilt walks slower
+  const len = Math.max(1, Math.hypot(ix, iy));
   // Ease toward the target speed, so starting and stopping feel smooth
   const blend = 1 - Math.exp(-ACCEL * dt);
   const top = SPEED * (updateStamina(dt, !!(ix || iy)) ? SPRINT : 1);
@@ -1072,6 +1074,7 @@ function renderSettings() {
   $('opt-minimap').checked = settings.minimap;
   $('opt-pad').checked = settings.pad;
   document.querySelector('.pad').hidden = !settings.pad;
+  document.getElementById('stick').hidden = !settings.pad;
 }
 
 // While rebinding, the next key you press becomes the new key (Esc cancels, Backspace clears it)
@@ -1170,6 +1173,43 @@ for (const btn of document.querySelectorAll('.pad button')) {
   for (const end of ['pointerup', 'pointerleave', 'pointercancel']) btn.addEventListener(end, () => held.delete(dir));
 }
 $('talk').addEventListener('click', () => { if (talkLines) nextLine(); });
+
+// Touch joystick: the knob follows your thumb inside the ring, and how far you push sets the direction and speed
+const stick = { x: 0, y: 0 };
+const stickEl = $('stick');
+const knob = $('stick-knob');
+let stickId = null;
+function moveStick(e) {
+  const r = stickEl.getBoundingClientRect();
+  const max = r.width / 2;
+  let dx = e.clientX - (r.left + max), dy = e.clientY - (r.top + max);
+  const dist = Math.hypot(dx, dy);
+  if (dist > max) { dx *= max / dist; dy *= max / dist; }
+  knob.style.transform = `translate(${dx}px, ${dy}px)`;
+  // A small dead zone so resting your thumb doesn't drift; near the edge counts as full speed
+  const push = Math.min(1, Math.max(0, (Math.min(dist, max) / max - 0.15) / 0.7));
+  stick.x = dist ? (dx / Math.min(dist, max)) * push : 0;
+  stick.y = dist ? (dy / Math.min(dist, max)) * push : 0;
+}
+function releaseStick() {
+  stickId = null;
+  stick.x = stick.y = 0;
+  knob.style.transform = '';
+  stickEl.classList.remove('active');
+}
+stickEl.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if (busy()) return;
+  stickId = e.pointerId;
+  stickEl.setPointerCapture(e.pointerId);
+  stickEl.classList.add('active');
+  moveStick(e);
+});
+stickEl.addEventListener('pointermove', e => { if (e.pointerId === stickId) moveStick(e); });
+for (const end of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+  stickEl.addEventListener(end, e => { if (e.pointerId === stickId) releaseStick(); });
+}
+window.addEventListener('blur', releaseStick);
 
 // ---------- Drawing ----------
 const canvas = $('world');

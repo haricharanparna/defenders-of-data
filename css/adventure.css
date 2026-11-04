@@ -69,6 +69,41 @@ body.adventure { display: flex; flex-direction: column; height: 100vh; }
 .pad [data-dir="down"] { grid-column: 2; grid-row: 3; }
 .world-wrap:has(.talk:not([hidden])) .pad { bottom: 9rem; }
 
+/* Touch joystick (adventure.js): only on touch screens, where it replaces the arrow buttons */
+.stick { display: none; }
+@media (pointer: coarse) {
+  .stick {
+    position: absolute;
+    left: 1.2rem;
+    bottom: 1.2rem;
+    display: grid;
+    place-items: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(14, 21, 56, 0.55);
+    border: 3px solid rgba(46, 230, 255, 0.55);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .stick[hidden] { display: none; }
+  .stick-knob {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #7ff2ff, var(--cyan) 55%, #1a7f99);
+    box-shadow: 0 0 14px rgba(46, 230, 255, 0.6);
+    pointer-events: none;
+  }
+  .stick.active { border-color: var(--cyan); background: rgba(14, 21, 56, 0.7); }
+  /* Only the A button stays, bigger, for your other thumb */
+  .pad { grid-template-columns: 72px; grid-template-rows: 72px; right: 1.4rem; bottom: 1.6rem; opacity: 0.9; }
+  .pad [data-dir]:not(.pad-a) { display: none; }
+  .pad .pad-a { grid-column: 1; grid-row: 1; font-size: 1.1rem; touch-action: manipulation; }
+  .world-wrap:has(.talk:not([hidden])) .stick { display: none; }
+}
+
 /* ---------- Battles ---------- */
 .battle {
   position: absolute;
@@ -324,3 +359,39 @@ body.adventure { display: flex; flex-direction: column; height: 100vh; }
 .setting-row.check input { width: 18px; height: 18px; accent-color: var(--cyan); }
 .fov-hint { display: flex; justify-content: space-between; font-size: 0.75rem; }
 @media (max-width: 520px) { .control-row { grid-template-columns: 1fr 5.5rem 5.5rem; } }
+
+/* ---------- Phones: a short top bar ----------
+   The full bar wrapped onto 5 rows and covered a third of the screen.
+   Here it's 2 rows: buttons on top, then the zone, your data and badges.
+   On touch screens Sprint floats above the A button instead, where your thumb is. */
+@media (max-width: 760px) {
+  body.adventure { height: 100dvh; }
+  body.adventure .hud { gap: 0.3rem 0.35rem; padding: 0.35rem 0.5rem; justify-content: flex-start; }
+  body.adventure .hud-left, body.adventure .controls { display: contents; }
+  body.adventure .hud .btn-small { padding: 0.45rem 0.5rem; font-size: 0.58rem; }
+  body.adventure .hud-coder { width: 32px; height: 32px; }
+  body.adventure #btn-index { margin-left: auto; }
+  body.adventure .stats { order: 1; flex-basis: 100%; justify-content: center; gap: 0.2rem 0.8rem; font-size: 0.8rem; }
+  body.adventure .hp-bar { width: 64px; }
+  body.adventure #btn-sprint { order: 1; }
+  /* Index and Badges show just their icons (the words stay for screen readers, and in the button's tooltip) */
+  body.adventure #btn-index { font-size: 0; }
+  body.adventure #btn-index::before { content: '📖'; font-size: 0.85rem; margin-right: 0.3rem; }
+  body.adventure #index-count { font-size: 0.58rem; }
+  body.adventure .stat:has(.badges) { font-size: 0; }
+  body.adventure .badges { font-size: 0.8rem; margin-left: 0; }
+  body.adventure .zone-name { font-size: 0.75rem; }
+}
+@media (pointer: coarse) {
+  body.adventure #btn-sprint {
+    position: fixed;
+    right: 1.2rem;
+    bottom: calc(1.6rem + 84px);
+    z-index: 5;
+    padding: 0.55rem 0.6rem 0.8rem;
+    font-size: 0.6rem;
+    opacity: 0.9;
+  }
+  body.adventure:has(.battle:not([hidden])) #btn-sprint,
+  body.adventure:has(.talk:not([hidden])) #btn-sprint { display: none; }
+}
