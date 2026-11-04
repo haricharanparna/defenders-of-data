@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Defenders of the Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/td.css">
+  <link rel="stylesheet" href="css/quiz.css">
+</head>
+<body class="quiz">
+  <header class="hud">
+    <div class="hud-left">
+      <a class="btn btn-small" href="index.html" aria-label="Back to main menu">&#8592; Menu</a>
+      <a class="hud-coder" id="hud-coder" href="index.html#coder" title="Your coder. Spend your stars on new looks in the Coder Locker" aria-label="Your coder: open the Coder Locker"></a>
+    </div>
+    <div class="stats" id="quiz-stats" hidden>
+      <span class="stat">📝 <strong id="stat-count">1/10</strong></span>
+      <span class="stat" id="stat-right-box">✔ Right <strong id="stat-right">0</strong></span>
+    </div>
+    <div class="controls">
+      <button class="btn btn-small" id="btn-mute" title="Sound (M)">🔊</button>
+    </div>
+  </header>
+
+  <main class="quiz-main">
+    <!-- Step 1: choose your quiz -->
+    <section id="quiz-setup" class="quiz-card" aria-labelledby="setup-title">
+      <h1 id="setup-title" class="quiz-title">📝 Quiz</h1>
+      <p class="quiz-intro">Show what you know about staying safe online. The questions come from all three games.</p>
+
+      <fieldset class="quiz-pick">
+        <legend>How do you want to play?</legend>
+        <div class="pick-row two" id="pick-mode"></div>
+      </fieldset>
+      <fieldset class="quiz-pick">
+        <legend>Topic</legend>
+        <div class="pick-row" id="pick-topic"></div>
+      </fieldset>
+      <div class="pick-pair">
+        <fieldset class="quiz-pick">
+          <legend>How hard?</legend>
+          <div class="pick-row small" id="pick-level"></div>
+        </fieldset>
+        <fieldset class="quiz-pick">
+          <legend>How many questions?</legend>
+          <div class="pick-row small" id="pick-length"></div>
+        </fieldset>
+      </div>
+
+      <p class="quiz-best" id="quiz-best" aria-live="polite"></p>
+      <button class="btn btn-primary" id="btn-start">&#9654; START</button>
+      <p class="hint hint-mouse">Answer with your mouse, or the keys <kbd>1</kbd>–<kbd>4</kbd>. <kbd>Enter</kbd> goes to the next question.</p>
+    </section>
+
+    <!-- Step 2: the questions (quiz.js puts each one in a new box, so Read aloud reads it fresh) -->
+    <section id="quiz-play" class="quiz-card" hidden aria-label="Quiz question">
+      <div class="quiz-top">
+        <p class="quiz-mode-tag" id="quiz-mode-tag"></p>
+        <button class="sq-quit" id="btn-quit" aria-label="Stop the quiz">✕</button>
+      </div>
+      <div class="quiz-bar" aria-hidden="true"><span id="quiz-bar-fill"></span></div>
+      <div id="quiz-question"></div>
+      <div class="quiz-next-row">
+        <button class="btn btn-primary btn-small" id="btn-next" disabled>Next ▶</button>
+      </div>
+    </section>
+
+    <!-- Step 3: your score and every answer -->
+    <section id="quiz-results" class="quiz-card" hidden aria-labelledby="results-title">
+      <p class="print-only" id="print-head"></p>
+      <!-- quiz.js puts your score here -->
+      <div class="result-buttons">
+        <button class="btn btn-primary btn-small" id="btn-missed">🎯 Practice what I missed</button>
+        <button class="btn btn-small" id="btn-again">🔁 New questions</button>
+        <button class="btn btn-small" id="btn-change">⚙️ Change quiz</button>
+        <button class="btn btn-small" id="btn-print">🖨️ Print results</button>
+      </div>
+      <h2 class="review-title">Review your answers</h2>
+      <ol class="review-list" id="review-list"></ol>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/access.js"></script>
+  <script src="js/lang-es.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/quiz.js"></script>
+</body>
+</html>

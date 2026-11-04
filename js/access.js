@@ -81,8 +81,9 @@ function say(text, interrupt = true) {
   speechSynthesis.speak(u);
 }
 
-// Pop-ups worth reading: open panels, plus in-game pop-ups that aren't <dialog>s (marked role="dialog" or aria-live)
-const READ_SPOTS = 'dialog[open]:not(.demo), [role="dialog"]:not([hidden]):not(dialog), aside[aria-live]:not([hidden])';
+// Pop-ups worth reading: open panels, plus in-game pop-ups that aren't <dialog>s (marked role="dialog" or aria-live),
+// and anything marked data-read (like each question in the Quiz)
+const READ_SPOTS = 'dialog[open]:not(.demo), [role="dialog"]:not([hidden]):not(dialog), aside[aria-live]:not([hidden]), [data-read]:not([hidden])';
 const heard = new WeakMap();   // each pop-up's lines already read, so only new ones are read
 // "Wave 3" and "Wave 4" count as the same line, so ticking timers and counters aren't read over and over
 const lineKey = line => line.replace(/\d+/g, '#');

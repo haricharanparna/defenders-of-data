@@ -585,8 +585,11 @@ kbd {
 }
 
 .modes.three { grid-template-columns: repeat(3, 1fr); }
-#dlg-mode:has(#mode-games:not([hidden])) { width: min(820px, 94vw); }
+.modes.four { grid-template-columns: repeat(4, 1fr); }
+#dlg-mode:has(#mode-games:not([hidden])) { width: min(1000px, 94vw); }
 @media (max-width: 720px) { .modes.three { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .modes.four { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .modes.four { grid-template-columns: 1fr; } }
 
 /* ---------- You've been hacked! (hacked.js) ---------- */
 .hacked {

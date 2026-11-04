@@ -6,7 +6,7 @@
 
 No download or account needed. Works on computers, tablets and phones.
 
-Defenders of the Data is a set of three browser games that teach teens how to protect themselves online. Made for the **Girls Who Code HHS Hackathon 2026** (theme: **Discover**: digital safety).
+Defenders of the Data is a set of three browser games, plus a quiz, that teach teens how to protect themselves online. Made for the **Girls Who Code HHS Hackathon 2026** (theme: **Discover**: digital safety).
 
 ## Why it matters
 
@@ -21,6 +21,17 @@ Scammers target teens where they spend their time: DMs, games, social media and 
 | 🏰 **Tower Defense** | Build towers to stop threats marching toward your Data Core. 100 levels with a boss every 10, or Endless mode. | Matching defenses to threats: link checking stops phishing, 2FA stops password crackers, updates stop malware, verifying stops catfish. |
 | 🖱️ **Data Clicker** | Click the shield to earn bytes, hire defenders, and decide whether pop-up messages are **real or a scam**. | Spotting scams in realistic messages, and why habits like backups and updates keep protecting you. |
 | ⚔️ **Adventure** | Explore "the internet", battle threats hiding in spam grass, quarantine them into your Threat Index, and beat hacker trainers. | 60 threats to learn about, from smishers to deepfakes, each with a real tip for spotting and stopping it. |
+
+### 📝 Quiz mode
+
+Want to check what you know without playing a whole game? **Quiz** (in the Play menu) draws from all 168 questions in the three games.
+
+- **🎓 Practice:** after every answer you see if you were right and *why*. No pressure.
+- **📝 Test:** answer them all first, then get your score, a rank and a review of every question, with your answer, the right one and the explanation. Pass with 70% to earn stars (and more for a perfect score).
+- **Pick what to study:** Everything, Links and phishing, Passwords and accounts, Scams and strangers, or Devices and privacy; Easy, Medium, Hard or Mixed (starts easy and gets harder); 10 or 20 questions.
+- **🎯 Practice what I missed:** one click turns your wrong answers into a practice round.
+- **🖨️ Print results:** a clean black-and-white page with your name, the topic, the date, your score and every answer, ready to hand in.
+- **No timer**, so everyone can take the time they need. Answer with the mouse, a tap, or the keys 1-4 and Enter. Right and wrong answers are marked with ✔ and ✖, not just colors, and Read aloud reads each question and explanation.
 
 Every unlock, upgrade and boss is won by **answering a safety question**, so learning is how you get stronger, not a quiz you have to sit through. Questions get harder as you go.
 
@@ -42,10 +53,10 @@ Defenders of the Data works as a ready-made lesson: it's free, runs in any brows
 
 1. **Hook (5 min):** open **Why It Matters** together and talk about the $12.5 billion number. Has anyone gotten a weird text or DM?
 2. **Play (20 min):** students pick a game. Tower Defense Levels mode teaches a new skill every 5 levels; Data Clicker is quickest to pick up.
-3. **Share (10 min):** students open **Study** and share one flashcard they learned, or a Real or Scam message that fooled them.
+3. **Check (10 min):** students take a 10-question **Quiz** in Test mode on today's topic and print or show their results. Talk about the question most people missed.
 4. **Homework (5 min):** each student does one **Real-Life Mission** at home (like turning on 2-step verification) and teaches it to someone in their family.
 
-The **Accessibility** settings (extra time, bigger text, calm mode) let every student play at their own pace, and a **Save Code** moves progress between school and home.
+The **Accessibility** settings (extra time, bigger text, calm mode, read aloud, easy-read font, high contrast) let every student play at their own pace, and a **Save Code** moves progress between school and home.
 
 ## Beginner-friendly and accessible
 
@@ -65,7 +76,7 @@ The **Accessibility** settings (extra time, bigger text, calm mode) let every st
 
 ## Rewards that keep you playing
 
-Earn ★ stars in all three games and spend them in the **Coder Locker** on 107 cosmetics for your coder: outfits (the legendary Hacker hoodie is the rarest), hair, glasses, laptops, backgrounds and sidekicks, plus a limited-time Halloween shop.
+Earn ★ stars in all three games (and by passing quizzes) and spend them in the **Coder Locker** on 107 cosmetics for your coder: outfits (the legendary Hacker hoodie is the rarest), hair, glasses, laptops, backgrounds and sidekicks, plus a limited-time Halloween shop.
 
 **🏆 Certified Data Defender:** master all three games (clear all 100 Tower Defense levels, earn 500K bytes in Data Clicker, and quarantine all 60 threats and unlock all 4 guardians in Adventure) to earn a printable certificate with your name and coder on it. A tracker on the title screen shows how close you are.
 
@@ -88,6 +99,7 @@ index.html            Title screen, Coder Locker, Why It Matters, Save Code, Acc
 tower-defense.html    Tower Defense      (js/td.js, levels.js, boss.js, dm.js, ...)
 clicker.html          Data Clicker       (js/clicker.js)
 adventure.html        Adventure          (js/adventure.js, adventure-data.js)
+quiz.html             Quiz mode          (js/quiz.js)
 js/content.js         The learning content: quiz, flashcards, DMs, skills, boss questions
 js/avatar.js          Your coder: cosmetics, drawing, stars
 js/demo.js            How to Play videos
