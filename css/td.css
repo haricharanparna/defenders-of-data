@@ -885,17 +885,32 @@ body.td {
 @media (prefers-reduced-motion: reduce) { .stat.boost { animation: none; } }
 
 /* ---------- Phones and narrow windows ----------
-   The top bar and tower bar wrap onto several rows, which left no room for the board.
-   Here the page scrolls instead: buttons wrap, the board is as big as fits on screen, and the towers sit 2 per row.
-   (Also for short windows, like a phone turned sideways.) */
+   The full top bar wrapped onto 5+ rows and pushed the towers off screen.
+   Here it packs into 3 short rows: small buttons, then the stats, then Blast / Levels / Start Wave.
+   The towers sit in one row you swipe sideways, so the whole game fits on a phone screen.
+   The page can still scroll if a window is very short (like a phone turned sideways). */
 @media (max-width: 700px), (max-height: 560px) {
   .controls { flex-wrap: wrap; justify-content: flex-end; }
-  body.td { height: auto; min-height: 100vh; }
+  html:has(body.td) { overflow: auto; }
+  body.td { height: auto; min-height: 100vh; min-height: 100dvh; }
+  body.td .hud { gap: 0.35rem; padding: 0.4rem 0.5rem; justify-content: flex-start; }
+  body.td .hud-left, body.td .controls { display: contents; }
+  body.td .hud .btn-small { padding: 0.45rem 0.55rem; font-size: 0.6rem; }
+  body.td .hud-coder { width: 32px; height: 32px; }
+  /* Row 1: Menu, coder, then the small icon buttons on the right */
+  body.td #btn-how { margin-left: auto; }
+  /* Row 2: stats */
+  body.td .stats { order: 1; flex-basis: 100%; justify-content: center; gap: 0.2rem 0.8rem; font-size: 0.8rem; }
+  body.td .stat strong { font-size: 0.7rem; margin-left: 0.2rem; }
+  /* Row 3: the big actions */
+  body.td #btn-blast, body.td #btn-levels, body.td #btn-wave { order: 2; }
+  body.td #btn-wave { flex: 1; white-space: normal; line-height: 1.4; }
   body.td .board { flex: none; padding: 0.4rem; }
   body.td #board { width: auto; height: auto; max-width: 100%; max-height: calc(100vh - 1.2rem); }
-  body.td .tower-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; padding: 0.5rem; }
-  body.td .tool { min-width: 0; padding: 0.45rem 0.55rem; }
-  body.td .tool-emoji { font-size: 1.5rem; }
-  body.td .tool-name { font-size: 0.85rem; }
-  body.td .tool-beats { font-size: 0.72rem; }
+  body.td .tower-bar { flex-wrap: nowrap; justify-content: flex-start; gap: 0.4rem; padding: 0.5rem; overflow-x: auto; scroll-snap-type: x proximity; }
+  body.td .tool { flex: 0 0 auto; width: 158px; min-width: 0; padding: 0.4rem 0.5rem; scroll-snap-align: start; }
+  body.td .tool-emoji { font-size: 1.4rem; }
+  body.td .tool-name { font-size: 0.82rem; }
+  body.td .tool-cost { font-size: 0.78rem; }
+  body.td .tool-beats { font-size: 0.7rem; }
 }
