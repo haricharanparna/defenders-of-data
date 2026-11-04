@@ -50,10 +50,13 @@ The **Accessibility** settings (extra time, bigger text, calm mode) let every st
 ## Beginner-friendly and accessible
 
 - **How to Play videos:** instead of a wall of text, each game shows a short video of the real game playing itself, with a moving cursor, an on-screen keyboard and mouse that light up, narration and captions. Skip any time.
-- **♿ Accessibility settings** (title screen):
+- **♿ Accessibility settings** (on the title screen, and the ♿ button next to 🔊 in every game):
   - **Extra time:** every countdown lasts twice as long.
   - **Bigger text:** everything is larger and easier to read.
   - **Calm mode:** turns off flashing, shaking and bouncing. The game also follows your computer's "reduce motion" setting.
+  - **🗣️ Read aloud:** questions, scam messages, DMs and explanations are read out loud as they pop up, in English or Spanish, and so is each button you move to with the keyboard. It uses the browser's built-in voices, so it works offline with nothing to install.
+  - **📖 Easy-read font:** swaps the blocky pixel letters for a plain, wide font that's easier to read, including for players with dyslexia.
+  - **🌓 High contrast:** solid black backgrounds, bright text and borders, and thick focus outlines for low vision.
 - **🌐 English and Spanish (Español):** one button on the title screen switches every game, question, scam example and caption to Spanish. The page language changes too, so screen readers read it in a Spanish voice.
 - **Keyboard and mouse:** everything works with Tab, Enter and Esc, with visible focus outlines. Adventure has re-mappable keys.
 - **Screen reader labels** on buttons and live regions for captions and results.

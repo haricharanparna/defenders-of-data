@@ -78,7 +78,9 @@ function lookup(core, tryDots = true) {
     const m = core.match(test);
     if (m) {
       let i = 1;
-      return to.replace(/\{\}/g, () => tr(m[i++]));
+      const out = to.replace(/\{\}/g, () => tr(m[i++]));
+      // a pattern like "{}: {}" that changed nothing gives the other ways below a chance
+      if (out !== core) return out;
     }
   }
   // An emoji or symbol in front ("🎣 Phishers") or punctuation behind: translate the words in between

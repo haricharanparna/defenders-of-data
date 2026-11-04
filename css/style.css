@@ -1045,6 +1045,34 @@ kbd {
 .access-switch:checked::after { transform: translateX(1.4rem); }
 .access-switch:focus-visible { outline: none; }
 .access-note { font-size: 0.92rem; color: var(--text-dim); }
+.access-reload { font-size: 0.92rem; font-weight: 800; color: var(--gold); }
+
+/* Easy-read font: the pixel font becomes a plain, wide font from the computer (Verdana, or the closest one it has).
+   size-adjust makes it about as big as the pixel letters it replaces. */
+@font-face {
+  font-family: 'Easy Read';
+  src: local('Verdana Bold'), local('Verdana-Bold'), local('Tahoma Bold'), local('Tahoma-Bold'), local('Roboto Bold'), local('Roboto-Bold'), local('Arial Bold'), local('Arial-BoldMT'), local('DejaVu Sans Bold');
+  size-adjust: 125%;
+}
+html.easy-font { --pixel: 'Easy Read', Verdana, var(--body); --lk-font: 'Easy Read', Verdana, var(--body); }
+html.easy-font body { letter-spacing: 0.02em; line-height: 1.5; }
+
+/* High contrast: solid backgrounds, bright text and borders, thick focus outlines */
+html.contrast {
+  --bg: #000;
+  --bg-2: #000;
+  --text: #fff;
+  --text-dim: #f2f6ff;
+  --cyan-dim: var(--cyan);
+  --panel: #000;
+}
+html.contrast body { background: #000; }
+html.contrast #bg { opacity: 0.25; }
+html.contrast .panel, html.contrast dialog { background: #000; border-color: #fff; }
+html.contrast .btn, html.contrast .choice, html.contrast .access-option, html.contrast input, html.contrast select { border-color: #fff !important; }
+html.contrast a { text-decoration: underline; }
+html.contrast :focus-visible { outline: 4px solid var(--gold) !important; outline-offset: 3px; }
+html.contrast * { text-shadow: none !important; }
 
 /* Read out by screen readers but not shown (like a page's main heading on the game screens) */
 .sr-only {
